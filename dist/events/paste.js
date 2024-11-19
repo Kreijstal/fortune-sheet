@@ -1,14 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 import _ from "lodash";
 import { getFlowdata } from "../context";
 import { locale } from "../locale";
@@ -26,29 +15,29 @@ import { CFSplitRange } from "../modules";
 import clipboard from "../modules/clipboard";
 function postPasteCut(ctx, source, target, RowlChange) {
     // 单元格数据更新联动
-    var execF_rc = {};
+    const execF_rc = {};
     ctx.formulaCache.execFunctionExist = [];
     // clearTimeout(refreshCanvasTimeOut);
-    for (var r = source.range.row[0]; r <= source.range.row[1]; r += 1) {
-        for (var c = source.range.column[0]; c <= source.range.column[1]; c += 1) {
-            if ("".concat(r, "_").concat(c, "_").concat(source.sheetId) in execF_rc) {
+    for (let r = source.range.row[0]; r <= source.range.row[1]; r += 1) {
+        for (let c = source.range.column[0]; c <= source.range.column[1]; c += 1) {
+            if (`${r}_${c}_${source.sheetId}` in execF_rc) {
                 continue;
             }
-            execF_rc["".concat(r, "_").concat(c, "_").concat(source.sheetId)] = 0;
-            ctx.formulaCache.execFunctionExist.push({ r: r, c: c, i: source.sheetId });
+            execF_rc[`${r}_${c}_${source.sheetId}`] = 0;
+            ctx.formulaCache.execFunctionExist.push({ r, c, i: source.sheetId });
         }
     }
-    for (var r = target.range.row[0]; r <= target.range.row[1]; r += 1) {
-        for (var c = target.range.column[0]; c <= target.range.column[1]; c += 1) {
-            if ("".concat(r, "_").concat(c, "_").concat(target.sheetId) in execF_rc) {
+    for (let r = target.range.row[0]; r <= target.range.row[1]; r += 1) {
+        for (let c = target.range.column[0]; c <= target.range.column[1]; c += 1) {
+            if (`${r}_${c}_${target.sheetId}` in execF_rc) {
                 continue;
             }
-            execF_rc["".concat(r, "_").concat(c, "_").concat(target.sheetId)] = 0;
-            ctx.formulaCache.execFunctionExist.push({ r: r, c: c, i: target.sheetId });
+            execF_rc[`${r}_${c}_${target.sheetId}`] = 0;
+            ctx.formulaCache.execFunctionExist.push({ r, c, i: target.sheetId });
         }
     }
     // config
-    var rowHeight;
+    let rowHeight;
     if (ctx.currentSheetId === source.sheetId) {
         ctx.config = source.curConfig;
         rowHeight = source.curData.length;
@@ -64,8 +53,8 @@ function postPasteCut(ctx, source, target, RowlChange) {
     if (RowlChange) {
         ctx.visibledatarow = [];
         ctx.rh_height = 0;
-        for (var i = 0; i < rowHeight; i += 1) {
-            var rowlen = ctx.defaultrowlen;
+        for (let i = 0; i < rowHeight; i += 1) {
+            let rowlen = ctx.defaultrowlen;
             if (ctx.config.rowlen != null && ctx.config.rowlen[i] != null) {
                 rowlen = ctx.config.rowlen[i];
             }
@@ -192,8 +181,6 @@ function postPasteCut(ctx, source, target, RowlChange) {
     // });
 }
 function pasteHandler(ctx, data, borderInfo) {
-    var _a;
-    var _b, _c, _d, _e, _f, _g;
     // if (
     //   !checkProtectionLockedRangeList(
     //     ctx.luckysheet_select_save,
@@ -202,10 +189,10 @@ function pasteHandler(ctx, data, borderInfo) {
     // ) {
     //   return;
     // }
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
-    if (((_c = (_b = ctx.luckysheet_select_save) === null || _b === void 0 ? void 0 : _b.length) !== null && _c !== void 0 ? _c : 0) !== 1) {
+    if ((ctx.luckysheet_select_save?.length ?? 0) !== 1) {
         // if (isEditMode()) {
         //   alert("不能对多重选择区域执行此操作，请选择单个区域，然后再试");
         // } else {
@@ -220,21 +207,21 @@ function pasteHandler(ctx, data, borderInfo) {
         if (data.length === 0) {
             return;
         }
-        var cfg = ctx.config || {};
+        const cfg = ctx.config || {};
         if (cfg.merge == null) {
             cfg.merge = {};
         }
         if (JSON.stringify(borderInfo).length > 2 && cfg.borderInfo == null) {
             cfg.borderInfo = [];
         }
-        var copyh = data.length;
-        var copyc = data[0].length;
-        var minh = ctx.luckysheet_select_save[0].row[0]; // 应用范围首尾行
-        var maxh = minh + copyh - 1;
-        var minc = ctx.luckysheet_select_save[0].column[0]; // 应用范围首尾列
-        var maxc = minc + copyc - 1;
+        const copyh = data.length;
+        const copyc = data[0].length;
+        const minh = ctx.luckysheet_select_save[0].row[0]; // 应用范围首尾行
+        const maxh = minh + copyh - 1;
+        const minc = ctx.luckysheet_select_save[0].column[0]; // 应用范围首尾列
+        const maxc = minc + copyc - 1;
         // 应用范围包含部分合并单元格，则return提示
-        var has_PartMC = false;
+        let has_PartMC = false;
         if (cfg.merge != null) {
             has_PartMC = hasPartMC(ctx, cfg, minh, maxh, minc, maxc);
         }
@@ -249,14 +236,14 @@ function pasteHandler(ctx, data, borderInfo) {
             // }
             return;
         }
-        var d = getFlowdata(ctx); // 取数据
+        const d = getFlowdata(ctx); // 取数据
         if (!d)
             return;
-        var rowMaxLength = d.length;
-        var cellMaxLength = d[0].length;
+        const rowMaxLength = d.length;
+        const cellMaxLength = d[0].length;
         // 若应用范围超过最大行或最大列，增加行列
-        var addr = maxh - rowMaxLength + 1;
-        var addc = maxc - cellMaxLength + 1;
+        const addr = maxh - rowMaxLength + 1;
+        const addc = maxc - cellMaxLength + 1;
         if (addr > 0 || addc > 0) {
             expandRowsAndColumns(d, addr, addc);
         }
@@ -265,33 +252,33 @@ function pasteHandler(ctx, data, borderInfo) {
         if (cfg.rowlen == null) {
             cfg.rowlen = {};
         }
-        var RowlChange = false;
-        var offsetMC = {};
-        for (var h = minh; h <= maxh; h += 1) {
-            var x = d[h];
-            var currentRowLen = ctx.defaultrowlen;
+        const RowlChange = false;
+        const offsetMC = {};
+        for (let h = minh; h <= maxh; h += 1) {
+            const x = d[h];
+            let currentRowLen = ctx.defaultrowlen;
             if (cfg.rowlen[h] != null) {
                 currentRowLen = cfg.rowlen[h];
             }
-            for (var c = minc; c <= maxc; c += 1) {
-                if ((_d = x === null || x === void 0 ? void 0 : x[c]) === null || _d === void 0 ? void 0 : _d.mc) {
+            for (let c = minc; c <= maxc; c += 1) {
+                if (x?.[c]?.mc) {
                     if ("rs" in x[c].mc) {
-                        delete cfg.merge["".concat(x[c].mc.r, "_").concat(x[c].mc.c)];
+                        delete cfg.merge[`${x[c].mc.r}_${x[c].mc.c}`];
                     }
                     delete x[c].mc;
                 }
-                var value = null;
+                let value = null;
                 if (data[h - minh] != null && data[h - minh][c - minc] != null) {
                     value = data[h - minh][c - minc];
                 }
                 x[c] = value;
-                if (value != null && ((_e = x === null || x === void 0 ? void 0 : x[c]) === null || _e === void 0 ? void 0 : _e.mc)) {
+                if (value != null && x?.[c]?.mc) {
                     if (x[c].mc.rs != null) {
                         x[c].mc.r = h;
                         x[c].mc.c = c;
                         // @ts-ignore
-                        cfg.merge["".concat(x[c].mc.r, "_").concat(x[c].mc.c)] = x[c].mc;
-                        offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)] = [
+                        cfg.merge[`${x[c].mc.r}_${x[c].mc.c}`] = x[c].mc;
+                        offsetMC[`${value.mc.r}_${value.mc.c}`] = [
                             x[c].mc.r,
                             x[c].mc.c,
                         ];
@@ -299,25 +286,25 @@ function pasteHandler(ctx, data, borderInfo) {
                     else {
                         x[c] = {
                             mc: {
-                                r: offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)][0],
-                                c: offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)][1],
+                                r: offsetMC[`${value.mc.r}_${value.mc.c}`][0],
+                                c: offsetMC[`${value.mc.r}_${value.mc.c}`][1],
                             },
                         };
                     }
                 }
-                if (borderInfo["".concat(h - minh, "_").concat(c - minc)]) {
-                    var bd_obj = {
+                if (borderInfo[`${h - minh}_${c - minc}`]) {
+                    const bd_obj = {
                         rangeType: "cell",
                         value: {
                             row_index: h,
                             col_index: c,
-                            l: borderInfo["".concat(h - minh, "_").concat(c - minc)].l,
-                            r: borderInfo["".concat(h - minh, "_").concat(c - minc)].r,
-                            t: borderInfo["".concat(h - minh, "_").concat(c - minc)].t,
-                            b: borderInfo["".concat(h - minh, "_").concat(c - minc)].b,
+                            l: borderInfo[`${h - minh}_${c - minc}`].l,
+                            r: borderInfo[`${h - minh}_${c - minc}`].r,
+                            t: borderInfo[`${h - minh}_${c - minc}`].t,
+                            b: borderInfo[`${h - minh}_${c - minc}`].b,
                         },
                     };
-                    (_f = cfg.borderInfo) === null || _f === void 0 ? void 0 : _f.push(bd_obj);
+                    cfg.borderInfo?.push(bd_obj);
                 }
                 // const fontset = luckysheetfontformat(x[c]);
                 // const oneLineTextHeight = menuButton.getTextSize("田", fontset)[1];
@@ -353,27 +340,27 @@ function pasteHandler(ctx, data, borderInfo) {
     }
     else {
         data = data.replace(/\r/g, "");
-        var dataChe = [];
-        var che = data.split("\n");
-        var colchelen = che[0].split("\t").length;
-        for (var i = 0; i < che.length; i += 1) {
+        const dataChe = [];
+        const che = data.split("\n");
+        const colchelen = che[0].split("\t").length;
+        for (let i = 0; i < che.length; i += 1) {
             if (che[i].split("\t").length < colchelen) {
                 continue;
             }
             dataChe.push(che[i].split("\t"));
         }
-        var d = getFlowdata(ctx); // 取数据
+        const d = getFlowdata(ctx); // 取数据
         if (!d)
             return;
-        var last = (_g = ctx.luckysheet_select_save) === null || _g === void 0 ? void 0 : _g[ctx.luckysheet_select_save.length - 1];
+        const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
         if (!last)
             return;
-        var curR = last.row == null ? 0 : last.row[0];
-        var curC = last.column == null ? 0 : last.column[0];
-        var rlen = dataChe.length;
-        var clen = dataChe[0].length;
+        const curR = last.row == null ? 0 : last.row[0];
+        const curC = last.column == null ? 0 : last.column[0];
+        const rlen = dataChe.length;
+        const clen = dataChe[0].length;
         // 应用范围包含部分合并单元格，则return提示
-        var has_PartMC = false;
+        let has_PartMC = false;
         if (ctx.config.merge != null) {
             has_PartMC = hasPartMC(ctx, ctx.config, curR, curR + rlen - 1, curC, curC + clen - 1);
         }
@@ -388,18 +375,18 @@ function pasteHandler(ctx, data, borderInfo) {
             // }
             return;
         }
-        var addr = curR + rlen - d.length;
-        var addc = curC + clen - d[0].length;
+        const addr = curR + rlen - d.length;
+        const addc = curC + clen - d[0].length;
         if (addr > 0 || addc > 0) {
             expandRowsAndColumns(d, addr, addc);
         }
         if (!d)
             return;
-        for (var r = 0; r < rlen; r += 1) {
-            var x = d[r + curR];
-            for (var c = 0; c < clen; c += 1) {
-                var originCell = x[c + curC];
-                var value = dataChe[r][c];
+        for (let r = 0; r < rlen; r += 1) {
+            const x = d[r + curR];
+            for (let c = 0; c < clen; c += 1) {
+                const originCell = x[c + curC];
+                let value = dataChe[r][c];
                 if (isRealNum(value)) {
                     // 如果单元格设置了纯文本格式，那么就不要转成数值类型了，防止数值过大自动转成科学计数法
                     if (originCell && originCell.ct && originCell.ct.fa === "@") {
@@ -423,9 +410,9 @@ function pasteHandler(ctx, data, borderInfo) {
                     }
                 }
                 else {
-                    var cell = {};
-                    var mask = genarate(value);
-                    _a = mask, cell.m = _a[0], cell.ct = _a[1], cell.v = _a[2];
+                    const cell = {};
+                    const mask = genarate(value);
+                    [cell.m, cell.ct, cell.v] = mask;
                     x[c + curC] = cell;
                 }
             }
@@ -446,14 +433,13 @@ function pasteHandler(ctx, data, borderInfo) {
     }
 }
 function setCellHyperlink(ctx, id, r, c, link) {
-    var index = getSheetIndex(ctx, id);
+    const index = getSheetIndex(ctx, id);
     if (!ctx.luckysheetfile[index].hyperlink) {
         ctx.luckysheetfile[index].hyperlink = {};
     }
-    ctx.luckysheetfile[index].hyperlink["".concat(r, "_").concat(c)] = link;
+    ctx.luckysheetfile[index].hyperlink[`${r}_${c}`] = link;
 }
 function pasteHandlerOfCutPaste(ctx, copyRange) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     // if (
     //   !checkProtectionLockedRangeList(
     //     ctx.luckysheet_select_save,
@@ -462,36 +448,36 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
     // ) {
     //   return;
     // }
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (!copyRange)
         return;
-    var cfg = ctx.config || {};
+    const cfg = ctx.config || {};
     if (cfg.merge == null) {
         cfg.merge = {};
     }
     // 复制范围
-    var copyHasMC = copyRange.HasMC;
-    var copyRowlChange = copyRange.RowlChange;
-    var copySheetId = copyRange.dataSheetId;
-    var c_r1 = copyRange.copyRange[0].row[0];
-    var c_r2 = copyRange.copyRange[0].row[1];
-    var c_c1 = copyRange.copyRange[0].column[0];
-    var c_c2 = copyRange.copyRange[0].column[1];
-    var copyData = _.cloneDeep(getdatabyselection(ctx, { row: [c_r1, c_r2], column: [c_c1, c_c2] }, copySheetId));
-    var copyh = copyData.length;
-    var copyc = copyData[0].length;
+    const copyHasMC = copyRange.HasMC;
+    const copyRowlChange = copyRange.RowlChange;
+    const copySheetId = copyRange.dataSheetId;
+    const c_r1 = copyRange.copyRange[0].row[0];
+    const c_r2 = copyRange.copyRange[0].row[1];
+    const c_c1 = copyRange.copyRange[0].column[0];
+    const c_c2 = copyRange.copyRange[0].column[1];
+    const copyData = _.cloneDeep(getdatabyselection(ctx, { row: [c_r1, c_r2], column: [c_c1, c_c2] }, copySheetId));
+    const copyh = copyData.length;
+    const copyc = copyData[0].length;
     // 应用范围
-    var last = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1];
+    const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
     if (!last || last.row_focus == null || last.column_focus == null)
         return;
-    var minh = last.row_focus;
-    var maxh = minh + copyh - 1; // 应用范围首尾行
-    var minc = last.column_focus;
-    var maxc = minc + copyc - 1; // 应用范围首尾列
+    const minh = last.row_focus;
+    const maxh = minh + copyh - 1; // 应用范围首尾行
+    const minc = last.column_focus;
+    const maxc = minc + copyc - 1; // 应用范围首尾列
     // 应用范围包含部分合并单元格，则提示
-    var has_PartMC = false;
+    let has_PartMC = false;
     if (cfg.merge != null) {
         has_PartMC = hasPartMC(ctx, cfg, minh, maxh, minc, maxc);
     }
@@ -506,31 +492,30 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
         // }
         return;
     }
-    var d = getFlowdata(ctx); // 取数据
+    const d = getFlowdata(ctx); // 取数据
     if (!d)
         return;
-    var rowMaxLength = d.length;
-    var cellMaxLength = d[0].length;
-    var addr = copyh + minh - rowMaxLength;
-    var addc = copyc + minc - cellMaxLength;
+    const rowMaxLength = d.length;
+    const cellMaxLength = d[0].length;
+    const addr = copyh + minh - rowMaxLength;
+    const addc = copyc + minc - cellMaxLength;
     if (addr > 0 || addc > 0) {
         expandRowsAndColumns(d, addr, addc);
     }
-    var borderInfoCompute = getBorderInfoCompute(ctx, copySheetId);
-    var c_dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)].dataVerification) || {};
-    var dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
+    const borderInfoCompute = getBorderInfoCompute(ctx, copySheetId);
+    const c_dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)].dataVerification) || {};
+    const dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
         .dataVerification) || {};
     // 若选区内包含超链接
-    if (((_b = ctx.luckysheet_select_save) === null || _b === void 0 ? void 0 : _b.length) === 1 &&
-        ((_c = ctx.luckysheet_copy_save) === null || _c === void 0 ? void 0 : _c.copyRange.length) === 1) {
-        _.forEach((_d = ctx.luckysheet_copy_save) === null || _d === void 0 ? void 0 : _d.copyRange, function (range) {
-            var _a, _b, _c;
-            for (var r = 0; r <= range.row[1] - range.row[0]; r += 1) {
-                for (var c = 0; c <= range.column[1] - range.column[0]; c += 1) {
-                    var index = getSheetIndex(ctx, (_a = ctx.luckysheet_copy_save) === null || _a === void 0 ? void 0 : _a.dataSheetId);
-                    if (((_b = ctx.luckysheetfile[index].data[r + range.row[0]][c + range.column[0]]) === null || _b === void 0 ? void 0 : _b.hl) &&
-                        ctx.luckysheetfile[index].hyperlink["".concat(r, "_").concat(c)]) {
-                        setCellHyperlink(ctx, (_c = ctx.luckysheet_copy_save) === null || _c === void 0 ? void 0 : _c.dataSheetId, r + ctx.luckysheet_select_save[0].row[0], c + ctx.luckysheet_select_save[0].column[0], ctx.luckysheetfile[index].hyperlink["".concat(r, "_").concat(c)]);
+    if (ctx.luckysheet_select_save?.length === 1 &&
+        ctx.luckysheet_copy_save?.copyRange.length === 1) {
+        _.forEach(ctx.luckysheet_copy_save?.copyRange, (range) => {
+            for (let r = 0; r <= range.row[1] - range.row[0]; r += 1) {
+                for (let c = 0; c <= range.column[1] - range.column[0]; c += 1) {
+                    const index = getSheetIndex(ctx, ctx.luckysheet_copy_save?.dataSheetId);
+                    if (ctx.luckysheetfile[index].data[r + range.row[0]][c + range.column[0]]?.hl &&
+                        ctx.luckysheetfile[index].hyperlink[`${r}_${c}`]) {
+                        setCellHyperlink(ctx, ctx.luckysheet_copy_save?.dataSheetId, r + ctx.luckysheet_select_save[0].row[0], c + ctx.luckysheet_select_save[0].column[0], ctx.luckysheetfile[index].hyperlink[`${r}_${c}`]);
                     }
                 }
             }
@@ -538,37 +523,37 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
     }
     // 剪切粘贴在当前表操作，删除剪切范围内数据、合并单元格、数据验证和超链接
     if (ctx.currentSheetId === copySheetId) {
-        for (var i = c_r1; i <= c_r2; i += 1) {
-            for (var j = c_c1; j <= c_c2; j += 1) {
-                var cell = d[i][j];
+        for (let i = c_r1; i <= c_r2; i += 1) {
+            for (let j = c_c1; j <= c_c2; j += 1) {
+                const cell = d[i][j];
                 if (cell && _.isPlainObject(cell) && "mc" in cell) {
-                    if (((_e = cell.mc) === null || _e === void 0 ? void 0 : _e.rs) != null) {
-                        delete cfg.merge["".concat(cell.mc.r, "_").concat(cell.mc.c)];
+                    if (cell.mc?.rs != null) {
+                        delete cfg.merge[`${cell.mc.r}_${cell.mc.c}`];
                     }
                     delete cell.mc;
                 }
                 d[i][j] = null;
-                delete dataVerification["".concat(i, "_").concat(j)];
-                (_f = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)].hyperlink) === null || _f === void 0 ? true : delete _f["".concat(i, "_").concat(j)];
+                delete dataVerification[`${i}_${j}`];
+                delete ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)].hyperlink?.[`${i}_${j}`];
             }
         }
         // 边框
         if (cfg.borderInfo && cfg.borderInfo.length > 0) {
-            var source_borderInfo = [];
-            for (var i = 0; i < cfg.borderInfo.length; i += 1) {
-                var bd_rangeType = cfg.borderInfo[i].rangeType;
+            const source_borderInfo = [];
+            for (let i = 0; i < cfg.borderInfo.length; i += 1) {
+                const bd_rangeType = cfg.borderInfo[i].rangeType;
                 if (bd_rangeType === "range") {
-                    var bd_range = cfg.borderInfo[i].range;
-                    var bd_emptyRange = [];
-                    for (var j = 0; j < bd_range.length; j += 1) {
+                    const bd_range = cfg.borderInfo[i].range;
+                    let bd_emptyRange = [];
+                    for (let j = 0; j < bd_range.length; j += 1) {
                         bd_emptyRange = bd_emptyRange.concat(CFSplitRange(bd_range[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "restPart"));
                     }
                     cfg.borderInfo[i].range = bd_emptyRange;
                     source_borderInfo.push(cfg.borderInfo[i]);
                 }
                 else if (bd_rangeType === "cell") {
-                    var bd_r = cfg.borderInfo[i].value.row_index;
-                    var bd_c = cfg.borderInfo[i].value.col_index;
+                    const bd_r = cfg.borderInfo[i].value.row_index;
+                    const bd_c = cfg.borderInfo[i].value.col_index;
                     if (!(bd_r >= c_r1 && bd_r <= c_r2 && bd_c >= c_c1 && bd_c <= c_c2)) {
                         source_borderInfo.push(cfg.borderInfo[i]);
                     }
@@ -577,21 +562,21 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
             cfg.borderInfo = source_borderInfo;
         }
     }
-    var offsetMC = {};
-    for (var h = minh; h <= maxh; h += 1) {
-        var x = d[h];
-        for (var c = minc; c <= maxc; c += 1) {
-            if (borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)] &&
-                !borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].s) {
-                var bd_obj = {
+    const offsetMC = {};
+    for (let h = minh; h <= maxh; h += 1) {
+        const x = d[h];
+        for (let c = minc; c <= maxc; c += 1) {
+            if (borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`] &&
+                !borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].s) {
+                const bd_obj = {
                     rangeType: "cell",
                     value: {
                         row_index: h,
                         col_index: c,
-                        l: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].l,
-                        r: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].r,
-                        t: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].t,
-                        b: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].b,
+                        l: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].l,
+                        r: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].r,
+                        t: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].t,
+                        b: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].b,
                     },
                 };
                 if (cfg.borderInfo == null) {
@@ -599,8 +584,8 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
                 }
                 cfg.borderInfo.push(bd_obj);
             }
-            else if (borderInfoCompute["".concat(h, "_").concat(c)]) {
-                var bd_obj = {
+            else if (borderInfoCompute[`${h}_${c}`]) {
+                const bd_obj = {
                     rangeType: "cell",
                     value: {
                         row_index: h,
@@ -616,12 +601,12 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
                 }
                 cfg.borderInfo.push(bd_obj);
             }
-            else if (borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)]) {
-                var bd_obj = {
+            else if (borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`]) {
+                const bd_obj = {
                     rangeType: "range",
                     borderType: "border-slash",
-                    color: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].s.color,
-                    style: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].s.style,
+                    color: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].s.color,
+                    style: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].s.style,
                     range: normalizeSelection(ctx, [{ row: [h, h], column: [c, c] }]),
                 };
                 if (cfg.borderInfo == null) {
@@ -630,28 +615,28 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
                 cfg.borderInfo.push(bd_obj);
             }
             // 数据验证 剪切
-            if (c_dataVerification["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)]) {
-                dataVerification["".concat(h, "_").concat(c)] =
-                    c_dataVerification["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)];
+            if (c_dataVerification[`${c_r1 + h - minh}_${c_c1 + c - minc}`]) {
+                dataVerification[`${h}_${c}`] =
+                    c_dataVerification[`${c_r1 + h - minh}_${c_c1 + c - minc}`];
             }
-            if ((_g = x[c]) === null || _g === void 0 ? void 0 : _g.mc) {
-                if (((_j = (_h = x[c]) === null || _h === void 0 ? void 0 : _h.mc) === null || _j === void 0 ? void 0 : _j.rs) != null) {
-                    delete cfg.merge["".concat(x[c].mc.r, "_").concat(x[c].mc.c)];
+            if (x[c]?.mc) {
+                if (x[c]?.mc?.rs != null) {
+                    delete cfg.merge[`${x[c].mc.r}_${x[c].mc.c}`];
                 }
                 delete x[c].mc;
             }
-            var value = null;
+            let value = null;
             if (copyData[h - minh] != null && copyData[h - minh][c - minc] != null) {
                 value = copyData[h - minh][c - minc];
             }
             x[c] = _.cloneDeep(value);
-            if (value != null && copyHasMC && ((_k = x[c]) === null || _k === void 0 ? void 0 : _k.mc)) {
+            if (value != null && copyHasMC && x[c]?.mc) {
                 if (x[c].mc.rs != null) {
                     x[c].mc.r = h;
                     x[c].mc.c = c;
                     // @ts-ignore
-                    cfg.merge["".concat(x[c].mc.r, "_").concat(x[c].mc.c)] = x[c].mc;
-                    offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)] = [
+                    cfg.merge[`${x[c].mc.r}_${x[c].mc.c}`] = x[c].mc;
+                    offsetMC[`${value.mc.r}_${value.mc.c}`] = [
                         x[c].mc.r,
                         x[c].mc.c,
                     ];
@@ -659,8 +644,8 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
                 else {
                     x[c] = {
                         mc: {
-                            r: offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)][0],
-                            c: offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)][1],
+                            r: offsetMC[`${value.mc.r}_${value.mc.c}`][0],
+                            c: offsetMC[`${value.mc.r}_${value.mc.c}`][1],
                         },
                     };
                 }
@@ -679,23 +664,23 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
         //   cfg = rowlenByRange(d, minh, maxh, cfg);
         // }
     }
-    var source;
-    var target;
+    let source;
+    let target;
     if (ctx.currentSheetId !== copySheetId) {
         // 跨表操作
-        var sourceData = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)].data);
-        var sourceConfig = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)].config);
-        var sourceCurData = _.cloneDeep(sourceData);
-        var sourceCurConfig = _.cloneDeep(sourceConfig) || {};
+        const sourceData = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)].data);
+        const sourceConfig = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)].config);
+        const sourceCurData = _.cloneDeep(sourceData);
+        const sourceCurConfig = _.cloneDeep(sourceConfig) || {};
         if (sourceCurConfig.merge == null) {
             sourceCurConfig.merge = {};
         }
-        for (var source_r = c_r1; source_r <= c_r2; source_r += 1) {
-            for (var source_c = c_c1; source_c <= c_c2; source_c += 1) {
-                var cell = sourceCurData[source_r][source_c];
-                if (cell === null || cell === void 0 ? void 0 : cell.mc) {
+        for (let source_r = c_r1; source_r <= c_r2; source_r += 1) {
+            for (let source_c = c_c1; source_c <= c_c2; source_c += 1) {
+                const cell = sourceCurData[source_r][source_c];
+                if (cell?.mc) {
                     if ("rs" in cell.mc) {
-                        delete sourceCurConfig.merge["".concat(cell.mc.r, "_").concat(cell.mc.c)];
+                        delete sourceCurConfig.merge[`${cell.mc.r}_${cell.mc.c}`];
                     }
                     delete cell.mc;
                 }
@@ -712,21 +697,21 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
         }
         // 边框
         if (sourceCurConfig.borderInfo && sourceCurConfig.borderInfo.length > 0) {
-            var source_borderInfo = [];
-            for (var i = 0; i < sourceCurConfig.borderInfo.length; i += 1) {
-                var bd_rangeType = sourceCurConfig.borderInfo[i].rangeType;
+            const source_borderInfo = [];
+            for (let i = 0; i < sourceCurConfig.borderInfo.length; i += 1) {
+                const bd_rangeType = sourceCurConfig.borderInfo[i].rangeType;
                 if (bd_rangeType === "range") {
-                    var bd_range = sourceCurConfig.borderInfo[i].range;
-                    var bd_emptyRange = [];
-                    for (var j = 0; j < bd_range.length; j += 1) {
+                    const bd_range = sourceCurConfig.borderInfo[i].range;
+                    let bd_emptyRange = [];
+                    for (let j = 0; j < bd_range.length; j += 1) {
                         bd_emptyRange = bd_emptyRange.concat(CFSplitRange(bd_range[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "restPart"));
                     }
                     sourceCurConfig.borderInfo[i].range = bd_emptyRange;
                     source_borderInfo.push(sourceCurConfig.borderInfo[i]);
                 }
                 else if (bd_rangeType === "cell") {
-                    var bd_r = sourceCurConfig.borderInfo[i].value.row_index;
-                    var bd_c = sourceCurConfig.borderInfo[i].value.col_index;
+                    const bd_r = sourceCurConfig.borderInfo[i].value.row_index;
+                    const bd_c = sourceCurConfig.borderInfo[i].value.col_index;
                     if (!(bd_r >= c_r1 && bd_r <= c_r2 && bd_c >= c_c1 && bd_c <= c_c2)) {
                         source_borderInfo.push(sourceCurConfig.borderInfo[i]);
                     }
@@ -735,41 +720,41 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
             sourceCurConfig.borderInfo = source_borderInfo;
         }
         // 条件格式
-        var source_cdformat = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)]
+        const source_cdformat = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetId)]
             .luckysheet_conditionformat_save);
-        var source_curCdformat = _.cloneDeep(source_cdformat);
-        var ruleArr = [];
+        const source_curCdformat = _.cloneDeep(source_cdformat);
+        const ruleArr = [];
         if (source_curCdformat != null && source_curCdformat.length > 0) {
-            for (var i = 0; i < source_curCdformat.length; i += 1) {
-                var source_curCdformat_cellrange = source_curCdformat[i].cellrange;
-                var emptyRange = [];
-                var emptyRange2 = [];
-                for (var j = 0; j < source_curCdformat_cellrange.length; j += 1) {
-                    var range = CFSplitRange(source_curCdformat_cellrange[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "restPart");
+            for (let i = 0; i < source_curCdformat.length; i += 1) {
+                const source_curCdformat_cellrange = source_curCdformat[i].cellrange;
+                let emptyRange = [];
+                let emptyRange2 = [];
+                for (let j = 0; j < source_curCdformat_cellrange.length; j += 1) {
+                    const range = CFSplitRange(source_curCdformat_cellrange[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "restPart");
                     emptyRange = emptyRange.concat(range);
-                    var range2 = CFSplitRange(source_curCdformat_cellrange[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "operatePart");
+                    const range2 = CFSplitRange(source_curCdformat_cellrange[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "operatePart");
                     if (range2.length > 0) {
                         emptyRange2 = emptyRange2.concat(range2);
                     }
                 }
                 source_curCdformat[i].cellrange = emptyRange;
                 if (emptyRange2.length > 0) {
-                    var ruleObj = (_l = source_curCdformat[i]) !== null && _l !== void 0 ? _l : {};
+                    const ruleObj = source_curCdformat[i] ?? {};
                     ruleObj.cellrange = emptyRange2;
                     ruleArr.push(ruleObj);
                 }
             }
         }
-        var target_cdformat = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
+        const target_cdformat = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
             .luckysheet_conditionformat_save);
-        var target_curCdformat = _.cloneDeep(target_cdformat);
+        let target_curCdformat = _.cloneDeep(target_cdformat);
         if (ruleArr.length > 0) {
-            target_curCdformat = target_curCdformat === null || target_curCdformat === void 0 ? void 0 : target_curCdformat.concat(ruleArr);
+            target_curCdformat = target_curCdformat?.concat(ruleArr);
         }
         // 数据验证
-        for (var i = c_r1; i <= c_r2; i += 1) {
-            for (var j = c_c1; j <= c_c2; j += 1) {
-                delete c_dataVerification["".concat(i, "_").concat(j)];
+        for (let i = c_r1; i <= c_r2; i += 1) {
+            for (let j = c_c1; j <= c_c2; j += 1) {
+                delete c_dataVerification[`${i}_${j}`];
             }
         }
         source = {
@@ -806,15 +791,15 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
     }
     else {
         // 条件格式
-        var cdformat = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
+        const cdformat = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
             .luckysheet_conditionformat_save);
-        var curCdformat = _.cloneDeep(cdformat);
+        const curCdformat = _.cloneDeep(cdformat);
         if (curCdformat != null && curCdformat.length > 0) {
-            for (var i = 0; i < curCdformat.length; i += 1) {
-                var cellrange = curCdformat[i].cellrange;
-                var emptyRange = [];
-                for (var j = 0; j < cellrange.length; j += 1) {
-                    var range = CFSplitRange(cellrange[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "allPart");
+            for (let i = 0; i < curCdformat.length; i += 1) {
+                const { cellrange } = curCdformat[i];
+                let emptyRange = [];
+                for (let j = 0; j < cellrange.length; j += 1) {
+                    const range = CFSplitRange(cellrange[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [minh, maxh], column: [minc, maxc] }, "allPart");
                     emptyRange = emptyRange.concat(range);
                 }
                 curCdformat[i].cellrange = emptyRange;
@@ -827,8 +812,8 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
             curData: d,
             config: _.cloneDeep(ctx.config),
             curConfig: cfg,
-            cdformat: cdformat,
-            curCdformat: curCdformat,
+            cdformat,
+            curCdformat,
             dataVerification: _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
                 .dataVerification),
             curDataVerification: dataVerification,
@@ -843,8 +828,8 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
             curData: d,
             config: _.cloneDeep(ctx.config),
             curConfig: cfg,
-            cdformat: cdformat,
-            curCdformat: curCdformat,
+            cdformat,
+            curCdformat,
             dataVerification: _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
                 .dataVerification),
             curDataVerification: dataVerification,
@@ -862,7 +847,6 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
     }
 }
 function pasteHandlerOfCopyPaste(ctx, copyRange) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     // if (
     //   !checkProtectionLockedRangeList(
     //     ctx.luckysheet_select_save,
@@ -871,35 +855,35 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
     // ) {
     //   return;
     // }
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (!copyRange)
         return;
-    var cfg = ctx.config;
+    const cfg = ctx.config;
     if (_.isNil(cfg.merge)) {
         cfg.merge = {};
     }
     // 复制范围
-    var copyHasMC = copyRange.HasMC;
-    var copyRowlChange = copyRange.RowlChange;
-    var copySheetIndex = copyRange.dataSheetId;
-    var c_r1 = copyRange.copyRange[0].row[0];
-    var c_r2 = copyRange.copyRange[0].row[1];
-    var c_c1 = copyRange.copyRange[0].column[0];
-    var c_c2 = copyRange.copyRange[0].column[1];
-    var arr = [];
-    var isSameRow = false;
-    var _loop_1 = function (i) {
-        var arrData = getdatabyselection(ctx, {
+    const copyHasMC = copyRange.HasMC;
+    const copyRowlChange = copyRange.RowlChange;
+    const copySheetIndex = copyRange.dataSheetId;
+    const c_r1 = copyRange.copyRange[0].row[0];
+    const c_r2 = copyRange.copyRange[0].row[1];
+    const c_c1 = copyRange.copyRange[0].column[0];
+    const c_c2 = copyRange.copyRange[0].column[1];
+    let arr = [];
+    let isSameRow = false;
+    for (let i = 0; i < copyRange.copyRange.length; i += 1) {
+        let arrData = getdatabyselection(ctx, {
             row: copyRange.copyRange[i].row,
             column: copyRange.copyRange[i].column,
         }, copySheetIndex);
         if (copyRange.copyRange.length > 1) {
             if (c_r1 === copyRange.copyRange[1].row[0] &&
                 c_r2 === copyRange.copyRange[1].row[1]) {
-                arrData = arrData[0].map(function (col, a) {
-                    return arrData.map(function (row) {
+                arrData = arrData[0].map((col, a) => {
+                    return arrData.map((row) => {
                         return row[a];
                     });
                 });
@@ -914,22 +898,19 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
         else {
             arr = arrData;
         }
-    };
-    for (var i = 0; i < copyRange.copyRange.length; i += 1) {
-        _loop_1(i);
     }
     if (isSameRow) {
-        arr = arr[0].map(function (col, b) {
-            return arr.map(function (row) {
+        arr = arr[0].map((col, b) => {
+            return arr.map((row) => {
                 return row[b];
             });
         });
     }
-    var copyData = _.cloneDeep(arr);
+    const copyData = _.cloneDeep(arr);
     // 多重选择选择区域 单元格如果有函数 则只取值 不取函数
     if (copyRange.copyRange.length > 1) {
-        for (var i = 0; i < copyData.length; i += 1) {
-            for (var j = 0; j < copyData[i].length; j += 1) {
+        for (let i = 0; i < copyData.length; i += 1) {
+            for (let j = 0; j < copyData[i].length; j += 1) {
                 if (copyData[i][j] != null && copyData[i][j].f != null) {
                     delete copyData[i][j].f;
                     delete copyData[i][j].spl;
@@ -937,25 +918,25 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
             }
         }
     }
-    var copyh = copyData.length;
-    var copyc = copyData[0].length;
+    const copyh = copyData.length;
+    const copyc = copyData[0].length;
     // 应用范围
-    var last = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1];
+    const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
     if (!last)
         return;
-    var minh = last.row[0];
-    var maxh = last.row[1]; // 应用范围首尾行
-    var minc = last.column[0];
-    var maxc = last.column[1]; // 应用范围首尾列
-    var mh = (maxh - minh + 1) % copyh;
-    var mc = (maxc - minc + 1) % copyc;
+    const minh = last.row[0];
+    let maxh = last.row[1]; // 应用范围首尾行
+    const minc = last.column[0];
+    let maxc = last.column[1]; // 应用范围首尾列
+    const mh = (maxh - minh + 1) % copyh;
+    const mc = (maxc - minc + 1) % copyc;
     if (mh !== 0 || mc !== 0) {
         // 若应用范围不是copydata行列数的整数倍，则取copydata的行列数
         maxh = minh + copyh - 1;
         maxc = minc + copyc - 1;
     }
     // 应用范围包含部分合并单元格，则提示
-    var has_PartMC = false;
+    let has_PartMC = false;
     if (!_.isNil(cfg.merge)) {
         has_PartMC = hasPartMC(ctx, cfg, minh, maxh, minc, maxc);
     }
@@ -970,58 +951,58 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
         // }
         return;
     }
-    var timesH = (maxh - minh + 1) / copyh;
-    var timesC = (maxc - minc + 1) / copyc;
-    var d = getFlowdata(ctx); // 取数据
+    const timesH = (maxh - minh + 1) / copyh;
+    const timesC = (maxc - minc + 1) / copyc;
+    const d = getFlowdata(ctx); // 取数据
     if (!d)
         return;
-    var rowMaxLength = d.length;
-    var cellMaxLength = d[0].length;
+    const rowMaxLength = d.length;
+    const cellMaxLength = d[0].length;
     // 若应用范围超过最大行或最大列，增加行列
-    var addr = copyh + minh - rowMaxLength;
-    var addc = copyc + minc - cellMaxLength;
+    const addr = copyh + minh - rowMaxLength;
+    const addc = copyc + minc - cellMaxLength;
     if (addr > 0 || addc > 0) {
         expandRowsAndColumns(d, addr, addc);
     }
-    var borderInfoCompute = getBorderInfoCompute(ctx, copySheetIndex);
-    var c_dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetIndex)].dataVerification) || {};
-    var dataVerification = null;
-    var mth = 0;
-    var mtc = 0;
-    var maxcellCahe = 0;
-    var maxrowCache = 0;
-    var file = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)];
-    var hiddenRows = new Set(Object.keys(((_b = file.config) === null || _b === void 0 ? void 0 : _b.rowhidden) || {}));
-    var hiddenCols = new Set(Object.keys(((_c = file.config) === null || _c === void 0 ? void 0 : _c.colhidden) || {}));
-    for (var th = 1; th <= timesH; th += 1) {
-        for (var tc = 1; tc <= timesC; tc += 1) {
+    const borderInfoCompute = getBorderInfoCompute(ctx, copySheetIndex);
+    const c_dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, copySheetIndex)].dataVerification) || {};
+    let dataVerification = null;
+    let mth = 0;
+    let mtc = 0;
+    let maxcellCahe = 0;
+    let maxrowCache = 0;
+    const file = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)];
+    const hiddenRows = new Set(Object.keys(file.config?.rowhidden || {}));
+    const hiddenCols = new Set(Object.keys(file.config?.colhidden || {}));
+    for (let th = 1; th <= timesH; th += 1) {
+        for (let tc = 1; tc <= timesC; tc += 1) {
             mth = minh + (th - 1) * copyh;
             mtc = minc + (tc - 1) * copyc;
             maxrowCache = minh + th * copyh;
             maxcellCahe = minc + tc * copyc;
             // 行列位移值 用于单元格有函数
-            var offsetRow = mth - c_r1;
-            var offsetCol = mtc - c_c1;
-            var offsetMC = {};
-            for (var h = mth; h < maxrowCache; h += 1) {
+            const offsetRow = mth - c_r1;
+            const offsetCol = mtc - c_c1;
+            const offsetMC = {};
+            for (let h = mth; h < maxrowCache; h += 1) {
                 // skip if row is hidden
-                if (hiddenRows === null || hiddenRows === void 0 ? void 0 : hiddenRows.has(h.toString()))
+                if (hiddenRows?.has(h.toString()))
                     continue;
-                var x = d[h];
-                for (var c = mtc; c < maxcellCahe; c += 1) {
-                    if (hiddenCols === null || hiddenCols === void 0 ? void 0 : hiddenCols.has(c.toString()))
+                const x = d[h];
+                for (let c = mtc; c < maxcellCahe; c += 1) {
+                    if (hiddenCols?.has(c.toString()))
                         continue;
-                    if (borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)] &&
-                        !borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)].s) {
-                        var bd_obj = {
+                    if (borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`] &&
+                        !borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`].s) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: h,
                                 col_index: c,
-                                l: borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)].l,
-                                r: borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)].r,
-                                t: borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)].t,
-                                b: borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)].b,
+                                l: borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`].l,
+                                r: borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`].r,
+                                t: borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`].t,
+                                b: borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`].b,
                             },
                         };
                         if (_.isNil(cfg.borderInfo)) {
@@ -1029,8 +1010,8 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
                         }
                         cfg.borderInfo.push(bd_obj);
                     }
-                    else if (borderInfoCompute["".concat(h, "_").concat(c)]) {
-                        var bd_obj = {
+                    else if (borderInfoCompute[`${h}_${c}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: h,
@@ -1046,13 +1027,13 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
                         }
                         cfg.borderInfo.push(bd_obj);
                     }
-                    else if (borderInfoCompute["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)]) {
-                        var bd_obj = {
+                    else if (borderInfoCompute[`${c_r1 + h - mth}_${c_c1 + c - mtc}`]) {
+                        const bd_obj = {
                             rangeType: "range",
                             borderType: "border-slash",
-                            color: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].s
+                            color: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].s
                                 .color,
-                            style: borderInfoCompute["".concat(c_r1 + h - minh, "_").concat(c_c1 + c - minc)].s
+                            style: borderInfoCompute[`${c_r1 + h - minh}_${c_c1 + c - minc}`].s
                                 .style,
                             range: normalizeSelection(ctx, [{ row: [h, h], column: [c, c] }]),
                         };
@@ -1062,45 +1043,46 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
                         cfg.borderInfo.push(bd_obj);
                     }
                     // 数据验证 复制
-                    if (c_dataVerification["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)]) {
+                    if (c_dataVerification[`${c_r1 + h - mth}_${c_c1 + c - mtc}`]) {
                         if (_.isNil(dataVerification)) {
-                            dataVerification = _.cloneDeep(((_d = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]) === null || _d === void 0 ? void 0 : _d.dataVerification) || {});
+                            dataVerification = _.cloneDeep(ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
+                                ?.dataVerification || {});
                         }
-                        dataVerification["".concat(h, "_").concat(c)] =
-                            c_dataVerification["".concat(c_r1 + h - mth, "_").concat(c_c1 + c - mtc)];
+                        dataVerification[`${h}_${c}`] =
+                            c_dataVerification[`${c_r1 + h - mth}_${c_c1 + c - mtc}`];
                     }
-                    if (((_e = x[c]) === null || _e === void 0 ? void 0 : _e.mc) != null) {
+                    if (x[c]?.mc != null) {
                         if ("rs" in x[c].mc) {
-                            delete cfg.merge["".concat(x[c].mc.r, "_").concat(x[c].mc.c)];
+                            delete cfg.merge[`${x[c].mc.r}_${x[c].mc.c}`];
                         }
                         delete x[c].mc;
                     }
-                    var value = null;
-                    if ((_f = copyData[h - mth]) === null || _f === void 0 ? void 0 : _f[c - mtc]) {
+                    let value = null;
+                    if (copyData[h - mth]?.[c - mtc]) {
                         value = _.cloneDeep(copyData[h - mth][c - mtc]);
                     }
                     if (!_.isNil(value) && !_.isNil(value.f)) {
-                        var func = value.f;
+                        let func = value.f;
                         if (offsetRow > 0) {
-                            func = "=".concat(functionCopy(ctx, func, "down", offsetRow));
+                            func = `=${functionCopy(ctx, func, "down", offsetRow)}`;
                         }
                         if (offsetRow < 0) {
-                            func = "=".concat(functionCopy(ctx, func, "up", Math.abs(offsetRow)));
+                            func = `=${functionCopy(ctx, func, "up", Math.abs(offsetRow))}`;
                         }
                         if (offsetCol > 0) {
-                            func = "=".concat(functionCopy(ctx, func, "right", offsetCol));
+                            func = `=${functionCopy(ctx, func, "right", offsetCol)}`;
                         }
                         if (offsetCol < 0) {
-                            func = "=".concat(functionCopy(ctx, func, "left", Math.abs(offsetCol)));
+                            func = `=${functionCopy(ctx, func, "left", Math.abs(offsetCol))}`;
                         }
-                        var funcV = execfunction(ctx, func, h, c, undefined, undefined, true);
+                        const funcV = execfunction(ctx, func, h, c, undefined, undefined, true);
                         if (!_.isNil(value.spl)) {
                             // value.f = funcV[2];
                             // value.v = funcV[1];
                             // value.spl = funcV[3].data;
                         }
                         else {
-                            value.v = funcV[1], value.f = funcV[2];
+                            [, value.v, value.f] = funcV;
                             if (!_.isNil(value.ct) && !_.isNil(value.ct.fa)) {
                                 value.m = update(value.ct.fa, funcV[1]);
                             }
@@ -1110,13 +1092,13 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
                         }
                     }
                     x[c] = _.cloneDeep(value);
-                    if (value != null && copyHasMC && ((_g = x === null || x === void 0 ? void 0 : x[c]) === null || _g === void 0 ? void 0 : _g.mc)) {
-                        if (((_j = (_h = x === null || x === void 0 ? void 0 : x[c]) === null || _h === void 0 ? void 0 : _h.mc) === null || _j === void 0 ? void 0 : _j.rs) != null) {
+                    if (value != null && copyHasMC && x?.[c]?.mc) {
+                        if (x?.[c]?.mc?.rs != null) {
                             x[c].mc.r = h;
                             x[c].mc.c = c;
                             // @ts-ignore
-                            cfg.merge["".concat(h, "_").concat(c)] = x[c].mc;
-                            offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)] = [
+                            cfg.merge[`${h}_${c}`] = x[c].mc;
+                            offsetMC[`${value.mc.r}_${value.mc.c}`] = [
                                 x[c].mc.r,
                                 x[c].mc.c,
                             ];
@@ -1124,8 +1106,8 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
                         else {
                             x[c] = {
                                 mc: {
-                                    r: offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)][0],
-                                    c: offsetMC["".concat(value.mc.r, "_").concat(value.mc.c)][1],
+                                    r: offsetMC[`${value.mc.r}_${value.mc.c}`][0],
+                                    c: offsetMC[`${value.mc.r}_${value.mc.c}`][1],
                                 },
                             };
                         }
@@ -1136,24 +1118,24 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
         }
     }
     // 复制范围 是否有 条件格式和数据验证
-    var cdformat = null;
+    let cdformat = null;
     if (copyRange.copyRange.length === 1) {
-        var c_file = ctx.luckysheetfile[getSheetIndex(ctx, copySheetIndex)];
-        var a_file = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)];
-        var ruleArr_cf = _.cloneDeep(c_file.luckysheet_conditionformat_save);
+        const c_file = ctx.luckysheetfile[getSheetIndex(ctx, copySheetIndex)];
+        const a_file = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)];
+        const ruleArr_cf = _.cloneDeep(c_file.luckysheet_conditionformat_save);
         if (!_.isNil(ruleArr_cf) && ruleArr_cf.length > 0) {
-            cdformat = (_k = _.cloneDeep(a_file.luckysheet_conditionformat_save)) !== null && _k !== void 0 ? _k : [];
-            for (var i = 0; i < ruleArr_cf.length; i += 1) {
-                var cf_range = ruleArr_cf[i].cellrange;
-                var emptyRange = [];
-                for (var th = 1; th <= timesH; th += 1) {
-                    for (var tc = 1; tc <= timesC; tc += 1) {
+            cdformat = _.cloneDeep(a_file.luckysheet_conditionformat_save) ?? [];
+            for (let i = 0; i < ruleArr_cf.length; i += 1) {
+                const cf_range = ruleArr_cf[i].cellrange;
+                let emptyRange = [];
+                for (let th = 1; th <= timesH; th += 1) {
+                    for (let tc = 1; tc <= timesC; tc += 1) {
                         mth = minh + (th - 1) * copyh;
                         mtc = minc + (tc - 1) * copyc;
                         maxrowCache = minh + th * copyh;
                         maxcellCahe = minc + tc * copyc;
-                        for (var j = 0; j < cf_range.length; j += 1) {
-                            var range = CFSplitRange(cf_range[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [mth, maxrowCache - 1], column: [mtc, maxcellCahe - 1] }, "operatePart");
+                        for (let j = 0; j < cf_range.length; j += 1) {
+                            const range = CFSplitRange(cf_range[j], { row: [c_r1, c_r2], column: [c_c1, c_c2] }, { row: [mth, maxrowCache - 1], column: [mtc, maxcellCahe - 1] }, "operatePart");
                             if (range.length > 0) {
                                 emptyRange = emptyRange.concat(range);
                             }
@@ -1171,18 +1153,17 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
     last.column = [minc, maxc];
     file.config = cfg;
     file.luckysheet_conditionformat_save = cdformat;
-    file.dataVerification = __assign(__assign({}, file.dataVerification), dataVerification);
+    file.dataVerification = { ...file.dataVerification, ...dataVerification };
     // 若选区内包含超链接
-    if (((_l = ctx.luckysheet_select_save) === null || _l === void 0 ? void 0 : _l.length) === 1 &&
-        ((_m = ctx.luckysheet_copy_save) === null || _m === void 0 ? void 0 : _m.copyRange.length) === 1) {
-        _.forEach((_o = ctx.luckysheet_copy_save) === null || _o === void 0 ? void 0 : _o.copyRange, function (range) {
-            var _a, _b, _c;
-            for (var r = 0; r <= range.row[1] - range.row[0]; r += 1) {
-                for (var c = 0; c <= range.column[1] - range.column[0]; c += 1) {
-                    var index = getSheetIndex(ctx, (_a = ctx.luckysheet_copy_save) === null || _a === void 0 ? void 0 : _a.dataSheetId);
-                    if (((_b = ctx.luckysheetfile[index].data[r + range.row[0]][c + range.column[0]]) === null || _b === void 0 ? void 0 : _b.hl) &&
-                        ctx.luckysheetfile[index].hyperlink["".concat(r, "_").concat(c)]) {
-                        setCellHyperlink(ctx, (_c = ctx.luckysheet_copy_save) === null || _c === void 0 ? void 0 : _c.dataSheetId, r + ctx.luckysheet_select_save[0].row[0], c + ctx.luckysheet_select_save[0].column[0], ctx.luckysheetfile[index].hyperlink["".concat(r, "_").concat(c)]);
+    if (ctx.luckysheet_select_save?.length === 1 &&
+        ctx.luckysheet_copy_save?.copyRange.length === 1) {
+        _.forEach(ctx.luckysheet_copy_save?.copyRange, (range) => {
+            for (let r = 0; r <= range.row[1] - range.row[0]; r += 1) {
+                for (let c = 0; c <= range.column[1] - range.column[0]; c += 1) {
+                    const index = getSheetIndex(ctx, ctx.luckysheet_copy_save?.dataSheetId);
+                    if (ctx.luckysheetfile[index].data[r + range.row[0]][c + range.column[0]]?.hl &&
+                        ctx.luckysheetfile[index].hyperlink[`${r}_${c}`]) {
+                        setCellHyperlink(ctx, ctx.luckysheet_copy_save?.dataSheetId, r + ctx.luckysheet_select_save[0].row[0], c + ctx.luckysheet_select_save[0].column[0], ctx.luckysheetfile[index].hyperlink[`${r}_${c}`]);
                     }
                 }
             }
@@ -1210,11 +1191,11 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
 }
 function handleFormulaStringPaste(ctx, formulaStr) {
     // plaintext formula is applied only to one cell
-    var r = ctx.luckysheet_select_save[0].row[0];
-    var c = ctx.luckysheet_select_save[0].column[0];
-    var funcV = execfunction(ctx, formulaStr, r, c, undefined, undefined, true);
-    var val = funcV[1];
-    var d = getFlowdata(ctx);
+    const r = ctx.luckysheet_select_save[0].row[0];
+    const c = ctx.luckysheet_select_save[0].column[0];
+    const funcV = execfunction(ctx, formulaStr, r, c, undefined, undefined, true);
+    const val = funcV[1];
+    const d = getFlowdata(ctx);
     if (!d)
         return;
     if (!d[r][c])
@@ -1224,19 +1205,18 @@ function handleFormulaStringPaste(ctx, formulaStr) {
     d[r][c].f = formulaStr;
 }
 export function handlePaste(ctx, e) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
     // if (isEditMode()) {
     //   // 此模式下禁用粘贴
     //   return;
     // }
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (selectionCache.isPasteAction) {
         ctx.luckysheetCellUpdate = [];
         // $("#luckysheet-rich-text-editor").blur();
         selectionCache.isPasteAction = false;
-        var clipboardData = e.clipboardData;
+        let { clipboardData } = e;
         if (!clipboardData) {
             // @ts-ignore
             // for IE
@@ -1244,23 +1224,23 @@ export function handlePaste(ctx, e) {
         }
         if (!clipboardData)
             return;
-        var txtdata = clipboardData.getData("text/html") || clipboardData.getData("text/plain");
+        let txtdata = clipboardData.getData("text/html") || clipboardData.getData("text/plain");
         // 如果标示是qksheet复制的内容，判断剪贴板内容是否是当前页面复制的内容
-        var isEqual = true;
+        let isEqual = true;
         if (txtdata.indexOf("fortune-copy-action-table") > -1 &&
-            ((_a = ctx.luckysheet_copy_save) === null || _a === void 0 ? void 0 : _a.copyRange) != null &&
+            ctx.luckysheet_copy_save?.copyRange != null &&
             ctx.luckysheet_copy_save.copyRange.length > 0) {
             // 剪贴板内容解析
-            var cpDataArr = [];
-            var reg = /<tr.*?>(.*?)<\/tr>/g;
-            var reg2 = /<td.*?>(.*?)<\/td>/g;
-            var regArr = txtdata.match(reg) || [];
-            for (var i = 0; i < regArr.length; i += 1) {
-                var cpRowArr = [];
-                var reg2Arr = regArr[i].match(reg2);
+            const cpDataArr = [];
+            const reg = /<tr.*?>(.*?)<\/tr>/g;
+            const reg2 = /<td.*?>(.*?)<\/td>/g;
+            const regArr = txtdata.match(reg) || [];
+            for (let i = 0; i < regArr.length; i += 1) {
+                const cpRowArr = [];
+                const reg2Arr = regArr[i].match(reg2);
                 if (!_.isNil(reg2Arr)) {
-                    for (var j = 0; j < reg2Arr.length; j += 1) {
-                        var cpValue = reg2Arr[j]
+                    for (let j = 0; j < reg2Arr.length; j += 1) {
+                        const cpValue = reg2Arr[j]
                             .replace(/<td.*?>/g, "")
                             .replace(/<\/td>/g, "");
                         cpRowArr.push(cpValue);
@@ -1269,47 +1249,47 @@ export function handlePaste(ctx, e) {
                 cpDataArr.push(cpRowArr);
             }
             // 当前页面复制区内容
-            var copy_r1 = ctx.luckysheet_copy_save.copyRange[0].row[0];
-            var copy_r2 = ctx.luckysheet_copy_save.copyRange[0].row[1];
-            var copy_c1 = ctx.luckysheet_copy_save.copyRange[0].column[0];
-            var copy_c2 = ctx.luckysheet_copy_save.copyRange[0].column[1];
-            var copy_index = ctx.luckysheet_copy_save.dataSheetId;
-            var d = void 0;
+            const copy_r1 = ctx.luckysheet_copy_save.copyRange[0].row[0];
+            const copy_r2 = ctx.luckysheet_copy_save.copyRange[0].row[1];
+            const copy_c1 = ctx.luckysheet_copy_save.copyRange[0].column[0];
+            const copy_c2 = ctx.luckysheet_copy_save.copyRange[0].column[1];
+            const copy_index = ctx.luckysheet_copy_save.dataSheetId;
+            let d;
             if (copy_index === ctx.currentSheetId) {
                 d = getFlowdata(ctx);
             }
             else {
-                var index = getSheetIndex(ctx, copy_index);
+                const index = getSheetIndex(ctx, copy_index);
                 if (_.isNil(index))
                     return;
                 d = ctx.luckysheetfile[index].data;
             }
             if (!d)
                 return;
-            for (var r = copy_r1; r <= copy_r2; r += 1) {
+            for (let r = copy_r1; r <= copy_r2; r += 1) {
                 if (r - copy_r1 > cpDataArr.length - 1) {
                     break;
                 }
-                for (var c = copy_c1; c <= copy_c2; c += 1) {
-                    var cell = d[r][c];
-                    var isInlineStr = false;
+                for (let c = copy_c1; c <= copy_c2; c += 1) {
+                    const cell = d[r][c];
+                    let isInlineStr = false;
                     if (!_.isNil(cell) && !_.isNil(cell.mc) && _.isNil(cell.mc.rs)) {
                         continue;
                     }
-                    var v = void 0;
+                    let v;
                     if (!_.isNil(cell)) {
-                        if (((_d = (_c = (_b = cell.ct) === null || _b === void 0 ? void 0 : _b.fa) === null || _c === void 0 ? void 0 : _c.indexOf("w")) !== null && _d !== void 0 ? _d : -1) > -1) {
-                            v = (_f = (_e = d[r]) === null || _e === void 0 ? void 0 : _e[c]) === null || _f === void 0 ? void 0 : _f.v;
+                        if ((cell.ct?.fa?.indexOf("w") ?? -1) > -1) {
+                            v = d[r]?.[c]?.v;
                         }
                         else {
-                            v = (_h = (_g = d[r]) === null || _g === void 0 ? void 0 : _g[c]) === null || _h === void 0 ? void 0 : _h.m;
+                            v = d[r]?.[c]?.m;
                         }
                     }
                     else {
                         v = "";
                     }
-                    if (_.isNil(v) && ((_l = (_k = (_j = d[r]) === null || _j === void 0 ? void 0 : _j[c]) === null || _k === void 0 ? void 0 : _k.ct) === null || _l === void 0 ? void 0 : _l.t) === "inlineStr") {
-                        v = d[r][c].ct.s.map(function (val) { return val.v; }).join("");
+                    if (_.isNil(v) && d[r]?.[c]?.ct?.t === "inlineStr") {
+                        v = d[r][c].ct.s.map((val) => val.v).join("");
                         isInlineStr = true;
                     }
                     if (_.isNil(v)) {
@@ -1334,12 +1314,12 @@ export function handlePaste(ctx, e) {
                 }
             }
         }
-        var locale_fontjson_1 = locale(ctx).fontjson;
-        if (((_o = (_m = ctx.hooks).beforePaste) === null || _o === void 0 ? void 0 : _o.call(_m, ctx.luckysheet_select_save, txtdata)) === false) {
+        const locale_fontjson = locale(ctx).fontjson;
+        if (ctx.hooks.beforePaste?.(ctx.luckysheet_select_save, txtdata) === false) {
             return;
         }
         if (txtdata.indexOf("fortune-copy-action-table") > -1 &&
-            ((_p = ctx.luckysheet_copy_save) === null || _p === void 0 ? void 0 : _p.copyRange) != null &&
+            ctx.luckysheet_copy_save?.copyRange != null &&
             ctx.luckysheet_copy_save.copyRange.length > 0 &&
             isEqual) {
             // 剪切板内容 和 luckysheet本身复制的内容 一致
@@ -1358,90 +1338,90 @@ export function handlePaste(ctx, e) {
         }
         else {
             if (txtdata.indexOf("table") > -1) {
-                var ele = document.createElement("div");
+                const ele = document.createElement("div");
                 ele.innerHTML = txtdata;
-                var trList = ele.querySelectorAll("table tr");
+                const trList = ele.querySelectorAll("table tr");
                 if (trList.length === 0) {
                     ele.remove();
                     return;
                 }
-                var data_1 = new Array(trList.length);
-                var colLen_1 = 0;
-                _.forEach(trList[0].querySelectorAll("td"), function (td) {
-                    var colspan = td.colSpan;
+                const data = new Array(trList.length);
+                let colLen = 0;
+                _.forEach(trList[0].querySelectorAll("td"), (td) => {
+                    let colspan = td.colSpan;
                     if (Number.isNaN(colspan)) {
                         colspan = 1;
                     }
-                    colLen_1 += colspan;
+                    colLen += colspan;
                 });
-                for (var i = 0; i < data_1.length; i += 1) {
-                    data_1[i] = new Array(colLen_1);
+                for (let i = 0; i < data.length; i += 1) {
+                    data[i] = new Array(colLen);
                 }
-                var r_1 = 0;
-                var borderInfo_1 = {};
-                var styleInner = ((_q = ele.querySelectorAll("style")[0]) === null || _q === void 0 ? void 0 : _q.innerHTML) || "";
-                var patternReg = /{([^}]*)}/g;
-                var patternStyle = styleInner.match(patternReg);
-                var nameReg = /^[^\t].*/gm;
-                var patternName = _.initial(styleInner.match(nameReg));
-                var allStyleList_1 = patternName.length === (patternStyle === null || patternStyle === void 0 ? void 0 : patternStyle.length) &&
+                let r = 0;
+                const borderInfo = {};
+                const styleInner = ele.querySelectorAll("style")[0]?.innerHTML || "";
+                const patternReg = /{([^}]*)}/g;
+                const patternStyle = styleInner.match(patternReg);
+                const nameReg = /^[^\t].*/gm;
+                const patternName = _.initial(styleInner.match(nameReg));
+                const allStyleList = patternName.length === patternStyle?.length &&
                     typeof patternName === typeof patternStyle
                     ? _.fromPairs(_.zip(patternName, patternStyle))
                     : {};
-                var index_1 = getSheetIndex(ctx, ctx.currentSheetId);
-                if (!_.isNil(index_1)) {
-                    if (_.isNil(ctx.luckysheetfile[index_1].config)) {
-                        ctx.luckysheetfile[index_1].config = {};
+                const index = getSheetIndex(ctx, ctx.currentSheetId);
+                if (!_.isNil(index)) {
+                    if (_.isNil(ctx.luckysheetfile[index].config)) {
+                        ctx.luckysheetfile[index].config = {};
                     }
-                    if (_.isNil(ctx.luckysheetfile[index_1].config.rowlen)) {
-                        ctx.luckysheetfile[index_1].config.rowlen = {};
+                    if (_.isNil(ctx.luckysheetfile[index].config.rowlen)) {
+                        ctx.luckysheetfile[index].config.rowlen = {};
                     }
-                    var rowHeightList_1 = ctx.luckysheetfile[index_1].config.rowlen;
-                    _.forEach(trList, function (tr) {
-                        var c = 0;
-                        var targetR = ctx.luckysheet_select_save[0].row[0] + r_1;
-                        var targetRowHeight = !_.isNil(tr.getAttribute("height"))
+                    const rowHeightList = ctx.luckysheetfile[index].config.rowlen;
+                    _.forEach(trList, (tr) => {
+                        let c = 0;
+                        const targetR = ctx.luckysheet_select_save[0].row[0] + r;
+                        const targetRowHeight = !_.isNil(tr.getAttribute("height"))
                             ? parseInt(tr.getAttribute("height"), 10)
                             : null;
-                        if ((_.has(ctx.luckysheetfile[index_1].config.rowlen, targetR) &&
-                            ctx.luckysheetfile[index_1].config.rowlen[targetR] !==
+                        if ((_.has(ctx.luckysheetfile[index].config.rowlen, targetR) &&
+                            ctx.luckysheetfile[index].config.rowlen[targetR] !==
                                 targetRowHeight) ||
-                            (!_.has(ctx.luckysheetfile[index_1].config.rowlen, targetR) &&
-                                ctx.luckysheetfile[index_1].defaultRowHeight !== targetRowHeight)) {
-                            rowHeightList_1[targetR] = targetRowHeight;
+                            (!_.has(ctx.luckysheetfile[index].config.rowlen, targetR) &&
+                                ctx.luckysheetfile[index].defaultRowHeight !== targetRowHeight)) {
+                            rowHeightList[targetR] = targetRowHeight;
                         }
-                        _.forEach(tr.querySelectorAll("td"), function (td) {
+                        _.forEach(tr.querySelectorAll("td"), (td) => {
                             // build cell from td
-                            var className = td.className;
-                            var cell = {};
-                            var txt = td.innerText || td.innerHTML;
+                            const { className } = td;
+                            const cell = {};
+                            const txt = td.innerText || td.innerHTML;
                             if (_.trim(txt).length === 0) {
                                 cell.v = undefined;
                                 cell.m = "";
                             }
                             else {
-                                var mask = genarate(txt);
+                                const mask = genarate(txt);
                                 // @ts-ignore
-                                cell.m = mask[0], cell.ct = mask[1], cell.v = mask[2];
+                                [cell.m, cell.ct, cell.v] = mask;
                             }
-                            var styleString = typeof allStyleList_1[".".concat(className)] === "string"
-                                ? allStyleList_1[".".concat(className)]
-                                    .substring(1, allStyleList_1[".".concat(className)].length - 1)
+                            const styleString = typeof allStyleList[`.${className}`] === "string"
+                                ? allStyleList[`.${className}`]
+                                    .substring(1, allStyleList[`.${className}`].length - 1)
                                     .split("\n\t")
                                 : [];
-                            var styles = {};
-                            _.forEach(styleString, function (s) {
-                                var styleList = s.split(":");
-                                styles[styleList[0]] = styleList === null || styleList === void 0 ? void 0 : styleList[1].replace(";", "");
+                            const styles = {};
+                            _.forEach(styleString, (s) => {
+                                const styleList = s.split(":");
+                                styles[styleList[0]] = styleList?.[1].replace(";", "");
                             });
                             if (!_.isNil(styles.border))
                                 td.style.border = styles.border;
-                            var bg = td.style.backgroundColor || styles.background;
+                            let bg = td.style.backgroundColor || styles.background;
                             if (bg === "rgba(0, 0, 0, 0)" || _.isEmpty(bg)) {
                                 bg = undefined;
                             }
                             cell.bg = bg;
-                            var fontWight = td.style.fontWeight;
+                            const fontWight = td.style.fontWeight;
                             cell.bl =
                                 (fontWight.toString() === "400" ||
                                     fontWight === "normal" ||
@@ -1460,12 +1440,12 @@ export function handlePaste(ctx, e) {
                                 ? undefined
                                 : 1;
                             cell.cl = !_.includes(td.innerHTML, "<s>") ? undefined : 1;
-                            var ff = td.style.fontFamily || styles["font-family"] || "";
-                            var ffs = ff.split(",");
-                            for (var i = 0; i < ffs.length; i += 1) {
-                                var fa = _.trim(ffs[i].toLowerCase());
+                            const ff = td.style.fontFamily || styles["font-family"] || "";
+                            const ffs = ff.split(",");
+                            for (let i = 0; i < ffs.length; i += 1) {
+                                let fa = _.trim(ffs[i].toLowerCase());
                                 // @ts-ignore
-                                fa = locale_fontjson_1[fa];
+                                fa = locale_fontjson[fa];
                                 if (_.isNil(fa)) {
                                     cell.ff = 0;
                                 }
@@ -1474,12 +1454,12 @@ export function handlePaste(ctx, e) {
                                     break;
                                 }
                             }
-                            var fs = Math.round(styles["font-size"]
+                            const fs = Math.round(styles["font-size"]
                                 ? parseInt(styles["font-size"].replace("pt", ""), 10)
                                 : (parseInt(td.style.fontSize || "13", 10) * 72) / 96);
                             cell.fs = fs;
                             cell.fc = td.style.color || styles.color;
-                            var ht = td.style.textAlign || styles["text-align"] || "left";
+                            const ht = td.style.textAlign || styles["text-align"] || "left";
                             if (ht === "center") {
                                 cell.ht = 0;
                             }
@@ -1489,12 +1469,12 @@ export function handlePaste(ctx, e) {
                             else {
                                 cell.ht = 1;
                             }
-                            var regex = /vertical-align:\s*(.*?);/;
-                            var vt = td.style.verticalAlign ||
+                            const regex = /vertical-align:\s*(.*?);/;
+                            const vt = td.style.verticalAlign ||
                                 styles["vertical-align"] ||
-                                (!_.isNil(allStyleList_1.td) &&
-                                    allStyleList_1.td.match(regex).length > 0 &&
-                                    allStyleList_1.td.match(regex)[1]) ||
+                                (!_.isNil(allStyleList.td) &&
+                                    allStyleList.td.match(regex).length > 0 &&
+                                    allStyleList.td.match(regex)[1]) ||
                                 "top";
                             if (vt === "middle") {
                                 cell.vt = 0;
@@ -1506,94 +1486,94 @@ export function handlePaste(ctx, e) {
                                 cell.vt = 2;
                             }
                             if ("mso-rotate" in styles) {
-                                var rt = styles["mso-rotate"];
+                                const rt = styles["mso-rotate"];
                                 cell.rt = parseFloat(rt);
                             }
-                            while (c < colLen_1 && !_.isNil(data_1[r_1][c])) {
+                            while (c < colLen && !_.isNil(data[r][c])) {
                                 c += 1;
                             }
-                            if (c === colLen_1) {
+                            if (c === colLen) {
                                 return true;
                             }
-                            if (_.isNil(data_1[r_1][c])) {
-                                data_1[r_1][c] = cell;
+                            if (_.isNil(data[r][c])) {
+                                data[r][c] = cell;
                                 // @ts-ignore
-                                var rowspan = parseInt(td.getAttribute("rowspan"), 10);
+                                let rowspan = parseInt(td.getAttribute("rowspan"), 10);
                                 // @ts-ignore
-                                var colspan = parseInt(td.getAttribute("colspan"), 10);
+                                let colspan = parseInt(td.getAttribute("colspan"), 10);
                                 if (Number.isNaN(rowspan)) {
                                     rowspan = 1;
                                 }
                                 if (Number.isNaN(colspan)) {
                                     colspan = 1;
                                 }
-                                var r_ab = ctx.luckysheet_select_save[0].row[0] + r_1;
-                                var c_ab = ctx.luckysheet_select_save[0].column[0] + c;
-                                for (var rp = 0; rp < rowspan; rp += 1) {
-                                    for (var cp = 0; cp < colspan; cp += 1) {
+                                const r_ab = ctx.luckysheet_select_save[0].row[0] + r;
+                                const c_ab = ctx.luckysheet_select_save[0].column[0] + c;
+                                for (let rp = 0; rp < rowspan; rp += 1) {
+                                    for (let cp = 0; cp < colspan; cp += 1) {
                                         if (rp === 0) {
-                                            var bt = td.style.borderTop;
+                                            const bt = td.style.borderTop;
                                             if (!_.isEmpty(bt) &&
                                                 bt.substring(0, 3).toLowerCase() !== "0px") {
-                                                var width = td.style.borderTopWidth;
-                                                var type = td.style.borderTopStyle;
-                                                var color = td.style.borderTopColor;
-                                                var borderconfig = getQKBorder(width, type, color);
-                                                if (!borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)]) {
-                                                    borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)] = {};
+                                                const width = td.style.borderTopWidth;
+                                                const type = td.style.borderTopStyle;
+                                                const color = td.style.borderTopColor;
+                                                const borderconfig = getQKBorder(width, type, color);
+                                                if (!borderInfo[`${r + rp}_${c + cp}`]) {
+                                                    borderInfo[`${r + rp}_${c + cp}`] = {};
                                                 }
-                                                borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)].t = {
+                                                borderInfo[`${r + rp}_${c + cp}`].t = {
                                                     style: borderconfig[0],
                                                     color: borderconfig[1],
                                                 };
                                             }
                                         }
                                         if (rp === rowspan - 1) {
-                                            var bb = td.style.borderBottom;
+                                            const bb = td.style.borderBottom;
                                             if (!_.isEmpty(bb) &&
                                                 bb.substring(0, 3).toLowerCase() !== "0px") {
-                                                var width = td.style.borderBottomWidth;
-                                                var type = td.style.borderBottomStyle;
-                                                var color = td.style.borderBottomColor;
-                                                var borderconfig = getQKBorder(width, type, color);
-                                                if (!borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)]) {
-                                                    borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)] = {};
+                                                const width = td.style.borderBottomWidth;
+                                                const type = td.style.borderBottomStyle;
+                                                const color = td.style.borderBottomColor;
+                                                const borderconfig = getQKBorder(width, type, color);
+                                                if (!borderInfo[`${r + rp}_${c + cp}`]) {
+                                                    borderInfo[`${r + rp}_${c + cp}`] = {};
                                                 }
-                                                borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)].b = {
+                                                borderInfo[`${r + rp}_${c + cp}`].b = {
                                                     style: borderconfig[0],
                                                     color: borderconfig[1],
                                                 };
                                             }
                                         }
                                         if (cp === 0) {
-                                            var bl = td.style.borderLeft;
+                                            const bl = td.style.borderLeft;
                                             if (!_.isEmpty(bl) &&
                                                 bl.substring(0, 3).toLowerCase() !== "0px") {
-                                                var width = td.style.borderLeftWidth;
-                                                var type = td.style.borderLeftStyle;
-                                                var color = td.style.borderLeftColor;
-                                                var borderconfig = getQKBorder(width, type, color);
-                                                if (!borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)]) {
-                                                    borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)] = {};
+                                                const width = td.style.borderLeftWidth;
+                                                const type = td.style.borderLeftStyle;
+                                                const color = td.style.borderLeftColor;
+                                                const borderconfig = getQKBorder(width, type, color);
+                                                if (!borderInfo[`${r + rp}_${c + cp}`]) {
+                                                    borderInfo[`${r + rp}_${c + cp}`] = {};
                                                 }
-                                                borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)].l = {
+                                                borderInfo[`${r + rp}_${c + cp}`].l = {
                                                     style: borderconfig[0],
                                                     color: borderconfig[1],
                                                 };
                                             }
                                         }
                                         if (cp === colspan - 1) {
-                                            var br = td.style.borderLeft;
+                                            const br = td.style.borderLeft;
                                             if (!_.isEmpty(br) &&
                                                 br.substring(0, 3).toLowerCase() !== "0px") {
-                                                var width = td.style.borderRightWidth;
-                                                var type = td.style.borderRightStyle;
-                                                var color = td.style.borderRightColor;
-                                                var borderconfig = getQKBorder(width, type, color);
-                                                if (!borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)]) {
-                                                    borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)] = {};
+                                                const width = td.style.borderRightWidth;
+                                                const type = td.style.borderRightStyle;
+                                                const color = td.style.borderRightColor;
+                                                const borderconfig = getQKBorder(width, type, color);
+                                                if (!borderInfo[`${r + rp}_${c + cp}`]) {
+                                                    borderInfo[`${r + rp}_${c + cp}`] = {};
                                                 }
-                                                borderInfo_1["".concat(r_1 + rp, "_").concat(c + cp)].r = {
+                                                borderInfo[`${r + rp}_${c + cp}`].r = {
                                                     style: borderconfig[0],
                                                     color: borderconfig[1],
                                                 };
@@ -1602,26 +1582,26 @@ export function handlePaste(ctx, e) {
                                         if (rp === 0 && cp === 0) {
                                             continue;
                                         }
-                                        data_1[r_1 + rp][c + cp] = { mc: { r: r_ab, c: c_ab } };
+                                        data[r + rp][c + cp] = { mc: { r: r_ab, c: c_ab } };
                                     }
                                 }
                                 if (rowspan > 1 || colspan > 1) {
-                                    var first = { rs: rowspan, cs: colspan, r: r_ab, c: c_ab };
-                                    data_1[r_1][c].mc = first;
+                                    const first = { rs: rowspan, cs: colspan, r: r_ab, c: c_ab };
+                                    data[r][c].mc = first;
                                 }
                             }
                             c += 1;
-                            if (c === colLen_1) {
+                            if (c === colLen) {
                                 return true;
                             }
                             return true;
                         });
-                        r_1 += 1;
+                        r += 1;
                     });
-                    setRowHeight(ctx, rowHeightList_1);
+                    setRowHeight(ctx, rowHeightList);
                 }
                 ctx.luckysheet_selection_range = [];
-                pasteHandler(ctx, data_1, borderInfo_1);
+                pasteHandler(ctx, data, borderInfo);
                 // $("#fortune-copy-content").empty();
                 ele.remove();
             }
@@ -1632,7 +1612,7 @@ export function handlePaste(ctx, e) {
             }
             else {
                 txtdata = clipboardData.getData("text/plain");
-                var isExcelFormula = txtdata.startsWith("=");
+                const isExcelFormula = txtdata.startsWith("=");
                 if (isExcelFormula) {
                     handleFormulaStringPaste(ctx, txtdata);
                 }
@@ -1645,38 +1625,37 @@ export function handlePaste(ctx, e) {
     else if (ctx.luckysheetCellUpdate.length > 0) {
         // 阻止默认粘贴
         e.preventDefault();
-        var clipboardData = e.clipboardData;
+        let { clipboardData } = e;
         if (!clipboardData) {
             // for IE
             // @ts-ignore
             clipboardData = window.clipboardData;
         }
-        var text = clipboardData === null || clipboardData === void 0 ? void 0 : clipboardData.getData("text/plain");
+        const text = clipboardData?.getData("text/plain");
         if (text) {
             document.execCommand("insertText", false, text);
         }
     }
 }
 export function handlePasteByClick(ctx, clipboardData, triggerType) {
-    var _a, _b, _c;
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (clipboardData)
         clipboard.writeHtml(clipboardData);
-    var textarea = document.querySelector("#fortune-copy-content");
+    const textarea = document.querySelector("#fortune-copy-content");
     // textarea.focus();
     // textarea.select();
     // 等50毫秒，keyPress事件发生了再去处理数据
     // setTimeout(function () {
-    var data = (textarea === null || textarea === void 0 ? void 0 : textarea.innerHTML) || (textarea === null || textarea === void 0 ? void 0 : textarea.textContent);
+    const data = textarea?.innerHTML || textarea?.textContent;
     if (!data)
         return;
-    if (((_b = (_a = ctx.hooks).beforePaste) === null || _b === void 0 ? void 0 : _b.call(_a, ctx.luckysheet_select_save, data)) === false) {
+    if (ctx.hooks.beforePaste?.(ctx.luckysheet_select_save, data) === false) {
         return;
     }
     if (data.indexOf("fortune-copy-action-table") > -1 &&
-        ((_c = ctx.luckysheet_copy_save) === null || _c === void 0 ? void 0 : _c.copyRange) != null &&
+        ctx.luckysheet_copy_save?.copyRange != null &&
         ctx.luckysheet_copy_save.copyRange.length > 0) {
         if (ctx.luckysheet_paste_iscut) {
             ctx.luckysheet_paste_iscut = false;
@@ -1691,7 +1670,7 @@ export function handlePasteByClick(ctx, clipboardData, triggerType) {
         // imageCtrl.pasteImgItem();
     }
     else if (triggerType !== "btn") {
-        var isExcelFormula = clipboardData.startsWith("=");
+        const isExcelFormula = clipboardData.startsWith("=");
         if (isExcelFormula) {
             handleFormulaStringPaste(ctx, clipboardData);
         }

@@ -15,21 +15,20 @@ import { showLinkCard } from "./hyperlink";
 import { cfSplitRange } from "./conditionalFormat";
 import { getCellTextInfo } from "./text";
 export function updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_st, col_ed, canvas) {
-    var _a, _b;
-    var _c;
+    var _a;
     if (_.isNil(d) || _.isNil(attr)) {
         return;
     }
     if (attr === "ct") {
-        for (var r = row_st; r <= row_ed; r += 1) {
+        for (let r = row_st; r <= row_ed; r += 1) {
             if (!_.isNil(ctx.config.rowhidden) && !_.isNil(ctx.config.rowhidden[r])) {
                 continue;
             }
-            for (var c = col_st; c <= col_ed; c += 1) {
-                var cell = d[r][c];
-                var value = void 0;
+            for (let c = col_st; c <= col_ed; c += 1) {
+                const cell = d[r][c];
+                let value;
                 if (_.isPlainObject(cell)) {
-                    value = cell === null || cell === void 0 ? void 0 : cell.v;
+                    value = cell?.v;
                 }
                 else {
                     value = cell;
@@ -37,8 +36,8 @@ export function updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_
                 if (foucsStatus !== "@" && isRealNum(value)) {
                     value = Number(value);
                 }
-                var mask = update(foucsStatus, value);
-                var type = "n";
+                const mask = update(foucsStatus, value);
+                let type = "n";
                 if (is_date(foucsStatus) ||
                     foucsStatus === 14 ||
                     foucsStatus === 15 ||
@@ -62,7 +61,7 @@ export function updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_
                     type = isRealNum(value) ? "n" : "g";
                 }
                 if (cell && _.isPlainObject(cell)) {
-                    cell.m = "".concat(mask);
+                    cell.m = `${mask}`;
                     if (_.isNil(cell.ct)) {
                         cell.ct = {};
                     }
@@ -133,16 +132,16 @@ export function updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_
                 foucsStatus = "5";
             }
         }
-        var sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
+        const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
         if (sheetIndex == null) {
             return;
         }
-        for (var r = row_st; r <= row_ed; r += 1) {
+        for (let r = row_st; r <= row_ed; r += 1) {
             if (!_.isNil(ctx.config.rowhidden) && !_.isNil(ctx.config.rowhidden[r])) {
                 continue;
             }
-            for (var c = col_st; c <= col_ed; c += 1) {
-                var value = d[r][c];
+            for (let c = col_st; c <= col_ed; c += 1) {
+                const value = d[r][c];
                 if (value && _.isPlainObject(value)) {
                     // if(attr in inlineStyleAffectAttribute && isInlineStringCell(value)){
                     updateInlineStringFormatOutside(value, attr, foucsStatus);
@@ -151,20 +150,20 @@ export function updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_
                     // @ts-ignore
                     value[attr] = foucsStatus;
                     // }
-                    (_c = ctx.luckysheetfile[sheetIndex]).config || (_c.config = {});
-                    var cfg = ctx.luckysheetfile[sheetIndex].config;
-                    var cellWidth = ((_a = cfg.columnlen) === null || _a === void 0 ? void 0 : _a[c]) ||
+                    (_a = ctx.luckysheetfile[sheetIndex]).config || (_a.config = {});
+                    const cfg = ctx.luckysheetfile[sheetIndex].config;
+                    const cellWidth = cfg.columnlen?.[c] ||
                         ctx.luckysheetfile[sheetIndex].defaultColWidth;
                     if (attr === "fs" && canvas) {
-                        var textInfo = getCellTextInfo(d[r][c], canvas, ctx, {
-                            r: r,
-                            c: c,
-                            cellWidth: cellWidth,
+                        const textInfo = getCellTextInfo(d[r][c], canvas, ctx, {
+                            r,
+                            c,
+                            cellWidth,
                         });
                         if (!textInfo)
                             continue;
-                        var rowHeight = _.round(textInfo.textHeightAll);
-                        var currentRowHeight = ((_b = cfg.rowlen) === null || _b === void 0 ? void 0 : _b[r]) ||
+                        const rowHeight = _.round(textInfo.textHeightAll);
+                        const currentRowHeight = cfg.rowlen?.[r] ||
                             ctx.luckysheetfile[sheetIndex].defaultRowHeight ||
                             19;
                         if (!_.isUndefined(rowHeight) &&
@@ -172,7 +171,7 @@ export function updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_
                             (!cfg.customHeight || cfg.customHeight[r] !== 1)) {
                             if (_.isUndefined(cfg.rowlen))
                                 cfg.rowlen = {};
-                            _.set(cfg, "rowlen.".concat(r), rowHeight);
+                            _.set(cfg, `rowlen.${r}`, rowHeight);
                         }
                     }
                 }
@@ -193,14 +192,14 @@ export function updateFormat(ctx, $input, d, attr, foucsStatus, canvas) {
     //   if (!checkProtectionFormatCells(ctx.currentSheetId)) {
     //     return;
     //   }
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (attr in inlineStyleAffectAttribute) {
         if (ctx.luckysheetCellUpdate.length > 0) {
-            var value = $input.innerText;
+            const value = $input.innerText;
             if (value.substring(0, 1) !== "=") {
-                var cell = d[ctx.luckysheetCellUpdate[0]][ctx.luckysheetCellUpdate[1]];
+                const cell = d[ctx.luckysheetCellUpdate[0]][ctx.luckysheetCellUpdate[1]];
                 if (cell) {
                     updateInlineStringFormat(ctx, cell, attr, foucsStatus, $input);
                 }
@@ -208,13 +207,13 @@ export function updateFormat(ctx, $input, d, attr, foucsStatus, canvas) {
             }
         }
     }
-    var cfg = _.cloneDeep(ctx.config);
+    const cfg = _.cloneDeep(ctx.config);
     if (_.isNil(cfg.rowlen)) {
         cfg.rowlen = {};
     }
-    _.forEach(ctx.luckysheet_select_save, function (selection) {
-        var _a = selection.row, row_st = _a[0], row_ed = _a[1];
-        var _b = selection.column, col_st = _b[0], col_ed = _b[1];
+    _.forEach(ctx.luckysheet_select_save, (selection) => {
+        const [row_st, row_ed] = selection.row;
+        const [col_st, col_ed] = selection.column;
         updateFormatCell(ctx, d, attr, foucsStatus, row_st, row_ed, col_st, col_ed, canvas);
         // if (attr === "tb" || attr === "tr" || attr === "fs") {
         //   cfg = rowlenByRange(ctx, d, row_st, row_ed, cfg);
@@ -230,22 +229,22 @@ export function updateFormat(ctx, $input, d, attr, foucsStatus, canvas) {
     //   jfrefreshgrid(d, ctx.luckysheet_select_save, allParam, false);
 }
 function toggleAttr(ctx, cellInput, attr) {
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
-    var flag = isAllSelectedCellsInStatus(ctx, attr, 1);
-    var foucsStatus = flag ? 0 : 1;
+    const flag = isAllSelectedCellsInStatus(ctx, attr, 1);
+    const foucsStatus = flag ? 0 : 1;
     updateFormat(ctx, cellInput, flowdata, attr, foucsStatus);
 }
 function setAttr(ctx, cellInput, attr, value, canvas) {
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
     updateFormat(ctx, cellInput, flowdata, attr, value, canvas);
 }
 // @ts-ignore
 function checkNoNullValue(cell) {
-    var v = cell;
+    let v = cell;
     if (_.isPlainObject(v)) {
         v = v.v;
     }
@@ -261,7 +260,7 @@ function checkNoNullValue(cell) {
 }
 // @ts-ignore
 function checkNoNullValueAll(cell) {
-    var v = cell;
+    let v = cell;
     if (_.isPlainObject(v)) {
         v = v.v;
     }
@@ -272,11 +271,11 @@ function checkNoNullValueAll(cell) {
 }
 function getNoNullValue(d, st_x, ed, type) {
     // let hasValueSum = 0;
-    var hasValueStart = null;
-    var nullNum = 0;
-    var nullTime = 0;
-    for (var r = ed - 1; r >= 0; r -= 1) {
-        var cell = void 0;
+    let hasValueStart = null;
+    let nullNum = 0;
+    let nullTime = 0;
+    for (let r = ed - 1; r >= 0; r -= 1) {
+        let cell;
         if (type === "c") {
             cell = d[st_x][r];
         }
@@ -311,17 +310,17 @@ function activeFormulaInput(cellInput, fxInput, ctx, row_index, col_index, rowh,
     ctx.luckysheetCellUpdate = [row_index, col_index];
     cache.doNotUpdateCell = true;
     if (isnull) {
-        var formulaTxt_1 = "<span dir=\"auto\" class=\"luckysheet-formula-text-color\">=</span><span dir=\"auto\" class=\"luckysheet-formula-text-color\">".concat(formula.toUpperCase(), "</span><span dir=\"auto\" class=\"luckysheet-formula-text-color\">(</span><span dir=\"auto\" class=\"luckysheet-formula-text-color\">)</span>");
-        cellInput.innerHTML = formulaTxt_1;
-        var spanList = cellInput.querySelectorAll("span");
+        const formulaTxt = `<span dir="auto" class="luckysheet-formula-text-color">=</span><span dir="auto" class="luckysheet-formula-text-color">${formula.toUpperCase()}</span><span dir="auto" class="luckysheet-formula-text-color">(</span><span dir="auto" class="luckysheet-formula-text-color">)</span>`;
+        cellInput.innerHTML = formulaTxt;
+        const spanList = cellInput.querySelectorAll("span");
         setCaretPosition(ctx, spanList[spanList.length - 2], 0, 1);
         return;
     }
-    var row_pre = rowLocationByIndex(rowh[0], ctx.visibledatarow)[0];
-    var row = rowLocationByIndex(rowh[1], ctx.visibledatarow)[1];
-    var col_pre = colLocationByIndex(columnh[0], ctx.visibledatacolumn)[0];
-    var col = colLocationByIndex(columnh[1], ctx.visibledatacolumn)[1];
-    var formulaTxt = "<span dir=\"auto\" class=\"luckysheet-formula-text-color\">=</span><span dir=\"auto\" class=\"luckysheet-formula-text-color\">".concat(formula.toUpperCase(), "</span><span dir=\"auto\" class=\"luckysheet-formula-text-color\">(</span><span class=\"fortune-formula-functionrange-cell\" rangeindex=\"0\" dir=\"auto\" style=\"color:").concat(colors[0], ";\">").concat(getRangetxt(ctx, ctx.currentSheetId, { row: rowh, column: columnh }, ctx.currentSheetId), "</span><span dir=\"auto\" class=\"luckysheet-formula-text-color\">)</span>");
+    const row_pre = rowLocationByIndex(rowh[0], ctx.visibledatarow)[0];
+    const row = rowLocationByIndex(rowh[1], ctx.visibledatarow)[1];
+    const col_pre = colLocationByIndex(columnh[0], ctx.visibledatacolumn)[0];
+    const col = colLocationByIndex(columnh[1], ctx.visibledatacolumn)[1];
+    const formulaTxt = `<span dir="auto" class="luckysheet-formula-text-color">=</span><span dir="auto" class="luckysheet-formula-text-color">${formula.toUpperCase()}</span><span dir="auto" class="luckysheet-formula-text-color">(</span><span class="fortune-formula-functionrange-cell" rangeindex="0" dir="auto" style="color:${colors[0]};">${getRangetxt(ctx, ctx.currentSheetId, { row: rowh, column: columnh }, ctx.currentSheetId)}</span><span dir="auto" class="luckysheet-formula-text-color">)</span>`;
     cellInput.innerHTML = formulaTxt;
     israngeseleciton(ctx);
     ctx.formulaCache.rangestart = true;
@@ -360,14 +359,14 @@ function activeFormulaInput(cellInput, fxInput, ctx, row_index, col_index, rowh,
 }
 function backFormulaInput(d, r, c, rowh, columnh, formula, ctx) {
     var _a;
-    var f = "=".concat(formula.toUpperCase(), "(").concat(getRangetxt(ctx, ctx.currentSheetId, { row: rowh, column: columnh }, ctx.currentSheetId), ")");
-    var v = execfunction(ctx, f, r, c);
-    var value = { v: v[1], f: v[2] };
+    const f = `=${formula.toUpperCase()}(${getRangetxt(ctx, ctx.currentSheetId, { row: rowh, column: columnh }, ctx.currentSheetId)})`;
+    const v = execfunction(ctx, f, r, c);
+    const value = { v: v[1], f: v[2] };
     setCellValue(ctx, r, c, d, value);
     (_a = ctx.formulaCache).execFunctionExist || (_a.execFunctionExist = []);
     ctx.formulaCache.execFunctionExist.push({
-        r: r,
-        c: c,
+        r,
+        c,
         i: ctx.currentSheetId,
     });
     // server.historyParam(d, ctx.currentSheetId, {
@@ -385,10 +384,10 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
     if (noNull == null) {
         noNull = true;
     }
-    var isNull = true;
-    var isNum = false;
-    for (var c = st_m; c <= ed_m; c += 1) {
-        var cell = null;
+    let isNull = true;
+    let isNum = false;
+    for (let c = st_m; c <= ed_m; c += 1) {
+        let cell = null;
         if (type === "c") {
             cell = d[c][fix];
         }
@@ -404,7 +403,7 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
         }
     }
     if (isNull && noNull) {
-        var st_r_r = getNoNullValue(d, _index, fix, type);
+        let st_r_r = getNoNullValue(d, _index, fix, type);
         if (st_r_r == null) {
             if (type === "c") {
                 activeFormulaInput(cellInput, fxInput, ctx, _index, fix, null, null, formula, cache, true);
@@ -415,7 +414,7 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
         }
         else {
             if (_index === st_m) {
-                for (var c = st_m; c <= ed_m; c += 1) {
+                for (let c = st_m; c <= ed_m; c += 1) {
                     st_r_r = getNoNullValue(d, c, fix, type);
                     if (st_r_r == null) {
                         break;
@@ -429,7 +428,7 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
                 }
             }
             else {
-                for (var c = ed_m; c >= st_m; c -= 1) {
+                for (let c = ed_m; c >= st_m; c -= 1) {
                     st_r_r = getNoNullValue(d, c, fix, type);
                     if (st_r_r == null) {
                         break;
@@ -446,7 +445,7 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
         return false;
     }
     if (isNum && noNum) {
-        var cell = null;
+        let cell = null;
         if (type === "c") {
             cell = d[ed_m + 1][fix];
         }
@@ -455,7 +454,7 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
         }
         /* 备注：在搜寻的时候排除自己以解决单元格函数引用自己的问题 */
         if (cell != null && cell.v != null && cell.v.toString().length > 0) {
-            var c = ed_m + 1;
+            let c = ed_m + 1;
             if (type === "c") {
                 cell = d[ed_m + 1][fix];
             }
@@ -464,7 +463,7 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
             }
             while (cell != null && cell.v != null && cell.v.toString().length > 0) {
                 c += 1;
-                var len = null;
+                let len = null;
                 if (type === "c") {
                     len = d.length;
                 }
@@ -501,17 +500,17 @@ function singleFormulaInput(cellInput, fxInput, ctx, d, _index, fix, st_m, ed_m,
     return true;
 }
 export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (flowdata == null)
         return;
     // const nullfindnum = 40;
-    var isfalse = true;
+    let isfalse = true;
     ctx.formulaCache.execFunctionExist = [];
     function execFormulaInput_c(d, st_r, ed_r, st_c, ed_c, _formula) {
-        var st_c_c = getNoNullValue(d, st_r, ed_c, "c");
+        const st_c_c = getNoNullValue(d, st_r, ed_c, "c");
         if (st_c_c == null) {
             activeFormulaInput(cellInput, fxInput, ctx, st_r, st_c, null, null, _formula, cache, true);
         }
@@ -520,7 +519,7 @@ export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
         }
     }
     function execFormulaInput(d, st_r, ed_r, st_c, ed_c, _formula) {
-        var st_r_c = getNoNullValue(d, st_c, ed_r, "r");
+        const st_r_c = getNoNullValue(d, st_c, ed_r, "r");
         if (st_r_c == null) {
             execFormulaInput_c(d, st_r, ed_r, st_c, ed_c, _formula);
         }
@@ -530,11 +529,11 @@ export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
     }
     if (!ctx.luckysheet_select_save)
         return;
-    _.forEach(ctx.luckysheet_select_save, function (selection) {
-        var _a = selection.row, st_r = _a[0], ed_r = _a[1];
-        var _b = selection.column, st_c = _b[0], ed_c = _b[1];
-        var row_index = selection.row_focus;
-        var col_index = selection.column_focus;
+    _.forEach(ctx.luckysheet_select_save, (selection) => {
+        const [st_r, ed_r] = selection.row;
+        const [st_c, ed_c] = selection.column;
+        const row_index = selection.row_focus;
+        const col_index = selection.column_focus;
         if (st_r === ed_r && st_c === ed_c) {
             if (ed_r - 1 < 0 && ed_c - 1 < 0) {
                 activeFormulaInput(cellInput, fxInput, ctx, st_r, st_c, null, null, formula, cache, true);
@@ -557,13 +556,13 @@ export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
             isfalse = singleFormulaInput(cellInput, fxInput, ctx, flowdata, row_index, st_c, st_r, ed_r, formula, "c", cache);
         }
         else {
-            var r_false = true;
-            for (var r = st_r; r <= ed_r; r += 1) {
+            let r_false = true;
+            for (let r = st_r; r <= ed_r; r += 1) {
                 r_false =
                     singleFormulaInput(cellInput, fxInput, ctx, flowdata, col_index, r, st_c, ed_c, formula, "r", cache, true, false) && r_false;
             }
-            var c_false = true;
-            for (var c = st_c; c <= ed_c; c += 1) {
+            let c_false = true;
+            for (let c = st_c; c <= ed_c; c += 1) {
                 c_false =
                     singleFormulaInput(cellInput, fxInput, ctx, flowdata, row_index, c, st_r, ed_r, formula, "c", cache, true, false) && c_false;
             }
@@ -579,18 +578,17 @@ export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
     }
 }
 export function cancelPaintModel(ctx) {
-    var _a;
     // $("#luckysheet-sheettable_0").removeClass("luckysheetPaintCursor");
     if (ctx.luckysheet_copy_save === null)
         return;
-    if (((_a = ctx.luckysheet_copy_save) === null || _a === void 0 ? void 0 : _a.dataSheetId) === ctx.currentSheetId) {
+    if (ctx.luckysheet_copy_save?.dataSheetId === ctx.currentSheetId) {
         ctx.luckysheet_selection_range = [];
         selectionCopyShow(ctx.luckysheet_selection_range, ctx);
     }
     else {
         if (!ctx.luckysheet_copy_save)
             return;
-        var index = getSheetIndex(ctx, ctx.luckysheet_copy_save.dataSheetId);
+        const index = getSheetIndex(ctx, ctx.luckysheet_copy_save.dataSheetId);
         if (!index)
             return;
         // ctx.luckysheetfile[getSheetIndex(ctx.luckysheet_copy_save["dataSheetIndex"])].luckysheet_selection_range = [];
@@ -607,41 +605,41 @@ export function cancelPaintModel(ctx) {
     //     $("#luckysheetpopover").remove();
 }
 export function handleCurrencyFormat(ctx, cellInput) {
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
-    var currency = ctx.currency || "¥";
-    updateFormat(ctx, cellInput, flowdata, "ct", "".concat(currency, " #.00"));
+    const currency = ctx.currency || "¥";
+    updateFormat(ctx, cellInput, flowdata, "ct", `${currency} #.00`);
 }
 export function handlePercentageFormat(ctx, cellInput) {
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
     updateFormat(ctx, cellInput, flowdata, "ct", "0.00%");
 }
 export function handleNumberDecrease(ctx, cellInput) {
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata || !ctx.luckysheet_select_save)
         return;
-    var row_index = ctx.luckysheet_select_save[0].row_focus;
-    var col_index = ctx.luckysheet_select_save[0].column_focus;
+    const row_index = ctx.luckysheet_select_save[0].row_focus;
+    const col_index = ctx.luckysheet_select_save[0].column_focus;
     if (row_index === undefined || col_index === undefined)
         return;
-    var foucsStatus = normalizedAttr(flowdata, row_index, col_index, "ct");
-    var cell = flowdata[row_index][col_index];
+    let foucsStatus = normalizedAttr(flowdata, row_index, col_index, "ct");
+    const cell = flowdata[row_index][col_index];
     if (foucsStatus == null || foucsStatus.t !== "n") {
         return;
     }
     if (foucsStatus.fa === "General") {
         if (!cell || !cell.v)
             return;
-        var mask = genarate(cell.v);
+        const mask = genarate(cell.v);
         if (!mask || mask.length < 2)
             return;
-        foucsStatus = mask[1];
+        [, foucsStatus] = mask;
     }
     // 万亿格式
-    var reg = /^(w|W)((0?)|(0\.0+))$/;
+    const reg = /^(w|W)((0?)|(0\.0+))$/;
     if (reg.test(foucsStatus.fa)) {
         if (foucsStatus.fa.indexOf(".") > -1) {
             if (foucsStatus.fa.substr(-2) === ".0") {
@@ -657,20 +655,20 @@ export function handleNumberDecrease(ctx, cellInput) {
         return;
     }
     // Uncaught ReferenceError: Cannot access 'fa' before initialization
-    var prefix = "";
-    var main = "";
-    var fa = [];
+    let prefix = "";
+    let main = "";
+    let fa = [];
     if (foucsStatus.fa.indexOf(".") > -1) {
         fa = foucsStatus.fa.split(".");
-        prefix = fa[0], main = fa[1];
+        [prefix, main] = fa;
     }
     else {
         return;
     }
     fa = main.split("");
-    var tail = "";
-    for (var i = fa.length - 1; i >= 0; i -= 1) {
-        var c = fa[i];
+    let tail = "";
+    for (let i = fa.length - 1; i >= 0; i -= 1) {
+        const c = fa[i];
         if (c !== "#" && c !== "0" && c !== "," && Number.isNaN(parseInt(c, 10))) {
             tail = c + tail;
         }
@@ -678,81 +676,81 @@ export function handleNumberDecrease(ctx, cellInput) {
             break;
         }
     }
-    var fmt = "";
+    let fmt = "";
     if (foucsStatus.fa.indexOf(".") > -1) {
-        var suffix = main;
+        let suffix = main;
         if (tail.length > 0) {
             suffix = main.replace(tail, "");
         }
-        var pos = suffix.replace(/#/g, "0");
+        let pos = suffix.replace(/#/g, "0");
         pos = pos.substr(0, pos.length - 1);
         if (pos === "") {
             fmt = prefix + tail;
         }
         else {
-            fmt = "".concat(prefix, ".").concat(pos).concat(tail);
+            fmt = `${prefix}.${pos}${tail}`;
         }
     }
     updateFormat(ctx, cellInput, flowdata, "ct", fmt);
 }
 export function handleNumberIncrease(ctx, cellInput) {
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
     if (!ctx.luckysheet_select_save)
         return;
-    var row_index = ctx.luckysheet_select_save[0].row_focus;
-    var col_index = ctx.luckysheet_select_save[0].column_focus;
+    const row_index = ctx.luckysheet_select_save[0].row_focus;
+    const col_index = ctx.luckysheet_select_save[0].column_focus;
     if (row_index === undefined || col_index === undefined)
         return;
-    var foucsStatus = normalizedAttr(flowdata, row_index, col_index, "ct");
-    var cell = flowdata[row_index][col_index];
+    let foucsStatus = normalizedAttr(flowdata, row_index, col_index, "ct");
+    const cell = flowdata[row_index][col_index];
     if (foucsStatus == null || foucsStatus.t !== "n") {
         return;
     }
     if (foucsStatus.fa === "General") {
         if (!cell || !cell.v)
             return;
-        var mask = genarate(cell.v);
+        const mask = genarate(cell.v);
         if (!mask || mask.length < 2)
             return;
-        foucsStatus = mask[1];
+        [, foucsStatus] = mask;
     }
     if (foucsStatus.fa === "General") {
         updateFormat(ctx, cellInput, flowdata, "ct", "#.0");
         return;
     }
     // 万亿格式
-    var reg = /^(w|W)((0?)|(0\.0+))$/;
+    const reg = /^(w|W)((0?)|(0\.0+))$/;
     if (reg.test(foucsStatus.fa)) {
         if (foucsStatus.fa.indexOf(".") > -1) {
-            updateFormat(ctx, cellInput, flowdata, "ct", "".concat(foucsStatus.fa, "0"));
+            updateFormat(ctx, cellInput, flowdata, "ct", `${foucsStatus.fa}0`);
         }
         else {
             if (foucsStatus.fa.substr(-1) === "0") {
-                updateFormat(ctx, cellInput, flowdata, "ct", "".concat(foucsStatus.fa, ".0"));
+                updateFormat(ctx, cellInput, flowdata, "ct", `${foucsStatus.fa}.0`);
             }
             else {
-                updateFormat(ctx, cellInput, flowdata, "ct", "".concat(foucsStatus.fa, "0.0"));
+                updateFormat(ctx, cellInput, flowdata, "ct", `${foucsStatus.fa}0.0`);
             }
         }
         return;
     }
     // Uncaught ReferenceError: Cannot access 'fa' before initialization
-    var prefix = "";
-    var main = "";
-    var fa = [];
+    let prefix = "";
+    let main = "";
+    let fa = [];
     if (foucsStatus.fa.indexOf(".") > -1) {
         fa = foucsStatus.fa.split(".");
-        prefix = fa[0], main = fa[1];
+        [prefix, main] = fa;
     }
     else {
         main = foucsStatus.fa;
     }
     fa = main.split("");
-    var tail = "";
-    for (var i = fa.length - 1; i >= 0; i -= 1) {
-        var c = fa[i];
+    let tail = "";
+    for (let i = fa.length - 1; i >= 0; i -= 1) {
+        const c = fa[i];
         if (c !== "#" && c !== "0" && c !== "," && Number.isNaN(parseInt(c, 10))) {
             tail = c + tail;
         }
@@ -760,22 +758,22 @@ export function handleNumberIncrease(ctx, cellInput) {
             break;
         }
     }
-    var fmt = "";
+    let fmt = "";
     if (foucsStatus.fa.indexOf(".") > -1) {
-        var suffix = main;
+        let suffix = main;
         if (tail.length > 0) {
             suffix = main.replace(tail, "");
         }
-        var pos = suffix.replace(/#/g, "0");
+        let pos = suffix.replace(/#/g, "0");
         pos += "0";
-        fmt = "".concat(prefix, ".").concat(pos).concat(tail);
+        fmt = `${prefix}.${pos}${tail}`;
     }
     else {
         if (tail.length > 0) {
-            fmt = "".concat(main.replace(tail, ""), ".0").concat(tail);
+            fmt = `${main.replace(tail, "")}.0${tail}`;
         }
         else {
-            fmt = "".concat(main, ".0").concat(tail);
+            fmt = `${main}.0${tail}`;
         }
     }
     updateFormat(ctx, cellInput, flowdata, "ct", fmt);
@@ -806,7 +804,7 @@ export function handleFormatPainter(ctx) {
     // e.stopPropagation();
     // let _locale = locale();
     // let locale_paint = _locale.paint;
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (ctx.luckysheet_select_save == null ||
@@ -830,11 +828,11 @@ export function handleFormatPainter(ctx) {
     }
     // *增加了对选区范围是否为部分合并单元格的校验，如果为部分合并单元格，就阻止格式刷的下一步
     // TODO 这里也可以改为：判断到是合并单元格的一部分后，格式刷执行黏贴格式后删除范围单元格的 mc 值
-    var has_PartMC = false;
-    var r1 = ctx.luckysheet_select_save[0].row[0];
-    var r2 = ctx.luckysheet_select_save[0].row[1];
-    var c1 = ctx.luckysheet_select_save[0].column[0];
-    var c2 = ctx.luckysheet_select_save[0].column[1];
+    let has_PartMC = false;
+    const r1 = ctx.luckysheet_select_save[0].row[0];
+    const r2 = ctx.luckysheet_select_save[0].row[1];
+    const c1 = ctx.luckysheet_select_save[0].column[0];
+    const c2 = ctx.luckysheet_select_save[0].column[1];
     has_PartMC = hasPartMC(ctx, ctx.config, r1, r2, c1, c2);
     if (has_PartMC) {
         // *提示后中止下一步
@@ -852,20 +850,20 @@ export function handleFormatPainter(ctx) {
         },
     ];
     selectionCopyShow(ctx.luckysheet_selection_range, ctx);
-    var RowlChange = false;
-    var HasMC = false;
-    for (var r = ctx.luckysheet_select_save[0].row[0]; r <= ctx.luckysheet_select_save[0].row[1]; r += 1) {
+    let RowlChange = false;
+    let HasMC = false;
+    for (let r = ctx.luckysheet_select_save[0].row[0]; r <= ctx.luckysheet_select_save[0].row[1]; r += 1) {
         if (ctx.config.rowhidden != null && ctx.config.rowhidden[r] != null) {
             continue;
         }
         if (ctx.config.rowlen != null && r in ctx.config.rowlen) {
             RowlChange = true;
         }
-        for (var c = ctx.luckysheet_select_save[0].column[0]; c <= ctx.luckysheet_select_save[0].column[1]; c += 1) {
-            var flowdata = getFlowdata(ctx);
+        for (let c = ctx.luckysheet_select_save[0].column[0]; c <= ctx.luckysheet_select_save[0].column[1]; c += 1) {
+            const flowdata = getFlowdata(ctx);
             if (!flowdata)
                 return;
-            var cell = flowdata[r][c];
+            const cell = flowdata[r][c];
             if (cell != null && cell.mc != null && cell.mc.rs != null) {
                 HasMC = true;
             }
@@ -879,59 +877,58 @@ export function handleFormatPainter(ctx) {
                 column: ctx.luckysheet_select_save[0].column,
             },
         ],
-        RowlChange: RowlChange,
-        HasMC: HasMC,
+        RowlChange,
+        HasMC,
     };
     ctx.luckysheetPaintModelOn = true;
     ctx.luckysheetPaintSingle = true;
 }
 // 2022-10-10 废弃了handleClearFormat中的foreach写法，改为可跳出的every写法，以防止选区多次覆盖
 export function handleClearFormat(ctx) {
-    var _a;
     if (ctx.allowEdit === false)
         return;
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
-    (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a.every(function (selection) {
-        var _a = selection.row, rowSt = _a[0], rowEd = _a[1];
-        var _b = selection.column, colSt = _b[0], colEd = _b[1];
-        for (var r = rowSt; r <= rowEd; r += 1) {
+    ctx.luckysheet_select_save?.every((selection) => {
+        const [rowSt, rowEd] = selection.row;
+        const [colSt, colEd] = selection.column;
+        for (let r = rowSt; r <= rowEd; r += 1) {
             if (!_.isNil(ctx.config.rowhidden) && !_.isNil(ctx.config.rowhidden[r])) {
                 continue;
             }
-            for (var c = colSt; c <= colEd; c += 1) {
-                var cell = flowdata[r][c];
+            for (let c = colSt; c <= colEd; c += 1) {
+                const cell = flowdata[r][c];
                 if (!cell)
                     continue;
                 flowdata[r][c] = _.pick(cell, "v", "m", "mc", "f", "ct");
             }
         }
         // 清空表格样式时，清除边框样式
-        var index = getSheetIndex(ctx, ctx.currentSheetId);
+        const index = getSheetIndex(ctx, ctx.currentSheetId);
         if (index == null)
             return false;
         // 表格边框为空时，不对表格进行操作
         if (ctx.config.borderInfo == null)
             return false;
-        var cfg = ctx.config || {};
+        const cfg = ctx.config || {};
         if (cfg.borderInfo && cfg.borderInfo.length > 0) {
-            var source_borderInfo = [];
-            for (var i = 0; i < cfg.borderInfo.length; i += 1) {
-                var bd_rangeType = cfg.borderInfo[i].rangeType;
+            const source_borderInfo = [];
+            for (let i = 0; i < cfg.borderInfo.length; i += 1) {
+                const bd_rangeType = cfg.borderInfo[i].rangeType;
                 if (bd_rangeType === "range" &&
                     cfg.borderInfo[i].borderType !== "border-slash") {
-                    var bd_range = cfg.borderInfo[i].range;
-                    var bd_emptyRange = [];
-                    for (var j = 0; j < bd_range.length; j += 1) {
+                    const bd_range = cfg.borderInfo[i].range;
+                    let bd_emptyRange = [];
+                    for (let j = 0; j < bd_range.length; j += 1) {
                         bd_emptyRange = bd_emptyRange.concat(cfSplitRange(bd_range[j], { row: [rowSt, rowEd], column: [colSt, colEd] }, { row: [rowSt, rowEd], column: [colSt, colEd] }, "restPart"));
                     }
                     cfg.borderInfo[i].range = bd_emptyRange;
                     source_borderInfo.push(cfg.borderInfo[i]);
                 }
                 else if (bd_rangeType === "cell") {
-                    var bd_r = cfg.borderInfo[i].value.row_index;
-                    var bd_c = cfg.borderInfo[i].value.col_index;
+                    const bd_r = cfg.borderInfo[i].value.row_index;
+                    const bd_c = cfg.borderInfo[i].value.col_index;
                     if (!(bd_r >= rowSt && bd_r <= rowEd && bd_c >= colSt && bd_c <= colEd)) {
                         source_borderInfo.push(cfg.borderInfo[i]);
                     }
@@ -968,7 +965,7 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
     // const d = editor.deepCopyFlowData(Store.flowdata);
     // let type = $(this).attr("type");
     // let type = "border-all";
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     if (type == null) {
@@ -978,45 +975,45 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
     // let color = $(`#${subcolormenuid}`).find(".luckysheet-color-selected").val();
     // let style = $("#luckysheetborderSizepreview").attr("itemvalue");
     // let color = "#000000";
-    var color = borderColor;
-    var style = borderStyle;
+    let color = borderColor;
+    let style = borderStyle;
     if (color == null || color === "") {
         color = "#000";
     }
     if (style == null || style === "") {
         style = "1";
     }
-    var cfg = ctx.config;
+    const cfg = ctx.config;
     if (cfg.borderInfo == null) {
         cfg.borderInfo = [];
     }
     if (type !== "border-slash") {
-        var borderInfo = {
+        const borderInfo = {
             rangeType: "range",
             borderType: type,
-            color: color,
-            style: style,
+            color,
+            style,
             range: _.cloneDeep(ctx.luckysheet_select_save) || [],
         };
         cfg.borderInfo.push(borderInfo);
     }
     else {
-        var rangeList_1 = [];
-        _.forEach(ctx.luckysheet_select_save, function (selection) {
-            for (var r = selection.row[0]; r <= selection.row[1]; r += 1) {
-                for (var c = selection.column[0]; c <= selection.column[1]; c += 1) {
-                    var range = "".concat(r, "_").concat(c);
-                    if (_.includes(rangeList_1, range))
+        const rangeList = [];
+        _.forEach(ctx.luckysheet_select_save, (selection) => {
+            for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
+                for (let c = selection.column[0]; c <= selection.column[1]; c += 1) {
+                    const range = `${r}_${c}`;
+                    if (_.includes(rangeList, range))
                         continue;
-                    var borderInfo = {
+                    const borderInfo = {
                         rangeType: "range",
                         borderType: type,
-                        color: color,
-                        style: style,
+                        color,
+                        style,
                         range: normalizeSelection(ctx, [{ row: [r, r], column: [c, c] }]),
                     };
                     cfg.borderInfo.push(borderInfo);
-                    rangeList_1.push(range);
+                    rangeList.push(range);
                 }
             }
         });
@@ -1024,7 +1021,7 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
     // server.saveParam("cg", ctx.currentSheetId, cfg.borderInfo, {
     //   k: "borderInfo",
     // });
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (index == null)
         return;
     ctx.luckysheetfile[index].config = ctx.config;
@@ -1033,7 +1030,7 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
     // }, 1);
 }
 export function handleMerge(ctx, type) {
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
     // if (!checkProtectionNotEnable(ctx.currentSheetId)) {
@@ -1048,14 +1045,14 @@ export function handleMerge(ctx, type) {
         return;
     }
     if (ctx.config.merge != null) {
-        var has_PartMC = false;
+        let has_PartMC = false;
         if (!ctx.luckysheet_select_save)
             return;
-        for (var s = 0; s < ctx.luckysheet_select_save.length; s += 1) {
-            var r1 = ctx.luckysheet_select_save[s].row[0];
-            var r2 = ctx.luckysheet_select_save[s].row[1];
-            var c1 = ctx.luckysheet_select_save[s].column[0];
-            var c2 = ctx.luckysheet_select_save[s].column[1];
+        for (let s = 0; s < ctx.luckysheet_select_save.length; s += 1) {
+            const r1 = ctx.luckysheet_select_save[s].row[0];
+            const r2 = ctx.luckysheet_select_save[s].row[1];
+            const c1 = ctx.luckysheet_select_save[s].column[0];
+            const c2 = ctx.luckysheet_select_save[s].column[1];
             has_PartMC = hasPartMC(ctx, ctx.config, r1, r2, c1, c2);
             if (has_PartMC) {
                 break;
@@ -1070,7 +1067,7 @@ export function handleMerge(ctx, type) {
             return;
         }
     }
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
     if (!ctx.luckysheet_select_save)
@@ -1081,29 +1078,28 @@ export function handleSort(ctx, isAsc) {
     sortSelection(ctx, isAsc);
 }
 export function handleFreeze(ctx, type) {
-    var _a, _b;
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
-    var file = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)];
+    const file = ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)];
     if (!file)
         return;
     if (type === "freeze-cancel") {
         delete file.frozen;
         return;
     }
-    var firstSelection = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[0];
+    const firstSelection = ctx.luckysheet_select_save?.[0];
     if (!firstSelection)
         return;
-    var row_focus = firstSelection.row_focus, column_focus = firstSelection.column_focus;
+    let { row_focus, column_focus } = firstSelection;
     if (row_focus == null || column_focus == null)
         return;
-    var m = (_b = ctx.config.merge) === null || _b === void 0 ? void 0 : _b["".concat(row_focus, "_").concat(column_focus)];
+    const m = ctx.config.merge?.[`${row_focus}_${column_focus}`];
     if (m) {
         row_focus = m.r + m.rs - 1;
         column_focus = m.c + m.cs - 1;
     }
-    file.frozen = { type: "both", range: { row_focus: row_focus, column_focus: column_focus } };
+    file.frozen = { type: "both", range: { row_focus, column_focus } };
     if (type === "freeze-row") {
         file.frozen.type = "rangeRow";
     }
@@ -1118,40 +1114,39 @@ export function handleSum(ctx, cellInput, fxInput, cache) {
     autoSelectionFormula(ctx, cellInput, fxInput, "SUM", cache);
 }
 export function handleLink(ctx) {
-    var _a;
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
-    var selection = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[0];
-    var flowdata = getFlowdata(ctx);
+    const selection = ctx.luckysheet_select_save?.[0];
+    const flowdata = getFlowdata(ctx);
     if (flowdata != null && selection != null) {
         showLinkCard(ctx, selection.row[0], selection.column[0], true);
     }
 }
-var handlerMap = {
+const handlerMap = {
     "currency-format": handleCurrencyFormat,
     "percentage-format": handlePercentageFormat,
     "number-decrease": handleNumberDecrease,
     "number-increase": handleNumberIncrease,
-    "sort-cell": function (ctx) { return handleSort(ctx, true); },
-    "merge-all": function (ctx) { return handleMerge(ctx, "mergeAll"); },
-    "border-all": function (ctx) { return handleBorder(ctx, "border-all"); },
+    "sort-cell": (ctx) => handleSort(ctx, true),
+    "merge-all": (ctx) => handleMerge(ctx, "mergeAll"),
+    "border-all": (ctx) => handleBorder(ctx, "border-all"),
     bold: handleBold,
     italic: handleItalic,
     "strike-through": handleStrikeThrough,
     underline: handleUnderline,
     "clear-format": handleClearFormat,
     "format-painter": handleFormatPainter,
-    search: function (ctx) {
+    search: (ctx) => {
         ctx.showSearch = true;
     },
     link: handleLink,
 };
-var selectedMap = {
-    bold: function (cell) { return (cell === null || cell === void 0 ? void 0 : cell.bl) === 1; },
-    italic: function (cell) { return (cell === null || cell === void 0 ? void 0 : cell.it) === 1; },
-    "strike-through": function (cell) { return (cell === null || cell === void 0 ? void 0 : cell.cl) === 1; },
-    underline: function (cell) { return (cell === null || cell === void 0 ? void 0 : cell.un) === 1; },
+const selectedMap = {
+    bold: (cell) => cell?.bl === 1,
+    italic: (cell) => cell?.it === 1,
+    "strike-through": (cell) => cell?.cl === 1,
+    underline: (cell) => cell?.un === 1,
 };
 export function toolbarItemClickHandler(name) {
     return handlerMap[name];

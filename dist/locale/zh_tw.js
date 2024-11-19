@@ -10874,7 +10874,7 @@ export default {
         ChileanPeso: "智利比索",
         CFAFrancBEAC: "中非金融合作法郎",
     },
-    defaultFmt: function (currency) { return [
+    defaultFmt: (currency) => [
         { text: "自動", value: "General", example: "" },
         { text: "純文字", value: "@", example: "" },
         { text: "", value: "split", example: "" },
@@ -10884,12 +10884,12 @@ export default {
         { text: "", value: "split", example: "" },
         {
             text: "會計",
-            value: "".concat(currency, "(0.00)"),
-            example: "".concat(currency, "(1200.09)"),
+            value: `${currency}(0.00)`,
+            example: `${currency}(1200.09)`,
         },
         // { "text": "財務", "value": "(#.####)", "example": "(1200.09)" },
         { text: "萬元", value: "w", example: "1亿2000万2500" },
-        { text: "貨幣", value: "".concat(currency, "0.00"), example: "".concat(currency, "1200.09") },
+        { text: "貨幣", value: `${currency}0.00`, example: `${currency}1200.09` },
         // { "text": "貨幣整數", "value": "¥####", "example": "¥1200" },
         { text: "萬元2位小數", value: "w0.00", example: "2万2500.55" },
         { text: "", value: "split", example: "" },
@@ -10908,7 +10908,7 @@ export default {
         },
         { text: "", value: "split", example: "" },
         { text: "自定義格式", value: "fmtOtherSelf", example: "more" },
-    ]; },
+    ],
     dateFmtList: [
         {
             name: "1930-08-05",

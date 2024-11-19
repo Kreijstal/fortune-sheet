@@ -2,26 +2,25 @@ import { colLocationByIndex, diff, getcellrange, getCellValue, getFlowdata, getR
 // TODO: 后期增加鼠标可以选择多个选区
 // 开启范围选区
 export function dataRangeSelection(ctx, cache, rangT, type, value) {
-    var _a, _b;
     ctx.rangeDialog.show = true;
     ctx.rangeDialog.type = type;
     ctx.rangeDialog.rangeTxt = value;
     if (ctx.luckysheet_select_save && !!rangT) {
-        var last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
-        var row_index = last.row_focus;
-        var col_index = last.column_focus;
+        const last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
+        const row_index = last.row_focus;
+        const col_index = last.column_focus;
         ctx.luckysheetCellUpdate = [row_index, col_index];
-        var range = getRangeByTxt(ctx, rangT);
-        var r = range[0].row;
-        var c = range[0].column;
-        var row_pre = rowLocationByIndex(r[0], ctx.visibledatarow)[0];
-        var row = rowLocationByIndex(r[1], ctx.visibledatarow)[1];
-        var col_pre = colLocationByIndex(c[0], ctx.visibledatacolumn)[0];
-        var col = colLocationByIndex(c[1], ctx.visibledatacolumn)[1];
+        const range = getRangeByTxt(ctx, rangT);
+        const r = range[0].row;
+        const c = range[0].column;
+        const row_pre = rowLocationByIndex(r[0], ctx.visibledatarow)[0];
+        const row = rowLocationByIndex(r[1], ctx.visibledatarow)[1];
+        const col_pre = colLocationByIndex(c[0], ctx.visibledatacolumn)[0];
+        const col = colLocationByIndex(c[1], ctx.visibledatacolumn)[1];
         ctx.formulaRangeSelect = {
             height: row - row_pre - 1,
             left: col_pre,
-            rangeIndex: (_b = (_a = ctx.formulaRangeSelect) === null || _a === void 0 ? void 0 : _a.rangeIndex) !== null && _b !== void 0 ? _b : 0,
+            rangeIndex: ctx.formulaRangeSelect?.rangeIndex ?? 0,
             top: row_pre,
             width: col - col_pre - 1,
         };
@@ -36,23 +35,23 @@ export function dataRangeSelection(ctx, cache, rangT, type, value) {
     // ctx.formulaCache.rangechangeindex = 0;
 }
 export function getDropdownList(ctx, txt) {
-    var list = [];
+    const list = [];
     if (iscelldata(txt)) {
-        var range = getcellrange(ctx, txt);
-        var index = getSheetIndex(ctx, range.sheetId);
-        var d = ctx.luckysheetfile[index].data;
+        const range = getcellrange(ctx, txt);
+        const index = getSheetIndex(ctx, range.sheetId);
+        const d = ctx.luckysheetfile[index].data;
         if (!d)
             return [];
-        for (var r = range.row[0]; r <= range.row[1]; r += 1) {
-            for (var c = range.column[0]; c <= range.column[1]; c += 1) {
+        for (let r = range.row[0]; r <= range.row[1]; r += 1) {
+            for (let c = range.column[0]; c <= range.column[1]; c += 1) {
                 if (!d[r]) {
                     continue;
                 }
-                var cell = d[r][c];
+                const cell = d[r][c];
                 if (!cell || !cell.v) {
                     continue;
                 }
-                var v = cell.m || cell.v;
+                const v = cell.m || cell.v;
                 if (!list.includes(v)) {
                     list.push(v);
                 }
@@ -60,9 +59,9 @@ export function getDropdownList(ctx, txt) {
         }
     }
     else {
-        var arr = txt.split(",");
-        for (var i = 0; i < arr.length; i += 1) {
-            var v = arr[i];
+        const arr = txt.split(",");
+        for (let i = 0; i < arr.length; i += 1) {
+            const v = arr[i];
             if (v.length === 0) {
                 continue;
             }
@@ -76,18 +75,18 @@ export function getDropdownList(ctx, txt) {
 // 身份证
 export function validateIdCard(ctx, idCard) {
     // 15位和18位身份证号码的正则表达式
-    var regIdCard = /^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/;
+    const regIdCard = /^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/;
     // 如果通过该验证，说明身份证格式正确，但准确性还需计算
     if (regIdCard.test(idCard)) {
         if (idCard.length === 18) {
-            var idCardWi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]; // 将前17位加权因子保存在数组里
-            var idCardY = [1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2]; // 这是除以11后，可能产生的11位余数、验证码，也保存成数组
-            var idCardWiSum = 0; // 用来保存前17位各自乖以加权因子后的总和
-            for (var i = 0; i < 17; i += 1) {
+            const idCardWi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]; // 将前17位加权因子保存在数组里
+            const idCardY = [1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2]; // 这是除以11后，可能产生的11位余数、验证码，也保存成数组
+            let idCardWiSum = 0; // 用来保存前17位各自乖以加权因子后的总和
+            for (let i = 0; i < 17; i += 1) {
                 idCardWiSum += Number(idCard.substring(i, i + 1)) * idCardWi[i];
             }
-            var idCardMod = idCardWiSum % 11; // 计算出校验码所在数组的位置
-            var idCardLast = idCard.substring(17); // 得到最后一位身份证号码
+            const idCardMod = idCardWiSum % 11; // 计算出校验码所在数组的位置
+            const idCardLast = idCard.substring(17); // 得到最后一位身份证号码
             // 如果等于2，则说明校验码是10，身份证号码最后一位应该是X
             if (idCardMod === 2) {
                 if (idCardLast === "X" || idCardLast === "x") {
@@ -109,22 +108,22 @@ export function validateIdCard(ctx, idCard) {
 }
 // 数据验证
 export function validateCellData(ctx, item, cellValue) {
-    var value1 = item.value1, value2 = item.value2;
-    var type = item.type, type2 = item.type2;
+    let { value1, value2 } = item;
+    const { type, type2 } = item;
     if (type === "dropdown") {
-        var list_1 = getDropdownList(ctx, value1);
+        const list = getDropdownList(ctx, value1);
         // 多选的情况 检查每个都在下拉列表中
         if (type2 && cellValue) {
             return cellValue
                 .toString()
                 .split(",")
-                .every(function (i) {
-                return list_1.indexOf(i) !== -1;
+                .every((i) => {
+                return list.indexOf(i) !== -1;
             });
         }
-        var result = false;
-        for (var i = 0; i < list_1.length; i += 1) {
-            if (list_1[i] === cellValue) {
+        let result = false;
+        for (let i = 0; i < list.length; i += 1) {
+            if (list[i] === cellValue) {
                 result = true;
                 break;
             }
@@ -259,27 +258,25 @@ export function validateCellData(ctx, item, cellValue) {
 }
 // 复选框处理
 export function checkboxChange(ctx, r, c) {
-    var _a;
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     // let historyDataVerification = $.extend(true, {}, _this.dataVerification);
-    var currentDataVerification = (_a = ctx.luckysheetfile[index].dataVerification) !== null && _a !== void 0 ? _a : {};
-    var item = currentDataVerification["".concat(r, "_").concat(c)];
+    const currentDataVerification = ctx.luckysheetfile[index].dataVerification ?? {};
+    const item = currentDataVerification[`${r}_${c}`];
     item.checked = !item.checked;
-    var value = item.value2;
+    let value = item.value2;
     if (item.checked) {
         value = item.value1;
     }
-    var d = getFlowdata(ctx);
+    const d = getFlowdata(ctx);
     setCellValue(ctx, r, c, d, value);
 }
 // 数据无效时的提示信息
 export function getFailureText(ctx, item) {
-    var _a, _b, _c, _d, _e;
-    var failureText = "";
-    var lang = ctx.lang;
-    var type = item.type, type2 = item.type2, value1 = item.value1, value2 = item.value2;
+    let failureText = "";
+    const { lang } = ctx;
+    const { type, type2, value1, value2 } = item;
     if (lang === "zh" || lang === "zh-CN") {
-        var optionLabel_zh = (_a = ctx.dataVerification) === null || _a === void 0 ? void 0 : _a.optionLabel_zh;
+        const optionLabel_zh = ctx.dataVerification?.optionLabel_zh;
         if (type === "dropdown") {
             failureText += "你选择的不是下拉列表中的选项";
         }
@@ -288,35 +285,35 @@ export function getFailureText(ctx, item) {
         else if (type === "number" ||
             type === "number_integer" ||
             type === "number_decimal") {
-            failureText += "\u4F60\u8F93\u5165\u7684\u4E0D\u662F".concat(optionLabel_zh[type2]).concat(value1);
+            failureText += `你输入的不是${optionLabel_zh[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "\u548C".concat(value2, "\u4E4B\u95F4");
+                failureText += `和${value2}之间`;
             }
-            failureText += "\u7684".concat(optionLabel_zh[type]);
+            failureText += `的${optionLabel_zh[type]}`;
         }
         else if (type === "text_content") {
-            failureText += "\u4F60\u8F93\u5165\u7684\u4E0D\u662F\u5185\u5BB9".concat(optionLabel_zh[type2]).concat(value1, "\u7684\u6587\u672C");
+            failureText += `你输入的不是内容${optionLabel_zh[type2]}${value1}的文本`;
         }
         else if (type === "text_length") {
-            failureText += "\u4F60\u8F93\u5165\u7684\u4E0D\u662F\u957F\u5EA6".concat(optionLabel_zh[type2]).concat(value1);
+            failureText += `你输入的不是长度${optionLabel_zh[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "\u548C".concat(value2, "\u4E4B\u95F4");
+                failureText += `和${value2}之间`;
             }
             failureText += "的文本";
         }
         else if (type === "date") {
-            failureText += "\u4F60\u8F93\u5165\u7684\u4E0D\u662F".concat(optionLabel_zh[type2]).concat(value1);
+            failureText += `你输入的不是${optionLabel_zh[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "\u548C".concat(value2, "\u4E4B\u95F4");
+                failureText += `和${value2}之间`;
             }
             failureText += "的日期";
         }
         else if (type === "validity") {
-            failureText += "\u4F60\u8F93\u5165\u7684\u4E0D\u662F\u4E00\u4E2A\u6B63\u786E\u7684".concat(optionLabel_zh[type2]);
+            failureText += `你输入的不是一个正确的${optionLabel_zh[type2]}`;
         }
     }
     else if (lang === "zh-TW") {
-        var optionLabel_zh_tw = (_b = ctx.dataVerification) === null || _b === void 0 ? void 0 : _b.optionLabel_zh_tw;
+        const optionLabel_zh_tw = ctx.dataVerification?.optionLabel_zh_tw;
         if (type === "dropdown") {
             failureText += "你選擇的不是下拉清單中的選項";
         }
@@ -325,35 +322,35 @@ export function getFailureText(ctx, item) {
         else if (type === "number" ||
             type === "number_integer" ||
             type === "number_decimal") {
-            failureText += "\u4F60\u8F38\u5165\u7684\u4E0D\u662F".concat(optionLabel_zh_tw[type2]).concat(value1);
+            failureText += `你輸入的不是${optionLabel_zh_tw[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "\u548C".concat(value2, "\u4E4B\u9593");
+                failureText += `和${value2}之間`;
             }
-            failureText += "\u7684".concat(optionLabel_zh_tw[type]);
+            failureText += `的${optionLabel_zh_tw[type]}`;
         }
         else if (type === "text_content") {
-            failureText += "\u4F60\u8F38\u5165\u7684\u4E0D\u662F\u5167\u5BB9".concat(optionLabel_zh_tw[type2]).concat(value1, "\u7684\u6587\u672C");
+            failureText += `你輸入的不是內容${optionLabel_zh_tw[type2]}${value1}的文本`;
         }
         else if (type === "text_length") {
-            failureText += "\u4F60\u8F38\u5165\u7684\u4E0D\u662F\u9577\u5EA6".concat(optionLabel_zh_tw[type2]).concat(value1);
+            failureText += `你輸入的不是長度${optionLabel_zh_tw[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "\u548C".concat(value2, "\u4E4B\u95F4");
+                failureText += `和${value2}之间`;
             }
             failureText += "的文本";
         }
         else if (type === "date") {
-            failureText += "\u4F60\u8F38\u5165\u7684\u4E0D\u662F".concat(optionLabel_zh_tw[type2]).concat(value1);
+            failureText += `你輸入的不是${optionLabel_zh_tw[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "\u548C".concat(value2, "\u4E4B\u95F4");
+                failureText += `和${value2}之间`;
             }
             failureText += "的日期";
         }
         else if (type === "validity") {
-            failureText += "\u4F60\u8F38\u5165\u7684\u4E0D\u662F\u4E00\u500B\u6B63\u78BA\u7684".concat(optionLabel_zh_tw[type2]);
+            failureText += `你輸入的不是一個正確的${optionLabel_zh_tw[type2]}`;
         }
     }
     else if (lang === "es") {
-        var optionLabel_es = (_c = ctx.dataVerification) === null || _c === void 0 ? void 0 : _c.optionLabel_es;
+        const optionLabel_es = ctx.dataVerification?.optionLabel_es;
         if (type === "dropdown") {
             failureText += "No elegiste una opción en la lista desplegable";
         }
@@ -362,35 +359,35 @@ export function getFailureText(ctx, item) {
         else if (type === "number" ||
             type === "number_integer" ||
             type === "number_decimal") {
-            failureText += "Lo que introduciste no es".concat(optionLabel_es[type2]).concat(value1);
+            failureText += `Lo que introduciste no es${optionLabel_es[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "Y".concat(value2, "Entre");
+                failureText += `Y${value2}Entre`;
             }
-            failureText += "De".concat(optionLabel_es[type]);
+            failureText += `De${optionLabel_es[type]}`;
         }
         else if (type === "text_content") {
-            failureText += "Lo que introduciste no fue contenido".concat(optionLabel_es[type2]).concat(value1, "Texto");
+            failureText += `Lo que introduciste no fue contenido${optionLabel_es[type2]}${value1}Texto`;
         }
         else if (type === "text_length") {
-            failureText += "No introduciste la longitud".concat(optionLabel_es[type2]).concat(value1);
+            failureText += `No introduciste la longitud${optionLabel_es[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "Y".concat(value2, "Entre");
+                failureText += `Y${value2}Entre`;
             }
             failureText += "Texto";
         }
         else if (type === "date") {
-            failureText += "Lo que introduciste no es".concat(optionLabel_es[type2]).concat(value1);
+            failureText += `Lo que introduciste no es${optionLabel_es[type2]}${value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += "Y".concat(value2, "Entre");
+                failureText += `Y${value2}Entre`;
             }
             failureText += "Fecha";
         }
         else if (type === "validity") {
-            failureText += "Lo que ingresas no es correcto".concat(optionLabel_es[type2]);
+            failureText += `Lo que ingresas no es correcto${optionLabel_es[type2]}`;
         }
     }
     else if (lang === "hi") {
-        var optionLabel_hi = (_d = ctx.dataVerification) === null || _d === void 0 ? void 0 : _d.optionLabel_hi;
+        const optionLabel_hi = ctx.dataVerification?.optionLabel_hi;
         if (type === "dropdown") {
             failureText +=
                 "आपने जो चयन किया है वह ड्रॉप-डाउन सूची में एक विकल्प नहीं है";
@@ -400,33 +397,33 @@ export function getFailureText(ctx, item) {
         else if (type === "number" ||
             type === "number_integer" ||
             type === "number_decimal") {
-            failureText += "\u0906\u092A\u0928\u0947 \u091C\u094B \u0926\u0930\u094D\u091C \u0915\u093F\u092F\u093E \u0939\u0948 \u0935\u0939 ".concat(optionLabel_hi[item.type], " ").concat(optionLabel_hi[item.type2], " ").concat(item.value1, " \u0928\u0939\u0940\u0902 \u0939\u0948");
+            failureText += `आपने जो दर्ज किया है वह ${optionLabel_hi[item.type]} ${optionLabel_hi[item.type2]} ${item.value1} नहीं है`;
             if (item.type2 === "between" || item.type2 === "notBetween") {
-                failureText += " and ".concat(item.value2);
+                failureText += ` and ${item.value2}`;
             }
         }
         else if (type === "text_content") {
-            failureText += "\u0906\u092A\u0928\u0947 \u091C\u094B \u0926\u0930\u094D\u091C \u0915\u093F\u092F\u093E \u0939\u0948 \u0935\u0939 \u092A\u093E\u0920 \u0928\u0939\u0940\u0902 \u0939\u0948 \u091C\u094B ".concat(optionLabel_hi[item.type2], " ").concat(item.value1, " \u0939\u0948");
+            failureText += `आपने जो दर्ज किया है वह पाठ नहीं है जो ${optionLabel_hi[item.type2]} ${item.value1} है`;
         }
         else if (type === "text_length") {
-            failureText += "\u0906\u092A\u0915\u0947 \u0926\u094D\u0935\u093E\u0930\u093E \u0926\u0930\u094D\u091C \u0915\u093F\u092F\u093E \u0917\u092F\u093E \u092A\u093E\u0920 \u0915\u0940 \u0932\u0902\u092C\u093E\u0908 ".concat(optionLabel_hi[item.type2], " ").concat(item.value1, " \u0928\u0939\u0940\u0902 \u0939\u0948");
+            failureText += `आपके द्वारा दर्ज किया गया पाठ की लंबाई ${optionLabel_hi[item.type2]} ${item.value1} नहीं है`;
             if (item.type2 === "between" || item.type2 === "notBetween") {
-                failureText += " \u0914\u0930 ".concat(item.value2);
+                failureText += ` और ${item.value2}`;
             }
         }
         else if (type === "date") {
-            failureText += "\u0906\u092A\u0915\u0947 \u0926\u094D\u0935\u093E\u0930\u093E \u0926\u0930\u094D\u091C \u0915\u0940 \u0917\u0908 \u0924\u093F\u0925\u093F ".concat(optionLabel_hi[item.type2], " ").concat(item.value1, " \u0928\u0939\u0940\u0902 \u0939\u0948\u0964");
+            failureText += `आपके द्वारा दर्ज की गई तिथि ${optionLabel_hi[item.type2]} ${item.value1} नहीं है।`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += " \u0914\u0930 ".concat(item.value2);
+                failureText += ` और ${item.value2}`;
             }
         }
         else if (type === "validity") {
-            failureText += "\u0906\u092A\u0928\u0947 \u091C\u094B \u0926\u0930\u094D\u091C \u0915\u093F\u092F\u093E \u0939\u0948 \u0935\u0939 \u0938\u0939\u0940 ".concat(optionLabel_hi[item.type2], " \u0928\u0939\u0940\u0902 \u0939\u0948\u0964");
+            failureText += `आपने जो दर्ज किया है वह सही ${optionLabel_hi[item.type2]} नहीं है।`;
         }
     }
     else {
         // default language english (en, en-US, en-GB, etc.)
-        var optionLabel_en = (_e = ctx.dataVerification) === null || _e === void 0 ? void 0 : _e.optionLabel_en;
+        const optionLabel_en = ctx.dataVerification?.optionLabel_en;
         if (type === "dropdown") {
             failureText += "what you selected is not an option in the drop-down list";
         }
@@ -435,41 +432,40 @@ export function getFailureText(ctx, item) {
         else if (type === "number" ||
             type === "number_integer" ||
             type === "number_decimal") {
-            failureText += "what you entered is not a ".concat(optionLabel_en[item.type], " ").concat(optionLabel_en[item.type2], " ").concat(item.value1);
+            failureText += `what you entered is not a ${optionLabel_en[item.type]} ${optionLabel_en[item.type2]} ${item.value1}`;
             if (item.type2 === "between" || item.type2 === "notBetween") {
-                failureText += " and ".concat(item.value2);
+                failureText += ` and ${item.value2}`;
             }
         }
         else if (type === "text_content") {
-            failureText += "what you entered is not text that ".concat(optionLabel_en[item.type2], " ").concat(item.value1);
+            failureText += `what you entered is not text that ${optionLabel_en[item.type2]} ${item.value1}`;
         }
         else if (type === "text_length") {
-            failureText += "the text you entered is not length ".concat(optionLabel_en[item.type2], " ").concat(item.value1);
+            failureText += `the text you entered is not length ${optionLabel_en[item.type2]} ${item.value1}`;
             if (item.type2 === "between" || item.type2 === "notBetween") {
-                failureText += " and ".concat(item.value2);
+                failureText += ` and ${item.value2}`;
             }
         }
         else if (type === "date") {
-            failureText += "the date you entered is not ".concat(optionLabel_en[item.type2], " ").concat(item.value1);
+            failureText += `the date you entered is not ${optionLabel_en[item.type2]} ${item.value1}`;
             if (type2 === "between" || type2 === "notBetween") {
-                failureText += " and ".concat(item.value2);
+                failureText += ` and ${item.value2}`;
             }
         }
         else if (type === "validity") {
-            failureText += "what you entered is not a correct ".concat(optionLabel_en[item.type2]);
+            failureText += `what you entered is not a correct ${optionLabel_en[item.type2]}`;
         }
     }
     return failureText;
 }
 // 获得提示内容
 export function getHintText(ctx, item) {
-    var _a, _b, _c, _d;
-    var hintValue = item.hintValue || "";
-    var type = item.type, type2 = item.type2, value1 = item.value1, value2 = item.value2;
-    var lang = ctx.lang;
+    let hintValue = item.hintValue || "";
+    const { type, type2, value1, value2 } = item;
+    const { lang } = ctx;
     if (!hintValue) {
         if (lang === "en") {
-            var optionLabel_en = (_a = ctx.dataVerification) === null || _a === void 0 ? void 0 : _a.optionLabel_en;
+            const optionLabel_en = ctx.dataVerification?.optionLabel_en;
             if (type === "dropdown") {
                 hintValue += "please select an option in the drop-down list";
             }
@@ -478,26 +474,26 @@ export function getHintText(ctx, item) {
             else if (type === "number" ||
                 type === "number_integer" ||
                 type === "number_decimal") {
-                hintValue += "please enter a ".concat(optionLabel_en[type], " ").concat(optionLabel_en[type2], " ").concat(item.value1);
+                hintValue += `please enter a ${optionLabel_en[type]} ${optionLabel_en[type2]} ${item.value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += " and ".concat(value2);
+                    hintValue += ` and ${value2}`;
                 }
             }
             else if (type === "text_content") {
-                hintValue += "please enter text ".concat(optionLabel_en[type2], " ").concat(value1);
+                hintValue += `please enter text ${optionLabel_en[type2]} ${value1}`;
             }
             else if (type === "date") {
-                hintValue += "please enter a date ".concat(optionLabel_en[type2], " ").concat(value1);
+                hintValue += `please enter a date ${optionLabel_en[type2]} ${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += " and ".concat(value2);
+                    hintValue += ` and ${value2}`;
                 }
             }
             else if (type === "validity") {
-                hintValue += "please enter the correct ".concat(optionLabel_en[type2]);
+                hintValue += `please enter the correct ${optionLabel_en[type2]}`;
             }
         }
         else if (lang === "zh" || lang === "zh-CN") {
-            var optionLabel_zh = (_b = ctx.dataVerification) === null || _b === void 0 ? void 0 : _b.optionLabel_zh;
+            const optionLabel_zh = ctx.dataVerification?.optionLabel_zh;
             if (type === "dropdown") {
                 hintValue += "请选择下拉列表中的选项";
             }
@@ -506,35 +502,35 @@ export function getHintText(ctx, item) {
             else if (type === "number" ||
                 type === "number_integer" ||
                 type === "number_decimal") {
-                hintValue += "\u8BF7\u8F93\u5165".concat(optionLabel_zh[type2]).concat(value1);
+                hintValue += `请输入${optionLabel_zh[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "\u548C".concat(value2, "\u4E4B\u95F4");
+                    hintValue += `和${value2}之间`;
                 }
-                hintValue += "\u7684".concat(optionLabel_zh[type]);
+                hintValue += `的${optionLabel_zh[type]}`;
             }
             else if (type === "text_content") {
-                hintValue += "\u8BF7\u8F93\u5165\u5185\u5BB9".concat(optionLabel_zh[type2]).concat(value1, "\u7684\u6587\u672C");
+                hintValue += `请输入内容${optionLabel_zh[type2]}${value1}的文本`;
             }
             else if (type === "text_length") {
-                hintValue += "\u8BF7\u8F93\u5165\u957F\u5EA6".concat(optionLabel_zh[type2]).concat(value1);
+                hintValue += `请输入长度${optionLabel_zh[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "\u548C".concat(value2, "\u4E4B\u95F4");
+                    hintValue += `和${value2}之间`;
                 }
                 hintValue += "的文本";
             }
             else if (type === "date") {
-                hintValue += "\u8BF7\u8F93\u5165".concat(optionLabel_zh[type2]).concat(value1);
+                hintValue += `请输入${optionLabel_zh[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "\u548C".concat(value2, "\u4E4B\u95F4");
+                    hintValue += `和${value2}之间`;
                 }
                 hintValue += "的日期";
             }
             else if (type === "validity") {
-                hintValue += "\u8BF7\u8F93\u5165\u6B63\u786E\u7684".concat(optionLabel_zh[type2]);
+                hintValue += `请输入正确的${optionLabel_zh[type2]}`;
             }
         }
         else if (lang === "zh-TW") {
-            var optionLabel_zh_tw = (_c = ctx.dataVerification) === null || _c === void 0 ? void 0 : _c.optionLabel_zh_tw;
+            const optionLabel_zh_tw = ctx.dataVerification?.optionLabel_zh_tw;
             if (type === "dropdown") {
                 hintValue += "請選擇下拉清單中的選項";
             }
@@ -543,35 +539,35 @@ export function getHintText(ctx, item) {
             else if (type === "number" ||
                 type === "number_integer" ||
                 type === "number_decimal") {
-                hintValue += "\u8ACB\u8F38\u5165".concat(optionLabel_zh_tw[type2]).concat(value1);
+                hintValue += `請輸入${optionLabel_zh_tw[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "\u548C".concat(value2, "\u4E4B\u9593");
+                    hintValue += `和${value2}之間`;
                 }
-                hintValue += "\u7684".concat(optionLabel_zh_tw[type]);
+                hintValue += `的${optionLabel_zh_tw[type]}`;
             }
             else if (type === "text_content") {
-                hintValue += "\u8ACB\u8F38\u5165\u5167\u5BB9".concat(optionLabel_zh_tw[type2]).concat(value1, "\u7684\u6587\u672C");
+                hintValue += `請輸入內容${optionLabel_zh_tw[type2]}${value1}的文本`;
             }
             else if (type === "text_length") {
-                hintValue += "\u8ACB\u8F38\u5165\u9577\u5EA6".concat(optionLabel_zh_tw[type2]).concat(value1);
+                hintValue += `請輸入長度${optionLabel_zh_tw[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "\u548C".concat(value2, "\u4E4B\u9593");
+                    hintValue += `和${value2}之間`;
                 }
                 hintValue += "的文本";
             }
             else if (type === "date") {
-                hintValue += "\u8ACB\u8F38\u5165".concat(optionLabel_zh_tw[type2]).concat(value1);
+                hintValue += `請輸入${optionLabel_zh_tw[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "\u548C".concat(value2, "\u4E4B\u9593");
+                    hintValue += `和${value2}之間`;
                 }
                 hintValue += "的日期";
             }
             else if (type === "validity") {
-                hintValue += "\u8ACB\u8F38\u5165\u6B63\u78BA\u7684".concat(optionLabel_zh_tw[type2]);
+                hintValue += `請輸入正確的${optionLabel_zh_tw[type2]}`;
             }
         }
         else if (lang === "es") {
-            var optionLabel_es = (_d = ctx.dataVerification) === null || _d === void 0 ? void 0 : _d.optionLabel_es;
+            const optionLabel_es = ctx.dataVerification?.optionLabel_es;
             if (type === "dropdown") {
                 hintValue += "Por favor, elija una opción en la lista desplegable";
             }
@@ -580,31 +576,31 @@ export function getHintText(ctx, item) {
             else if (type === "number" ||
                 type === "number_integer" ||
                 type === "number_decimal") {
-                hintValue += "Por favor, introduzca".concat(optionLabel_es[type2]).concat(value1);
+                hintValue += `Por favor, introduzca${optionLabel_es[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "Y".concat(value2, "Entre");
+                    hintValue += `Y${value2}Entre`;
                 }
-                hintValue += "De".concat(optionLabel_es[type]);
+                hintValue += `De${optionLabel_es[type]}`;
             }
             else if (type === "text_content") {
-                hintValue += "Por favor, introduzca el contenido".concat(optionLabel_es[type2]).concat(value1, "Texto");
+                hintValue += `Por favor, introduzca el contenido${optionLabel_es[type2]}${value1}Texto`;
             }
             else if (type === "text_length") {
-                hintValue += "Por favor, introduzca la longitud".concat(optionLabel_es[type2]).concat(value1);
+                hintValue += `Por favor, introduzca la longitud${optionLabel_es[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "Y".concat(value2, "Entre");
+                    hintValue += `Y${value2}Entre`;
                 }
                 hintValue += "Texto";
             }
             else if (type === "date") {
-                hintValue += "Por favor, introduzca".concat(optionLabel_es[type2]).concat(value1);
+                hintValue += `Por favor, introduzca${optionLabel_es[type2]}${value1}`;
                 if (type2 === "between" || type2 === "notBetween") {
-                    hintValue += "Y".concat(value2, "Entre");
+                    hintValue += `Y${value2}Entre`;
                 }
                 hintValue += "Fecha";
             }
             else if (type === "validity") {
-                hintValue += "Por favor, introduzca lo correcto.".concat(optionLabel_es[type2]);
+                hintValue += `Por favor, introduzca lo correcto.${optionLabel_es[type2]}`;
             }
         }
     }
@@ -612,35 +608,34 @@ export function getHintText(ctx, item) {
 }
 // 单元格聚焦处理
 export function cellFocus(ctx, r, c, clickMode) {
-    var _a, _b;
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
-    var showHintBox = document.getElementById("luckysheet-dataVerification-showHintBox");
-    var dropDownBtn = document.getElementById("luckysheet-dataVerification-dropdown-btn");
+    const showHintBox = document.getElementById("luckysheet-dataVerification-showHintBox");
+    const dropDownBtn = document.getElementById("luckysheet-dataVerification-dropdown-btn");
     ctx.dataVerificationDropDownList = false;
     if (!showHintBox || !dropDownBtn)
         return;
     showHintBox.style.display = "none";
     dropDownBtn.style.display = "none";
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
-    var dataVerification = ctx.luckysheetfile[index].dataVerification;
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
+    const { dataVerification } = ctx.luckysheetfile[index];
     ctx.dataVerificationDropDownList = false;
     if (!dataVerification)
         return;
-    var row = ctx.visibledatarow[r];
-    var row_pre = r === 0 ? 0 : ctx.visibledatarow[r - 1];
-    var col = ctx.visibledatacolumn[c];
-    var col_pre = c === 0 ? 0 : ctx.visibledatacolumn[c - 1];
-    var d = getFlowdata(ctx);
+    let row = ctx.visibledatarow[r];
+    let row_pre = r === 0 ? 0 : ctx.visibledatarow[r - 1];
+    let col = ctx.visibledatacolumn[c];
+    let col_pre = c === 0 ? 0 : ctx.visibledatacolumn[c - 1];
+    const d = getFlowdata(ctx);
     if (!d)
         return;
-    var margeSet = mergeBorder(ctx, d, r, c);
+    const margeSet = mergeBorder(ctx, d, r, c);
     if (margeSet) {
-        _a = margeSet.row, row_pre = _a[0], row = _a[1];
-        _b = margeSet.column, col_pre = _b[0], col = _b[1];
+        [row_pre, row] = margeSet.row;
+        [col_pre, col] = margeSet.column;
     }
-    var item = dataVerification["".concat(r, "_").concat(c)];
+    const item = dataVerification[`${r}_${c}`];
     if (!item)
         return;
     // 单元格数据验证 类型是 复选
@@ -650,15 +645,15 @@ export function cellFocus(ctx, r, c, clickMode) {
     // 单元格数据验证 类型是 下拉列表
     if (item.type === "dropdown") {
         dropDownBtn.style.display = "block";
-        dropDownBtn.style.maxWidth = "".concat(col - col_pre, "px");
-        dropDownBtn.style.maxHeight = "".concat(row - row_pre, "px");
-        dropDownBtn.style.left = "".concat(col - 20, "px");
-        dropDownBtn.style.top = "".concat(row_pre + (row - row_pre - 20) / 2 - 2, "px");
+        dropDownBtn.style.maxWidth = `${col - col_pre}px`;
+        dropDownBtn.style.maxHeight = `${row - row_pre}px`;
+        dropDownBtn.style.left = `${col - 20}px`;
+        dropDownBtn.style.top = `${row_pre + (row - row_pre - 20) / 2 - 2}px`;
     }
     // 提示语
     if (item.hintShow) {
-        var hintText = "";
-        var lang = ctx.lang;
+        let hintText = "";
+        const { lang } = ctx;
         if (lang === "en") {
             hintText = '<span style="color:#f5a623;">Hint: </span>';
         }
@@ -677,18 +672,18 @@ export function cellFocus(ctx, r, c, clickMode) {
         hintText += getHintText(ctx, item);
         showHintBox.innerHTML = hintText;
         showHintBox.style.display = "block";
-        showHintBox.style.left = "".concat(col_pre, "px");
-        showHintBox.style.top = "".concat(row, "px");
+        showHintBox.style.left = `${col_pre}px`;
+        showHintBox.style.top = `${row}px`;
     }
     // 数据验证未通过,失效提醒
-    var cellValue = getCellValue(r, c, d);
+    const cellValue = getCellValue(r, c, d);
     if (isRealNull(cellValue)) {
         return;
     }
-    var validate = validateCellData(ctx, item, cellValue);
+    const validate = validateCellData(ctx, item, cellValue);
     if (!validate) {
-        var failureText = "";
-        var lang = ctx.lang;
+        let failureText = "";
+        const { lang } = ctx;
         if (lang === "en") {
             failureText = '<span style="color:#f72626;">Failure: </span>';
         }
@@ -707,28 +702,28 @@ export function cellFocus(ctx, r, c, clickMode) {
         failureText += getFailureText(ctx, item);
         showHintBox.innerHTML = failureText;
         showHintBox.style.display = "block";
-        showHintBox.style.left = "".concat(col_pre, "px");
-        showHintBox.style.top = "".concat(row, "px");
+        showHintBox.style.left = `${col_pre}px`;
+        showHintBox.style.top = `${row}px`;
     }
 }
 // 设置下拉列表的值
 export function setDropcownValue(ctx, value, arr) {
     if (!ctx.luckysheet_select_save)
         return;
-    var d = getFlowdata(ctx);
+    const d = getFlowdata(ctx);
     if (!d)
         return;
-    var last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
-    var rowIndex = last.row_focus;
-    var colIndex = last.column_focus;
+    const last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
+    const rowIndex = last.row_focus;
+    const colIndex = last.column_focus;
     if (rowIndex == null || colIndex == null)
         return;
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
-    var item = ctx.luckysheetfile[index].dataVerification["".concat(rowIndex, "_").concat(colIndex)];
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
+    const item = ctx.luckysheetfile[index].dataVerification[`${rowIndex}_${colIndex}`];
     if (item.type2 === "true") {
         value = item.value1
             .split(",")
-            .filter(function (v) { return arr.indexOf(v) >= 0; })
+            .filter((v) => arr.indexOf(v) >= 0)
             .join(",");
     }
     else {
@@ -739,17 +734,16 @@ export function setDropcownValue(ctx, value, arr) {
 }
 // 输入数据验证
 export function confirmMessage(ctx, generalDialog, dataVerification) {
-    var _a, _b;
-    var range = getRangeByTxt(ctx, (_b = (_a = ctx.dataVerification) === null || _a === void 0 ? void 0 : _a.dataRegulation) === null || _b === void 0 ? void 0 : _b.rangeTxt);
+    const range = getRangeByTxt(ctx, ctx.dataVerification?.dataRegulation?.rangeTxt);
     if (range.length === 0) {
         ctx.warnDialog = generalDialog.noSeletionError;
         return false;
     }
-    var str = range[range.length - 1].row[0];
-    var edr = range[range.length - 1].row[1];
-    var stc = range[range.length - 1].column[0];
-    var edc = range[range.length - 1].column[1];
-    var d = getFlowdata(ctx);
+    let str = range[range.length - 1].row[0];
+    let edr = range[range.length - 1].row[1];
+    let stc = range[range.length - 1].column[0];
+    let edc = range[range.length - 1].column[1];
+    const d = getFlowdata(ctx);
     if (!d)
         return false;
     if (str < 0) {
@@ -764,12 +758,12 @@ export function confirmMessage(ctx, generalDialog, dataVerification) {
     if (edc > d[0].length - 1) {
         edc = d[0].length - 1;
     }
-    var regulation = ctx.dataVerification.dataRegulation;
-    var verifacationT = regulation === null || regulation === void 0 ? void 0 : regulation.type;
-    var value1 = regulation.value1, value2 = regulation.value2, type2 = regulation.type2;
+    const regulation = ctx.dataVerification.dataRegulation;
+    const verifacationT = regulation?.type;
+    const { value1, value2, type2 } = regulation;
     // 判断是不是数字
-    var v1 = parseFloat(value1).toString() !== "NaN";
-    var v2 = parseFloat(value2).toString() !== "NaN";
+    const v1 = parseFloat(value1).toString() !== "NaN";
+    const v2 = parseFloat(value2).toString() !== "NaN";
     if (verifacationT === "dropdown") {
         if (!value1) {
             ctx.warnDialog = dataVerification.tooltipInfo1;

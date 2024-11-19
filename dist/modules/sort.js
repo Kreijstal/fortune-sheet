@@ -7,9 +7,9 @@ export function orderbydata(isAsc, index, data) {
     if (isAsc == null) {
         isAsc = true;
     }
-    var a = function (x, y) {
-        var x1 = x[index];
-        var y1 = y[index];
+    const a = (x, y) => {
+        let x1 = x[index];
+        let y1 = y[index];
         if (x[index] != null) {
             x1 = x[index].v;
         }
@@ -26,8 +26,8 @@ export function orderbydata(isAsc, index, data) {
             return diff(x1, y1);
         }
         if (isRealNum(x1) && isRealNum(y1)) {
-            var y1Value = numeral(y1).value();
-            var x1Value = numeral(x1).value();
+            const y1Value = numeral(y1).value();
+            const x1Value = numeral(x1).value();
             if (y1Value == null || x1Value == null)
                 return null;
             return x1Value - y1Value;
@@ -43,34 +43,33 @@ export function orderbydata(isAsc, index, data) {
         }
         return 0;
     };
-    var d = function (x, y) { return a(y, x); };
-    var sortedData = _.clone(data);
+    const d = (x, y) => a(y, x);
+    const sortedData = _.clone(data);
     sortedData.sort(isAsc ? a : d);
     // calc row offsets
-    var rowOffsets = sortedData.map(function (r, i) {
-        var origIndex = _.findIndex(data, function (origR) { return origR === r; });
+    const rowOffsets = sortedData.map((r, i) => {
+        const origIndex = _.findIndex(data, (origR) => origR === r);
         return i - origIndex;
     });
-    return { sortedData: sortedData, rowOffsets: rowOffsets };
+    return { sortedData, rowOffsets };
 }
 export function sortDataRange(ctx, sheetData, dataRange, index, isAsc, str, edr, stc, edc) {
-    var _a;
-    var _b = orderbydata(isAsc, index, dataRange), sortedData = _b.sortedData, rowOffsets = _b.rowOffsets;
-    for (var r = str; r <= edr; r += 1) {
-        for (var c = stc; c <= edc; c += 1) {
-            var cell = sortedData[r - str][c - stc];
-            if (cell === null || cell === void 0 ? void 0 : cell.f) {
-                var moveOffset = rowOffsets[r - str];
-                var func = cell === null || cell === void 0 ? void 0 : cell.f;
+    const { sortedData, rowOffsets } = orderbydata(isAsc, index, dataRange);
+    for (let r = str; r <= edr; r += 1) {
+        for (let c = stc; c <= edc; c += 1) {
+            const cell = sortedData[r - str][c - stc];
+            if (cell?.f) {
+                const moveOffset = rowOffsets[r - str];
+                let func = cell?.f;
                 if (moveOffset > 0) {
-                    func = "=".concat(functionCopy(ctx, func, "down", moveOffset));
+                    func = `=${functionCopy(ctx, func, "down", moveOffset)}`;
                 }
                 else if (moveOffset < 0) {
-                    func = "=".concat(functionCopy(ctx, func, "up", -moveOffset));
+                    func = `=${functionCopy(ctx, func, "up", -moveOffset)}`;
                 }
-                var funcV = execfunction(ctx, func, r, c, undefined, undefined, true);
-                cell.v = funcV[1], cell.f = funcV[2];
-                cell.m = update(((_a = cell.ct) === null || _a === void 0 ? void 0 : _a.fa) || "General", cell.v);
+                const funcV = execfunction(ctx, func, r, c, undefined, undefined, true);
+                [, cell.v, cell.f] = funcV;
+                cell.m = update(cell.ct?.fa || "General", cell.v);
             }
             sheetData[r][c] = cell;
         }
@@ -86,9 +85,7 @@ export function sortDataRange(ctx, sheetData, dataRange, index, isAsc, str, edr,
     // }
     jfrefreshgrid(ctx, sheetData, [{ row: [str, edr], column: [stc, edc] }]);
 }
-export function sortSelection(ctx, isAsc, colIndex) {
-    var _a;
-    if (colIndex === void 0) { colIndex = 0; }
+export function sortSelection(ctx, isAsc, colIndex = 0) {
     // if (!checkProtectionAuthorityNormal(ctx.currentSheetIndex, "sort")) {
     //   return;
     // }
@@ -111,25 +108,25 @@ export function sortSelection(ctx, isAsc, colIndex) {
         isAsc = true;
     }
     // const d = editor.deepCopyFlowData(Store.flowdata);
-    var flowdata = getFlowdata(ctx);
-    var d = flowdata;
+    const flowdata = getFlowdata(ctx);
+    const d = flowdata;
     if (d == null)
         return;
-    var r1 = ctx.luckysheet_select_save[0].row[0];
-    var r2 = ctx.luckysheet_select_save[0].row[1];
-    var c1 = ctx.luckysheet_select_save[0].column[0];
-    var c2 = ctx.luckysheet_select_save[0].column[1];
-    var str = null;
-    var edr;
-    for (var r = r1; r <= r2; r += 1) {
+    const r1 = ctx.luckysheet_select_save[0].row[0];
+    const r2 = ctx.luckysheet_select_save[0].row[1];
+    const c1 = ctx.luckysheet_select_save[0].column[0];
+    const c2 = ctx.luckysheet_select_save[0].column[1];
+    let str = null;
+    let edr;
+    for (let r = r1; r <= r2; r += 1) {
         if (d[r] != null && d[r][c1] != null) {
-            var cell = d[r][c1];
+            const cell = d[r][c1];
             if (cell == null)
                 return; //
             if (cell.mc != null || isRealNull(cell.v)) {
                 continue;
             }
-            if (str == null && /[\u4e00-\u9fa5]+/g.test("".concat(cell.v))) {
+            if (str == null && /[\u4e00-\u9fa5]+/g.test(`${cell.v}`)) {
                 str = r + 1;
                 edr = r + 1;
                 continue;
@@ -143,14 +140,14 @@ export function sortSelection(ctx, isAsc, colIndex) {
     if (str == null || str > r2) {
         return;
     }
-    var hasMc = false; // 排序选区是否有合并单元格
-    var data = [];
+    let hasMc = false; // 排序选区是否有合并单元格
+    const data = [];
     if (edr == null)
         return;
-    for (var r = str; r <= edr; r += 1) {
-        var data_row = [];
-        for (var c = c1; c <= c2; c += 1) {
-            if (d[r][c] != null && ((_a = d[r][c]) === null || _a === void 0 ? void 0 : _a.mc) != null) {
+    for (let r = str; r <= edr; r += 1) {
+        const data_row = [];
+        for (let c = c1; c <= c2; c += 1) {
+            if (d[r][c] != null && d[r][c]?.mc != null) {
                 hasMc = true;
                 break;
             }

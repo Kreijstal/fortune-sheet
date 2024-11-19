@@ -4,26 +4,26 @@ function cutVolumn(arr, cutindex) {
     if (cutindex <= 0) {
         return arr;
     }
-    var ret = arr.slice(cutindex);
+    const ret = arr.slice(cutindex);
     return ret;
 }
 function frozenTofreezen(ctx, cache, sheetId) {
     // get frozen type
-    var file = ctx.luckysheetfile[getSheetIndex(ctx, sheetId)];
-    var frozen = file.frozen;
+    const file = ctx.luckysheetfile[getSheetIndex(ctx, sheetId)];
+    const { frozen } = file;
     if (frozen == null) {
         delete cache.freezen;
         return;
     }
-    var freezen = {};
-    var range = frozen.range;
+    const freezen = {};
+    let { range } = frozen;
     if (!range) {
         range = {
             row_focus: 0,
             column_focus: 0,
         };
     }
-    var type = frozen.type;
+    let { type } = frozen;
     if (type === "row") {
         type = "rangeRow";
     }
@@ -35,40 +35,40 @@ function frozenTofreezen(ctx, cache, sheetId) {
     }
     // transform to freezen
     if (type === "rangeRow" || type === "rangeBoth") {
-        var scrollTop = 0;
-        var row_st = _.sortedIndex(ctx.visibledatarow, scrollTop);
-        var row_focus = range.row_focus;
+        const scrollTop = 0;
+        let row_st = _.sortedIndex(ctx.visibledatarow, scrollTop);
+        const { row_focus } = range;
         if (row_focus > row_st) {
             row_st = row_focus;
         }
         if (row_st === -1) {
             row_st = 0;
         }
-        var top_1 = ctx.visibledatarow[row_st] - 2 - scrollTop + ctx.columnHeaderHeight;
-        var freezenhorizontaldata = [
+        const top = ctx.visibledatarow[row_st] - 2 - scrollTop + ctx.columnHeaderHeight;
+        const freezenhorizontaldata = [
             ctx.visibledatarow[row_st],
             row_st + 1,
             scrollTop,
             cutVolumn(ctx.visibledatarow, row_st + 1),
-            top_1,
+            top,
         ];
         freezen.horizontal = {
-            freezenhorizontaldata: freezenhorizontaldata,
-            top: top_1,
+            freezenhorizontaldata,
+            top,
         };
     }
     if (type === "rangeColumn" || type === "rangeBoth") {
-        var scrollLeft = 0;
-        var col_st = _.sortedIndex(ctx.visibledatacolumn, scrollLeft);
-        var column_focus = range.column_focus;
+        const scrollLeft = 0;
+        let col_st = _.sortedIndex(ctx.visibledatacolumn, scrollLeft);
+        const { column_focus } = range;
         if (column_focus > col_st) {
             col_st = column_focus;
         }
         if (col_st === -1) {
             col_st = 0;
         }
-        var left = ctx.visibledatacolumn[col_st] - 2 - scrollLeft + ctx.rowHeaderWidth;
-        var freezenverticaldata = [
+        const left = ctx.visibledatacolumn[col_st] - 2 - scrollLeft + ctx.rowHeaderWidth;
+        const freezenverticaldata = [
             ctx.visibledatacolumn[col_st],
             col_st + 1,
             scrollLeft,
@@ -76,8 +76,8 @@ function frozenTofreezen(ctx, cache, sheetId) {
             left,
         ];
         freezen.vertical = {
-            freezenverticaldata: freezenverticaldata,
-            left: left,
+            freezenverticaldata,
+            left,
         };
     }
     cache.freezen || (cache.freezen = {});
@@ -87,33 +87,31 @@ export function initFreeze(ctx, cache, sheetId) {
     frozenTofreezen(ctx, cache, sheetId);
 }
 export function scrollToFrozenRowCol(ctx, freeze) {
-    var _a, _b;
-    var _c, _d;
-    var select_save = ctx.luckysheet_select_save;
+    const select_save = ctx.luckysheet_select_save;
     if (!select_save)
         return;
-    var row;
-    var row_focus = select_save[0].row_focus;
+    let row;
+    const { row_focus } = select_save[0];
     if (row_focus === select_save[0].row[0]) {
-        _a = select_save[0].row, row = _a[1];
+        [, row] = select_save[0].row;
     }
     else if (row_focus === select_save[0].row[1]) {
-        row = select_save[0].row[0];
+        [row] = select_save[0].row;
     }
-    var column;
-    var column_focus = select_save[0].column_focus;
+    let column;
+    const { column_focus } = select_save[0];
     if (column_focus === select_save[0].column[0]) {
-        _b = select_save[0].column, column = _b[1];
+        [, column] = select_save[0].column;
     }
     else if (column_focus === select_save[0].column[1]) {
-        column = select_save[0].column[0];
+        [column] = select_save[0].column;
     }
-    var freezenverticaldata = (_c = freeze === null || freeze === void 0 ? void 0 : freeze.vertical) === null || _c === void 0 ? void 0 : _c.freezenverticaldata;
-    var freezenhorizontaldata = (_d = freeze === null || freeze === void 0 ? void 0 : freeze.horizontal) === null || _d === void 0 ? void 0 : _d.freezenhorizontaldata;
+    const freezenverticaldata = freeze?.vertical?.freezenverticaldata;
+    const freezenhorizontaldata = freeze?.horizontal?.freezenhorizontaldata;
     if (freezenverticaldata != null && column != null) {
-        var freezen_colindex = freezenverticaldata[1];
-        var offset = _.sortedIndex(freezenverticaldata[3], ctx.scrollLeft);
-        var top_2 = freezenverticaldata[4];
+        let freezen_colindex = freezenverticaldata[1];
+        const offset = _.sortedIndex(freezenverticaldata[3], ctx.scrollLeft);
+        const top = freezenverticaldata[4];
         freezen_colindex += offset;
         if (column >= ctx.visibledatacolumn.length) {
             column = ctx.visibledatacolumn.length - 1;
@@ -121,9 +119,9 @@ export function scrollToFrozenRowCol(ctx, freeze) {
         if (freezen_colindex >= ctx.visibledatacolumn.length) {
             freezen_colindex = ctx.visibledatacolumn.length - 1;
         }
-        var column_px = ctx.visibledatacolumn[column];
-        var freezen_px = ctx.visibledatacolumn[freezen_colindex];
-        if (column_px <= freezen_px + top_2) {
+        const column_px = ctx.visibledatacolumn[column];
+        const freezen_px = ctx.visibledatacolumn[freezen_colindex];
+        if (column_px <= freezen_px + top) {
             ctx.scrollLeft = 0;
             // setTimeout(function () {
             //   $("#luckysheet-scrollbar-x").scrollLeft(0);
@@ -131,9 +129,9 @@ export function scrollToFrozenRowCol(ctx, freeze) {
         }
     }
     if (freezenhorizontaldata != null && row != null) {
-        var freezen_rowindex = freezenhorizontaldata[1];
-        var offset = _.sortedIndex(freezenhorizontaldata[3], ctx.scrollTop);
-        var left = freezenhorizontaldata[4];
+        let freezen_rowindex = freezenhorizontaldata[1];
+        const offset = _.sortedIndex(freezenhorizontaldata[3], ctx.scrollTop);
+        const left = freezenhorizontaldata[4];
         freezen_rowindex += offset;
         if (row >= ctx.visibledatarow.length) {
             row = ctx.visibledatarow.length - 1;
@@ -141,8 +139,8 @@ export function scrollToFrozenRowCol(ctx, freeze) {
         if (freezen_rowindex >= ctx.visibledatarow.length) {
             freezen_rowindex = ctx.visibledatarow.length - 1;
         }
-        var row_px = ctx.visibledatarow[row];
-        var freezen_px = ctx.visibledatarow[freezen_rowindex];
+        const row_px = ctx.visibledatarow[row];
+        const freezen_px = ctx.visibledatarow[freezen_rowindex];
         if (row_px <= freezen_px + left) {
             ctx.scrollTop = 0;
             // setTimeout(function () {
@@ -152,30 +150,28 @@ export function scrollToFrozenRowCol(ctx, freeze) {
     }
 }
 export function getFrozenHandleTop(ctx) {
-    var _a, _b, _c, _d, _e, _f;
-    var idx = getSheetIndex(ctx, ctx.currentSheetId);
+    const idx = getSheetIndex(ctx, ctx.currentSheetId);
     if (idx == null)
         return ctx.scrollTop;
-    var sheet = ctx.luckysheetfile[idx];
-    if (((_a = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _a === void 0 ? void 0 : _a.type) === "row" ||
-        ((_b = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _b === void 0 ? void 0 : _b.type) === "rangeRow" ||
-        ((_c = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _c === void 0 ? void 0 : _c.type) === "rangeBoth" ||
-        ((_d = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _d === void 0 ? void 0 : _d.type) === "both") {
-        return (rowLocationByIndex(((_f = (_e = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _e === void 0 ? void 0 : _e.range) === null || _f === void 0 ? void 0 : _f.row_focus) || 0, ctx.visibledatarow)[1] + ctx.scrollTop);
+    const sheet = ctx.luckysheetfile[idx];
+    if (sheet?.frozen?.type === "row" ||
+        sheet?.frozen?.type === "rangeRow" ||
+        sheet?.frozen?.type === "rangeBoth" ||
+        sheet?.frozen?.type === "both") {
+        return (rowLocationByIndex(sheet?.frozen?.range?.row_focus || 0, ctx.visibledatarow)[1] + ctx.scrollTop);
     }
     return ctx.scrollTop;
 }
 export function getFrozenHandleLeft(ctx) {
-    var _a, _b, _c, _d, _e, _f;
-    var idx = getSheetIndex(ctx, ctx.currentSheetId);
+    const idx = getSheetIndex(ctx, ctx.currentSheetId);
     if (idx == null)
         return ctx.scrollLeft;
-    var sheet = ctx.luckysheetfile[idx];
-    if (((_a = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _a === void 0 ? void 0 : _a.type) === "column" ||
-        ((_b = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _b === void 0 ? void 0 : _b.type) === "rangeColumn" ||
-        ((_c = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _c === void 0 ? void 0 : _c.type) === "rangeBoth" ||
-        ((_d = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _d === void 0 ? void 0 : _d.type) === "both") {
-        return (colLocationByIndex(((_f = (_e = sheet === null || sheet === void 0 ? void 0 : sheet.frozen) === null || _e === void 0 ? void 0 : _e.range) === null || _f === void 0 ? void 0 : _f.column_focus) || 0, ctx.visibledatacolumn)[1] -
+    const sheet = ctx.luckysheetfile[idx];
+    if (sheet?.frozen?.type === "column" ||
+        sheet?.frozen?.type === "rangeColumn" ||
+        sheet?.frozen?.type === "rangeBoth" ||
+        sheet?.frozen?.type === "both") {
+        return (colLocationByIndex(sheet?.frozen?.range?.column_focus || 0, ctx.visibledatacolumn)[1] -
             2 +
             ctx.scrollLeft);
     }

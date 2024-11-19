@@ -1,4 +1,4 @@
-export var colors = [
+export const colors = [
     "#c1232b",
     "#27727b",
     "#fcce10",

@@ -6,7 +6,7 @@ import { isInlineStringCell } from "./modules/inline-string";
 import { getSheetIndex, indexToColumnChar } from "./utils";
 import { getBorderInfoComputeRange } from "./modules/border";
 import { checkCF, getComputeMap, validateCellData } from "./modules";
-export var defaultStyle = {
+export const defaultStyle = {
     fillStyle: "#000000",
     textBaseline: "middle",
     strokeStyle: "#dfdfdf",
@@ -17,7 +17,7 @@ export var defaultStyle = {
 function isRealNum(val) {
     return !Number.isNaN(Number(val));
 }
-var cfIconsImg;
+let cfIconsImg;
 function getCfIconsImg() {
     if (cfIconsImg)
         return cfIconsImg;
@@ -30,7 +30,7 @@ function getBorderFix() {
     return [-1, 0, 0, -1];
 }
 function setLineDash(canvasborder, type, hv, moveX, moveY, toX, toY) {
-    var borderType = {
+    const borderType = {
         "0": "none",
         "1": "Thin",
         "2": "Hair",
@@ -93,22 +93,20 @@ function setLineDash(canvasborder, type, hv, moveX, moveY, toX, toY) {
         canvasborder.lineWidth = 1;
     }
 }
-var Canvas = /** @class */ (function () {
-    function Canvas(canvasElement, ctx) {
+export class Canvas {
+    constructor(canvasElement, ctx) {
         this.canvasElement = canvasElement;
         this.sheetCtx = ctx;
         this.cellOverflowMapCache = {};
     }
-    Canvas.prototype.drawRowHeader = function (scrollHeight, drawHeight, offsetTop) {
-        var _a;
-        var _b, _c, _d, _e, _f, _g, _h, _j;
+    drawRowHeader(scrollHeight, drawHeight, offsetTop) {
         if (_.isNil(drawHeight)) {
-            _a = this.sheetCtx.luckysheetTableContentHW, drawHeight = _a[1];
+            [, drawHeight] = this.sheetCtx.luckysheetTableContentHW;
         }
         if (_.isNil(offsetTop)) {
             offsetTop = this.sheetCtx.columnHeaderHeight;
         }
-        var renderCtx = this.canvasElement.getContext("2d");
+        const renderCtx = this.canvasElement.getContext("2d");
         if (!renderCtx)
             return;
         renderCtx.save();
@@ -118,8 +116,8 @@ var Canvas = /** @class */ (function () {
         // @ts-ignore
         renderCtx.textBaseline = defaultStyle.textBaseline; // 基准线 垂直居中
         renderCtx.fillStyle = defaultStyle.fillStyle;
-        var dataset_row_st;
-        var dataset_row_ed;
+        let dataset_row_st;
+        let dataset_row_ed;
         dataset_row_st = _.sortedIndex(this.sheetCtx.visibledatarow, scrollHeight);
         dataset_row_ed = _.sortedIndex(this.sheetCtx.visibledatarow, scrollHeight + drawHeight);
         if (dataset_row_st === -1) {
@@ -132,11 +130,11 @@ var Canvas = /** @class */ (function () {
         renderCtx.beginPath();
         renderCtx.rect(0, offsetTop - 1, this.sheetCtx.rowHeaderWidth - 1, drawHeight - 2);
         renderCtx.clip();
-        var end_r;
-        var start_r;
-        var bodrder05 = 0.5; // Default 0.5
-        var preEndR;
-        for (var r = dataset_row_st; r <= dataset_row_ed; r += 1) {
+        let end_r;
+        let start_r;
+        const bodrder05 = 0.5; // Default 0.5
+        let preEndR;
+        for (let r = dataset_row_st; r <= dataset_row_ed; r += 1) {
             if (r === 0) {
                 start_r = -scrollHeight - 1;
             }
@@ -144,23 +142,23 @@ var Canvas = /** @class */ (function () {
                 start_r = this.sheetCtx.visibledatarow[r - 1] - scrollHeight - 1;
             }
             end_r = this.sheetCtx.visibledatarow[r] - scrollHeight;
-            var firstOffset = dataset_row_st === r ? -2 : 0;
-            var lastOffset = dataset_row_ed === r ? -2 : 0;
+            const firstOffset = dataset_row_st === r ? -2 : 0;
+            const lastOffset = dataset_row_ed === r ? -2 : 0;
             // 行标题单元格渲染前触发，return false 则不渲染该单元格
-            if (((_c = (_b = this.sheetCtx.hooks).beforeRenderRowHeaderCell) === null || _c === void 0 ? void 0 : _c.call(_b, "".concat(r + 1), r, start_r + offsetTop + firstOffset, this.sheetCtx.rowHeaderWidth - 1, end_r - start_r + 1 + lastOffset - firstOffset, renderCtx)) === false) {
+            if (this.sheetCtx.hooks.beforeRenderRowHeaderCell?.(`${r + 1}`, r, start_r + offsetTop + firstOffset, this.sheetCtx.rowHeaderWidth - 1, end_r - start_r + 1 + lastOffset - firstOffset, renderCtx) === false) {
                 continue;
             }
-            if (((_e = (_d = this.sheetCtx.config) === null || _d === void 0 ? void 0 : _d.rowhidden) === null || _e === void 0 ? void 0 : _e[r]) == null) {
+            if (this.sheetCtx.config?.rowhidden?.[r] == null) {
                 renderCtx.fillStyle = "#ffffff";
                 renderCtx.fillRect(0, start_r + offsetTop + firstOffset, this.sheetCtx.rowHeaderWidth - 1, end_r - start_r + 1 + lastOffset - firstOffset);
                 renderCtx.fillStyle = "#000000";
                 // 行标题栏序列号
                 renderCtx.save(); // save scale before draw text
                 renderCtx.scale(this.sheetCtx.zoomRatio, this.sheetCtx.zoomRatio);
-                var textMetrics = getMeasureText(r + 1, renderCtx, this.sheetCtx);
-                var horizonAlignPos = (this.sheetCtx.rowHeaderWidth - textMetrics.width) / 2;
-                var verticalAlignPos = start_r + (end_r - start_r) / 2 + offsetTop;
-                renderCtx.fillText("".concat(r + 1), horizonAlignPos / this.sheetCtx.zoomRatio, verticalAlignPos / this.sheetCtx.zoomRatio);
+                const textMetrics = getMeasureText(r + 1, renderCtx, this.sheetCtx);
+                const horizonAlignPos = (this.sheetCtx.rowHeaderWidth - textMetrics.width) / 2;
+                const verticalAlignPos = start_r + (end_r - start_r) / 2 + offsetTop;
+                renderCtx.fillText(`${r + 1}`, horizonAlignPos / this.sheetCtx.zoomRatio, verticalAlignPos / this.sheetCtx.zoomRatio);
                 renderCtx.restore(); // restore scale after draw text
             }
             // vertical
@@ -189,7 +187,7 @@ var Canvas = /** @class */ (function () {
                 renderCtx.closePath();
                 renderCtx.stroke();
             }
-            if (((_g = (_f = this.sheetCtx.config) === null || _f === void 0 ? void 0 : _f.rowhidden) === null || _g === void 0 ? void 0 : _g[r - 1]) != null &&
+            if (this.sheetCtx.config?.rowhidden?.[r - 1] != null &&
                 preEndR !== undefined) {
                 renderCtx.beginPath();
                 renderCtx.moveTo(-1, preEndR + offsetTop + bodrder05);
@@ -198,21 +196,20 @@ var Canvas = /** @class */ (function () {
                 renderCtx.stroke();
             }
             preEndR = end_r;
-            (_j = (_h = this.sheetCtx.hooks).afterRenderRowHeaderCell) === null || _j === void 0 ? void 0 : _j.call(_h, "".concat(r + 1), r, start_r + offsetTop + firstOffset, this.sheetCtx.rowHeaderWidth - 1, end_r - start_r + 1 + lastOffset - firstOffset, renderCtx);
+            this.sheetCtx.hooks.afterRenderRowHeaderCell?.(`${r + 1}`, r, start_r + offsetTop + firstOffset, this.sheetCtx.rowHeaderWidth - 1, end_r - start_r + 1 + lastOffset - firstOffset, renderCtx);
         }
         // Must be restored twice, otherwise it will be enlarged under window.devicePixelRatio = 1.5
         renderCtx.restore();
         renderCtx.restore();
-    };
-    Canvas.prototype.drawColumnHeader = function (scrollWidth, drawWidth, offsetLeft) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+    }
+    drawColumnHeader(scrollWidth, drawWidth, offsetLeft) {
         if (drawWidth === undefined) {
-            drawWidth = this.sheetCtx.luckysheetTableContentHW[0];
+            [drawWidth] = this.sheetCtx.luckysheetTableContentHW;
         }
         if (offsetLeft === undefined) {
             offsetLeft = this.sheetCtx.rowHeaderWidth;
         }
-        var renderCtx = this.canvasElement.getContext("2d");
+        const renderCtx = this.canvasElement.getContext("2d");
         if (!renderCtx)
             return;
         renderCtx.save();
@@ -222,8 +219,8 @@ var Canvas = /** @class */ (function () {
         // @ts-ignore
         renderCtx.textBaseline = defaultStyle.textBaseline; // 基准线 垂直居中
         renderCtx.fillStyle = defaultStyle.fillStyle;
-        var dataset_col_st;
-        var dataset_col_ed;
+        let dataset_col_st;
+        let dataset_col_ed;
         dataset_col_st = _.sortedIndex(this.sheetCtx.visibledatacolumn, scrollWidth);
         dataset_col_ed = _.sortedIndex(this.sheetCtx.visibledatacolumn, scrollWidth + drawWidth);
         if (dataset_col_st === -1) {
@@ -236,11 +233,11 @@ var Canvas = /** @class */ (function () {
         renderCtx.beginPath();
         renderCtx.rect(offsetLeft - 1, 0, drawWidth, this.sheetCtx.columnHeaderHeight - 1);
         renderCtx.clip();
-        var end_c;
-        var start_c;
-        var bodrder05 = 0.5; // Default 0.5
-        var preEndC;
-        for (var c = dataset_col_st; c <= dataset_col_ed; c += 1) {
+        let end_c;
+        let start_c;
+        const bodrder05 = 0.5; // Default 0.5
+        let preEndC;
+        for (let c = dataset_col_st; c <= dataset_col_ed; c += 1) {
             if (c === 0) {
                 start_c = -scrollWidth;
             }
@@ -248,21 +245,21 @@ var Canvas = /** @class */ (function () {
                 start_c = this.sheetCtx.visibledatacolumn[c - 1] - scrollWidth;
             }
             end_c = this.sheetCtx.visibledatacolumn[c] - scrollWidth;
-            var abc = indexToColumnChar(c);
+            const abc = indexToColumnChar(c);
             // 列标题单元格渲染前触发，return false 则不渲染该单元格
-            if (((_b = (_a = this.sheetCtx.hooks).beforeRenderColumnHeaderCell) === null || _b === void 0 ? void 0 : _b.call(_a, abc, c, start_c + offsetLeft - 1, end_c - start_c, this.sheetCtx.columnHeaderHeight - 1, renderCtx)) === false) {
+            if (this.sheetCtx.hooks.beforeRenderColumnHeaderCell?.(abc, c, start_c + offsetLeft - 1, end_c - start_c, this.sheetCtx.columnHeaderHeight - 1, renderCtx) === false) {
                 continue;
             }
-            if (((_d = (_c = this.sheetCtx.config) === null || _c === void 0 ? void 0 : _c.colhidden) === null || _d === void 0 ? void 0 : _d[c]) == null) {
+            if (this.sheetCtx.config?.colhidden?.[c] == null) {
                 renderCtx.fillStyle = "#ffffff";
                 renderCtx.fillRect(start_c + offsetLeft - 1, 0, end_c - start_c, this.sheetCtx.columnHeaderHeight - 1);
                 renderCtx.fillStyle = "#000000";
                 // 列标题栏序列号
                 renderCtx.save(); // save scale before draw text
                 renderCtx.scale(this.sheetCtx.zoomRatio, this.sheetCtx.zoomRatio);
-                var textMetrics = getMeasureText(abc, renderCtx, this.sheetCtx);
-                var horizonAlignPos = Math.round(start_c + (end_c - start_c) / 2 + offsetLeft - textMetrics.width / 2);
-                var verticalAlignPos = Math.round(this.sheetCtx.columnHeaderHeight / 2);
+                const textMetrics = getMeasureText(abc, renderCtx, this.sheetCtx);
+                const horizonAlignPos = Math.round(start_c + (end_c - start_c) / 2 + offsetLeft - textMetrics.width / 2);
+                const verticalAlignPos = Math.round(this.sheetCtx.columnHeaderHeight / 2);
                 renderCtx.fillText(abc, horizonAlignPos / this.sheetCtx.zoomRatio, verticalAlignPos / this.sheetCtx.zoomRatio);
                 renderCtx.restore(); // restore scale after draw text
             }
@@ -288,7 +285,7 @@ var Canvas = /** @class */ (function () {
                 renderCtx.closePath();
                 renderCtx.stroke();
             }
-            if (((_f = (_e = this.sheetCtx.config) === null || _e === void 0 ? void 0 : _e.colhidden) === null || _f === void 0 ? void 0 : _f[c - 1]) != null &&
+            if (this.sheetCtx.config?.colhidden?.[c - 1] != null &&
                 preEndC !== undefined) {
                 renderCtx.beginPath();
                 renderCtx.moveTo(preEndC + offsetLeft + bodrder05, 0);
@@ -303,28 +300,24 @@ var Canvas = /** @class */ (function () {
             renderCtx.stroke();
             renderCtx.closePath();
             preEndC = end_c;
-            (_h = (_g = this.sheetCtx.hooks).afterRenderColumnHeaderCell) === null || _h === void 0 ? void 0 : _h.call(_g, abc, c, start_c + offsetLeft - 1, end_c - start_c, this.sheetCtx.columnHeaderHeight - 1, renderCtx);
+            this.sheetCtx.hooks.afterRenderColumnHeaderCell?.(abc, c, start_c + offsetLeft - 1, end_c - start_c, this.sheetCtx.columnHeaderHeight - 1, renderCtx);
         }
         // Must be restored twice, otherwise it will be enlarged under window.devicePixelRatio = 1.5
         renderCtx.restore();
         renderCtx.restore();
-    };
-    Canvas.prototype.drawMain = function (_a) {
-        var _b;
-        var _this = this;
-        var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
-        var scrollWidth = _a.scrollWidth, scrollHeight = _a.scrollHeight, drawWidth = _a.drawWidth, drawHeight = _a.drawHeight, offsetLeft = _a.offsetLeft, offsetTop = _a.offsetTop, columnOffsetCell = _a.columnOffsetCell, rowOffsetCell = _a.rowOffsetCell, clear = _a.clear;
-        var flowdata = getFlowdata(this.sheetCtx);
+    }
+    drawMain({ scrollWidth, scrollHeight, drawWidth, drawHeight, offsetLeft, offsetTop, columnOffsetCell, rowOffsetCell, clear, }) {
+        const flowdata = getFlowdata(this.sheetCtx);
         if (_.isNil(flowdata)) {
             return;
         }
         clearTimeout(this.measureTextCacheTimeOut);
         // 参数未定义处理
         if (drawWidth === undefined) {
-            drawWidth = this.sheetCtx.luckysheetTableContentHW[0];
+            [drawWidth] = this.sheetCtx.luckysheetTableContentHW;
         }
         if (drawHeight === undefined) {
-            _b = this.sheetCtx.luckysheetTableContentHW, drawHeight = _b[1];
+            [, drawHeight] = this.sheetCtx.luckysheetTableContentHW;
         }
         if (offsetLeft === undefined) {
             offsetLeft = this.sheetCtx.rowHeaderWidth;
@@ -357,7 +350,7 @@ var Canvas = /** @class */ (function () {
         //       .getContext("2d");
         //   }
         // }
-        var renderCtx = this.canvasElement.getContext("2d");
+        const renderCtx = this.canvasElement.getContext("2d");
         if (!renderCtx)
             return;
         renderCtx.save();
@@ -366,10 +359,10 @@ var Canvas = /** @class */ (function () {
             renderCtx.clearRect(0, 0, this.sheetCtx.luckysheetTableContentHW[0], this.sheetCtx.luckysheetTableContentHW[1]);
         }
         // 表格渲染区域, 起止行列index
-        var rowStart;
-        var rowEnd;
-        var colStart;
-        var colEnd;
+        let rowStart;
+        let rowEnd;
+        let colStart;
+        let colEnd;
         rowStart = _.sortedIndex(this.sheetCtx.visibledatarow, scrollHeight);
         rowEnd = _.sortedIndex(this.sheetCtx.visibledatarow, scrollHeight + drawHeight);
         if (rowStart === -1) {
@@ -397,73 +390,73 @@ var Canvas = /** @class */ (function () {
             colEnd = this.sheetCtx.visibledatacolumn.length - 1;
         }
         // 表格渲染区域 起止行列坐标
-        var rowEndY = this.sheetCtx.visibledatarow[rowEnd];
-        var colEndX = this.sheetCtx.visibledatacolumn[colEnd];
+        const rowEndY = this.sheetCtx.visibledatarow[rowEnd];
+        const colEndX = this.sheetCtx.visibledatacolumn[colEnd];
         // 表格canvas 初始化处理
         renderCtx.fillStyle = "#ffffff";
         renderCtx.fillRect(offsetLeft - 1, offsetTop - 1, colEndX - scrollWidth, rowEndY - scrollHeight);
         renderCtx.font = defaultFont(this.sheetCtx.defaultFontSize);
         renderCtx.fillStyle = defaultStyle.fillStyle;
         // 表格渲染区域 非空单元格行列 起止坐标
-        var cellupdate = [];
-        var mergeCache = {};
-        var borderOffset = {};
-        var bodrder05 = 0.5; // Default 0.5
-        (_d = (_c = this.sheetCtx.hooks).beforeRenderCellArea) === null || _d === void 0 ? void 0 : _d.call(_c, flowdata, renderCtx);
-        for (var r = rowStart; r <= rowEnd; r += 1) {
-            var startY = void 0;
+        const cellupdate = [];
+        const mergeCache = {};
+        const borderOffset = {};
+        const bodrder05 = 0.5; // Default 0.5
+        this.sheetCtx.hooks.beforeRenderCellArea?.(flowdata, renderCtx);
+        for (let r = rowStart; r <= rowEnd; r += 1) {
+            let startY;
             if (r === 0) {
                 startY = -scrollHeight - 1;
             }
             else {
                 startY = this.sheetCtx.visibledatarow[r - 1] - scrollHeight - 1;
             }
-            var endY = this.sheetCtx.visibledatarow[r] - scrollHeight;
-            if (((_f = (_e = this.sheetCtx.config) === null || _e === void 0 ? void 0 : _e.rowhidden) === null || _f === void 0 ? void 0 : _f[r]) != null) {
+            const endY = this.sheetCtx.visibledatarow[r] - scrollHeight;
+            if (this.sheetCtx.config?.rowhidden?.[r] != null) {
                 continue;
             }
-            for (var c = colStart; c <= colEnd; c += 1) {
-                var startX = void 0;
+            for (let c = colStart; c <= colEnd; c += 1) {
+                let startX;
                 if (c === 0) {
                     startX = -scrollWidth;
                 }
                 else {
                     startX = this.sheetCtx.visibledatacolumn[c - 1] - scrollWidth;
                 }
-                var endX = this.sheetCtx.visibledatacolumn[c] - scrollWidth;
-                if (((_h = (_g = this.sheetCtx.config) === null || _g === void 0 ? void 0 : _g.colhidden) === null || _h === void 0 ? void 0 : _h[c]) != null) {
+                const endX = this.sheetCtx.visibledatacolumn[c] - scrollWidth;
+                if (this.sheetCtx.config?.colhidden?.[c] != null) {
                     continue;
                 }
-                var firstcolumnlen = this.sheetCtx.defaultcollen;
-                if ((_k = (_j = this.sheetCtx.config) === null || _j === void 0 ? void 0 : _j.columnlen) === null || _k === void 0 ? void 0 : _k[c]) {
+                let firstcolumnlen = this.sheetCtx.defaultcollen;
+                if (this.sheetCtx.config?.columnlen?.[c]) {
                     firstcolumnlen = this.sheetCtx.config.columnlen[c];
                 }
-                if ((_l = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r]) === null || _l === void 0 ? void 0 : _l[c]) {
-                    var value = flowdata[r][c];
-                    if (value === null || value === void 0 ? void 0 : value.mc) {
-                        borderOffset["".concat(r, "_").concat(c)] = {
-                            startY: startY,
-                            startX: startX,
-                            endY: endY,
-                            endX: endX,
+                if (flowdata?.[r]?.[c]) {
+                    const value = flowdata[r][c];
+                    if (value?.mc) {
+                        borderOffset[`${r}_${c}`] = {
+                            startY,
+                            startX,
+                            endY,
+                            endX,
                         };
                         if ("rs" in value.mc) {
-                            var key = "r".concat(r, "c").concat(c);
+                            const key = `r${r}c${c}`;
                             mergeCache[key] = cellupdate.length;
                         }
                         else {
-                            var key = "r".concat(value.mc.r, "c").concat(value.mc.c);
-                            var margeMain = cellupdate[mergeCache[key]];
+                            const key = `r${value.mc.r}c${value.mc.c}`;
+                            const margeMain = cellupdate[mergeCache[key]];
                             if (_.isNil(margeMain)) {
                                 mergeCache[key] = cellupdate.length;
                                 cellupdate.push({
-                                    r: r,
-                                    c: c,
-                                    startX: startX,
-                                    startY: startY,
-                                    endY: endY,
-                                    endX: endX,
-                                    firstcolumnlen: firstcolumnlen,
+                                    r,
+                                    c,
+                                    startX,
+                                    startY,
+                                    endY,
+                                    endX,
+                                    firstcolumnlen,
                                 });
                             }
                             else {
@@ -480,19 +473,19 @@ var Canvas = /** @class */ (function () {
                     }
                 }
                 cellupdate.push({
-                    r: r,
-                    c: c,
-                    startY: startY,
-                    startX: startX,
-                    endY: endY,
-                    endX: endX,
-                    firstcolumnlen: firstcolumnlen,
+                    r,
+                    c,
+                    startY,
+                    startX,
+                    endY,
+                    endX,
+                    firstcolumnlen,
                 });
-                borderOffset["".concat(r, "_").concat(c)] = {
-                    startY: startY,
-                    startX: startX,
-                    endY: endY,
-                    endX: endX,
+                borderOffset[`${r}_${c}`] = {
+                    startY,
+                    startX,
+                    endY,
+                    endX,
                 };
             }
         }
@@ -502,24 +495,24 @@ var Canvas = /** @class */ (function () {
         //     getSheetIndex(this.sheetCtx.currentSheetId)
         //   ].dynamicArray
         // );
-        var dynamicArrayCompute = {};
+        const dynamicArrayCompute = {};
         // 交替颜色计算
         // const afCompute = alternateformat.getComputeMap();
-        var afCompute = {};
+        const afCompute = {};
         // 条件格式计算
         // const cfCompute = conditionformat.getComputeMap();
-        var cfCompute = getComputeMap(this.sheetCtx);
+        const cfCompute = getComputeMap(this.sheetCtx);
         // 表格渲染区域 溢出单元格配置保存
-        var cellOverflowMap = this.getCellOverflowMap(renderCtx, colStart, colEnd, rowStart, rowEnd);
-        var mcArr = [];
-        for (var cud = 0; cud < cellupdate.length; cud += 1) {
-            var item = cellupdate[cud];
-            var r = item.r;
-            var c = item.c;
-            var startY = item.startY;
-            var startX = item.startX;
-            var endY = item.endY;
-            var endX = item.endX;
+        const cellOverflowMap = this.getCellOverflowMap(renderCtx, colStart, colEnd, rowStart, rowEnd);
+        const mcArr = [];
+        for (let cud = 0; cud < cellupdate.length; cud += 1) {
+            const item = cellupdate[cud];
+            const { r } = item;
+            const { c } = item;
+            const { startY } = item;
+            const { startX } = item;
+            const { endY } = item;
+            const { endX } = item;
             if (_.isNil(flowdata[r])) {
                 continue;
             }
@@ -528,9 +521,9 @@ var Canvas = /** @class */ (function () {
                 this.nullCellRender(r, c, startY, startX, endY, endX, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05);
             }
             else {
-                var cell = flowdata[r][c];
-                var value = null;
-                if (cell === null || cell === void 0 ? void 0 : cell.mc) {
+                const cell = flowdata[r][c];
+                let value = null;
+                if (cell?.mc) {
                     mcArr.push(cellupdate[cud]);
                     // continue;
                 }
@@ -557,35 +550,35 @@ var Canvas = /** @class */ (function () {
                     // );
                 }
                 else {
-                    if ("".concat(r, "_").concat(c) in dynamicArrayCompute) {
+                    if (`${r}_${c}` in dynamicArrayCompute) {
                         // 动态数组公式
-                        value = dynamicArrayCompute["".concat(r, "_").concat(c)].v;
+                        value = dynamicArrayCompute[`${r}_${c}`].v;
                     }
                     this.cellRender(r, c, startY, startX, endY, endX, value, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05);
                 }
             }
         }
         // 合并单元格再处理
-        for (var m = 0; m < mcArr.length; m += 1) {
-            var item = mcArr[m];
-            var r = item.r;
-            var c = item.c;
-            var startY = item.startY;
-            var startX = item.startX;
-            var endY = item.endY - 1;
-            var endX = item.endX - 1;
-            var cell = flowdata[r][c];
+        for (let m = 0; m < mcArr.length; m += 1) {
+            const item = mcArr[m];
+            let { r } = item;
+            let { c } = item;
+            let { startY } = item;
+            let { startX } = item;
+            let endY = item.endY - 1;
+            let endX = item.endX - 1;
+            const cell = flowdata[r][c];
             if (!cell)
                 continue;
-            var value = null;
-            var mergeMaindata = cell.mc;
+            let value = null;
+            const mergeMaindata = cell.mc;
             if (!mergeMaindata)
                 continue;
             value = getRealCellValue(mergeMaindata.r, mergeMaindata.c, flowdata);
             r = mergeMaindata.r;
             c = mergeMaindata.c;
-            var mainCell = flowdata[r][c];
-            if (!((_m = mainCell === null || mainCell === void 0 ? void 0 : mainCell.mc) === null || _m === void 0 ? void 0 : _m.rs) || !((_o = mainCell.mc) === null || _o === void 0 ? void 0 : _o.cs)) {
+            const mainCell = flowdata[r][c];
+            if (!mainCell?.mc?.rs || !mainCell.mc?.cs) {
                 continue;
             }
             if (c === 0) {
@@ -624,9 +617,9 @@ var Canvas = /** @class */ (function () {
                 // );
             }
             else {
-                if ("".concat(r, "_").concat(c) in dynamicArrayCompute) {
+                if (`${r}_${c}` in dynamicArrayCompute) {
                     // 动态数组公式
-                    value = dynamicArrayCompute["".concat(r, "_").concat(c)].v;
+                    value = dynamicArrayCompute[`${r}_${c}`].v;
                 }
                 this.cellRender(r, c, startY, startX, endY, endX, value, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05, true);
             }
@@ -740,13 +733,13 @@ var Canvas = /** @class */ (function () {
         }
         */
         // 边框单独渲染
-        if (((_r = (_q = (_p = this.sheetCtx.config) === null || _p === void 0 ? void 0 : _p.borderInfo) === null || _q === void 0 ? void 0 : _q.length) !== null && _r !== void 0 ? _r : 0) > 0) {
-            var borderSlashRender_1 = function (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) {
-                var linetype = style;
-                var moveX = startX - 2 + bodrder05 + _offsetLeft;
-                var moveY = startY + _offsetTop;
-                var toX = endX - 2 + bodrder05 + _offsetLeft;
-                var toY = endY - 2 + bodrder05 + _offsetTop;
+        if ((this.sheetCtx.config?.borderInfo?.length ?? 0) > 0) {
+            const borderSlashRender = (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) => {
+                const linetype = style;
+                const moveX = startX - 2 + bodrder05 + _offsetLeft;
+                const moveY = startY + _offsetTop;
+                const toX = endX - 2 + bodrder05 + _offsetLeft;
+                const toY = endY - 2 + bodrder05 + _offsetTop;
                 canvas.save();
                 setLineDash(canvas, linetype, "v", moveX, moveY, toX, toY);
                 canvas.strokeStyle = color;
@@ -754,12 +747,12 @@ var Canvas = /** @class */ (function () {
                 canvas.closePath();
                 canvas.restore();
             };
-            var borderLeftRender_1 = function (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) {
-                var linetype = style;
-                var moveX = startX - 2 + bodrder05 + _offsetLeft;
-                var moveY = startY + _offsetTop - 1;
-                var toX = startX - 2 + bodrder05 + _offsetLeft;
-                var toY = endY - 2 + bodrder05 + _offsetTop;
+            const borderLeftRender = (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) => {
+                const linetype = style;
+                const moveX = startX - 2 + bodrder05 + _offsetLeft;
+                const moveY = startY + _offsetTop - 1;
+                const toX = startX - 2 + bodrder05 + _offsetLeft;
+                const toY = endY - 2 + bodrder05 + _offsetTop;
                 canvas.save();
                 setLineDash(canvas, linetype, "v", moveX, moveY, toX, toY);
                 canvas.strokeStyle = color;
@@ -767,12 +760,12 @@ var Canvas = /** @class */ (function () {
                 canvas.closePath();
                 canvas.restore();
             };
-            var borderRightRender_1 = function (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) {
-                var linetype = style;
-                var moveX = endX - 2 + bodrder05 + _offsetLeft;
-                var moveY = startY + _offsetTop - 1;
-                var toX = endX - 2 + bodrder05 + _offsetLeft;
-                var toY = endY - 2 + bodrder05 + _offsetTop;
+            const borderRightRender = (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) => {
+                const linetype = style;
+                const moveX = endX - 2 + bodrder05 + _offsetLeft;
+                const moveY = startY + _offsetTop - 1;
+                const toX = endX - 2 + bodrder05 + _offsetLeft;
+                const toY = endY - 2 + bodrder05 + _offsetTop;
                 canvas.save();
                 setLineDash(canvas, linetype, "v", moveX, moveY, toX, toY);
                 canvas.strokeStyle = color;
@@ -780,12 +773,12 @@ var Canvas = /** @class */ (function () {
                 canvas.closePath();
                 canvas.restore();
             };
-            var borderBottomRender_1 = function (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) {
-                var linetype = style;
-                var moveX = startX - 2 + bodrder05 + _offsetLeft;
-                var moveY = endY - 2 + bodrder05 + _offsetTop;
-                var toX = endX - 2 + bodrder05 + _offsetLeft;
-                var toY = endY - 2 + bodrder05 + _offsetTop;
+            const borderBottomRender = (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) => {
+                const linetype = style;
+                const moveX = startX - 2 + bodrder05 + _offsetLeft;
+                const moveY = endY - 2 + bodrder05 + _offsetTop;
+                const toX = endX - 2 + bodrder05 + _offsetLeft;
+                const toY = endY - 2 + bodrder05 + _offsetTop;
                 canvas.save();
                 setLineDash(canvas, linetype, "h", moveX, moveY, toX, toY);
                 canvas.strokeStyle = color;
@@ -793,12 +786,12 @@ var Canvas = /** @class */ (function () {
                 canvas.closePath();
                 canvas.restore();
             };
-            var borderTopRender_1 = function (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) {
-                var linetype = style;
-                var moveX = startX - 2 + bodrder05 + _offsetLeft;
-                var moveY = startY - 1 + bodrder05 + _offsetTop;
-                var toX = endX - 2 + bodrder05 + _offsetLeft;
-                var toY = startY - 1 + bodrder05 + _offsetTop;
+            const borderTopRender = (style, color, startY, startX, endY, endX, _offsetLeft, _offsetTop, canvas) => {
+                const linetype = style;
+                const moveX = startX - 2 + bodrder05 + _offsetLeft;
+                const moveY = startY - 1 + bodrder05 + _offsetTop;
+                const toX = endX - 2 + bodrder05 + _offsetLeft;
+                const toY = startY - 1 + bodrder05 + _offsetTop;
                 canvas.save();
                 setLineDash(canvas, linetype, "h", moveX, moveY, toX, toY);
                 canvas.strokeStyle = color;
@@ -806,49 +799,49 @@ var Canvas = /** @class */ (function () {
                 canvas.closePath();
                 canvas.restore();
             };
-            var borderInfoCompute_1 = getBorderInfoComputeRange(this.sheetCtx, rowStart, rowEnd, colStart, colEnd);
-            Object.keys(borderInfoCompute_1).forEach(function (x) {
-                var bdRow = Number(x.substring(0, x.indexOf("_")));
-                var bdCol = Number(x.substring(x.indexOf("_") + 1));
-                if (borderOffset["".concat(bdRow, "_").concat(bdCol)]) {
-                    var startY = borderOffset["".concat(bdRow, "_").concat(bdCol)].startY;
-                    var startX = borderOffset["".concat(bdRow, "_").concat(bdCol)].startX;
-                    var endY = borderOffset["".concat(bdRow, "_").concat(bdCol)].endY;
-                    var endX = borderOffset["".concat(bdRow, "_").concat(bdCol)].endX;
-                    var cellOverflow_colInObj = _this.cellOverflow_colIn(cellOverflowMap, bdRow, bdCol, colStart, colEnd);
-                    var borderSlash = borderInfoCompute_1[x].s;
+            const borderInfoCompute = getBorderInfoComputeRange(this.sheetCtx, rowStart, rowEnd, colStart, colEnd);
+            Object.keys(borderInfoCompute).forEach((x) => {
+                const bdRow = Number(x.substring(0, x.indexOf("_")));
+                const bdCol = Number(x.substring(x.indexOf("_") + 1));
+                if (borderOffset[`${bdRow}_${bdCol}`]) {
+                    const { startY } = borderOffset[`${bdRow}_${bdCol}`];
+                    const { startX } = borderOffset[`${bdRow}_${bdCol}`];
+                    const { endY } = borderOffset[`${bdRow}_${bdCol}`];
+                    const { endX } = borderOffset[`${bdRow}_${bdCol}`];
+                    const cellOverflow_colInObj = this.cellOverflow_colIn(cellOverflowMap, bdRow, bdCol, colStart, colEnd);
+                    const borderSlash = borderInfoCompute[x].s;
                     if (borderSlash &&
                         (!cellOverflow_colInObj.colIn ||
                             cellOverflow_colInObj.stc === bdCol)) {
-                        var mergeMap = _this.sheetCtx.config.merge;
-                        var mergeCell = mergeMap === null || mergeMap === void 0 ? void 0 : mergeMap["".concat(bdRow, "_").concat(bdCol)];
-                        var mergeCellEndX = void 0;
-                        var mergeCellEndY = void 0;
+                        const mergeMap = this.sheetCtx.config.merge;
+                        const mergeCell = mergeMap?.[`${bdRow}_${bdCol}`];
+                        let mergeCellEndX;
+                        let mergeCellEndY;
                         if (mergeCell) {
-                            var mergeCellOffset = borderOffset["".concat(bdRow + mergeCell.rs - 1, "_").concat(bdCol + mergeCell.cs - 1)];
+                            const mergeCellOffset = borderOffset[`${bdRow + mergeCell.rs - 1}_${bdCol + mergeCell.cs - 1}`];
                             mergeCellEndX = mergeCellOffset.endX;
                             mergeCellEndY = mergeCellOffset.endY;
                         }
-                        borderSlashRender_1(borderSlash.style, borderSlash.color, startY, startX, mergeCellEndY !== null && mergeCellEndY !== void 0 ? mergeCellEndY : endY, mergeCellEndX !== null && mergeCellEndX !== void 0 ? mergeCellEndX : endX, offsetLeft, offsetTop, renderCtx);
+                        borderSlashRender(borderSlash.style, borderSlash.color, startY, startX, mergeCellEndY ?? endY, mergeCellEndX ?? endX, offsetLeft, offsetTop, renderCtx);
                     }
-                    var borderLeft = borderInfoCompute_1[x].l;
+                    const borderLeft = borderInfoCompute[x].l;
                     if (borderLeft &&
                         (!cellOverflow_colInObj.colIn ||
                             cellOverflow_colInObj.stc === bdCol)) {
-                        borderLeftRender_1(borderLeft.style, borderLeft.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
+                        borderLeftRender(borderLeft.style, borderLeft.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
                     }
-                    var borderRight = borderInfoCompute_1[x].r;
+                    const borderRight = borderInfoCompute[x].r;
                     if (borderRight &&
                         (!cellOverflow_colInObj.colIn || cellOverflow_colInObj.colLast)) {
-                        borderRightRender_1(borderRight.style, borderRight.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
+                        borderRightRender(borderRight.style, borderRight.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
                     }
-                    var borderTop = borderInfoCompute_1[x].t;
+                    const borderTop = borderInfoCompute[x].t;
                     if (borderTop) {
-                        borderTopRender_1(borderTop.style, borderTop.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
+                        borderTopRender(borderTop.style, borderTop.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
                     }
-                    var borderBottom = borderInfoCompute_1[x].b;
+                    const borderBottom = borderInfoCompute[x].b;
                     if (borderBottom) {
-                        borderBottomRender_1(borderBottom.style, borderBottom.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
+                        borderBottomRender(borderBottom.style, borderBottom.color, startY, startX, endY, endX, offsetLeft, offsetTop, renderCtx);
                     }
                 }
             });
@@ -858,21 +851,20 @@ var Canvas = /** @class */ (function () {
             renderCtx.clearRect(colEndX - scrollWidth + offsetLeft - 1, offsetTop - 1, this.sheetCtx.ch_width - this.sheetCtx.visibledatacolumn[colEnd], rowEndY - scrollHeight);
         }
         renderCtx.restore();
-        this.measureTextCacheTimeOut = setTimeout(function () {
+        this.measureTextCacheTimeOut = setTimeout(() => {
             clearMeasureTextCache();
-            _this.cellOverflowMapCache = {};
+            this.cellOverflowMapCache = {};
         }, 100);
-    };
+    }
     // 获取表格渲染范围 溢出单元格
-    Canvas.prototype.getCellOverflowMap = function (canvas, colStart, colEnd, rowStart, rowEnd) {
-        var _a, _b;
-        var flowdata = getFlowdata(this.sheetCtx);
-        var map = {};
-        var data = flowdata;
+    getCellOverflowMap(canvas, colStart, colEnd, rowStart, rowEnd) {
+        const flowdata = getFlowdata(this.sheetCtx);
+        const map = {};
+        const data = flowdata;
         if (!data) {
             return map;
         }
-        for (var r = rowStart; r <= rowEnd; r += 1) {
+        for (let r = rowStart; r <= rowEnd; r += 1) {
             if (_.isNil(data[r])) {
                 continue;
             }
@@ -880,10 +872,10 @@ var Canvas = /** @class */ (function () {
                 map[r] = this.cellOverflowMapCache[r];
                 continue;
             }
-            var hasCellOver = false;
-            for (var c = 0; c < data[r].length; c += 1) {
-                var cell = data[r][c];
-                if (((_b = (_a = this.sheetCtx.config) === null || _a === void 0 ? void 0 : _a.colhidden) === null || _b === void 0 ? void 0 : _b[c]) != null) {
+            let hasCellOver = false;
+            for (let c = 0; c < data[r].length; c += 1) {
+                const cell = data[r][c];
+                if (this.sheetCtx.config?.colhidden?.[c] != null) {
                     continue;
                 }
                 if (cell &&
@@ -891,25 +883,25 @@ var Canvas = /** @class */ (function () {
                     _.isNil(cell.mc) &&
                     cell.tb === "1") {
                     // 水平对齐
-                    var horizonAlign = normalizedAttr(data, r, c, "ht");
-                    var textMetricsObj = getCellTextInfo(cell, canvas, this.sheetCtx, {
-                        r: r,
-                        c: c,
+                    const horizonAlign = normalizedAttr(data, r, c, "ht");
+                    const textMetricsObj = getCellTextInfo(cell, canvas, this.sheetCtx, {
+                        r,
+                        c,
                     });
-                    var textMetrics = 0;
+                    let textMetrics = 0;
                     if (textMetricsObj) {
                         textMetrics = textMetricsObj.textWidthAll;
                     }
                     // canvas.measureText(value).width;
-                    var startX = c - 1 < 0 ? 0 : this.sheetCtx.visibledatacolumn[c - 1];
-                    var endX = this.sheetCtx.visibledatacolumn[c];
-                    var stc = void 0;
-                    var edc = void 0;
+                    const startX = c - 1 < 0 ? 0 : this.sheetCtx.visibledatacolumn[c - 1];
+                    const endX = this.sheetCtx.visibledatacolumn[c];
+                    let stc;
+                    let edc;
                     if (endX - startX < textMetrics) {
                         if (horizonAlign === "0") {
                             // 居中对齐
-                            var trace_forward = this.cellOverflow_trace(r, c, c - 1, "forward", horizonAlign, textMetrics);
-                            var trace_backward = this.cellOverflow_trace(r, c, c + 1, "backward", horizonAlign, textMetrics);
+                            const trace_forward = this.cellOverflow_trace(r, c, c - 1, "forward", horizonAlign, textMetrics);
+                            const trace_backward = this.cellOverflow_trace(r, c, c + 1, "backward", horizonAlign, textMetrics);
                             if (trace_forward.success) {
                                 stc = trace_forward.c;
                             }
@@ -925,7 +917,7 @@ var Canvas = /** @class */ (function () {
                         }
                         else if (horizonAlign === "1") {
                             // 左对齐
-                            var trace = this.cellOverflow_trace(r, c, c + 1, "backward", horizonAlign, textMetrics);
+                            const trace = this.cellOverflow_trace(r, c, c + 1, "backward", horizonAlign, textMetrics);
                             stc = c;
                             if (trace.success) {
                                 edc = trace.c;
@@ -936,7 +928,7 @@ var Canvas = /** @class */ (function () {
                         }
                         else if (horizonAlign === "2") {
                             // 右对齐
-                            var trace = this.cellOverflow_trace(r, c, c - 1, "forward", horizonAlign, textMetrics);
+                            const trace = this.cellOverflow_trace(r, c, c - 1, "forward", horizonAlign, textMetrics);
                             edc = c;
                             if (trace.success) {
                                 stc = trace.c;
@@ -951,10 +943,10 @@ var Canvas = /** @class */ (function () {
                         edc = c;
                     }
                     if ((stc <= colEnd || edc >= colStart) && stc < edc) {
-                        var item = {
-                            r: r,
-                            stc: stc,
-                            edc: edc,
+                        const item = {
+                            r,
+                            stc,
+                            edc,
                         };
                         if (_.isNil(map[r])) {
                             map[r] = {};
@@ -969,19 +961,17 @@ var Canvas = /** @class */ (function () {
             }
         }
         return map;
-    };
+    }
     // 空白单元格渲染
-    Canvas.prototype.nullCellRender = function (r, c, startY, startX, endY, endX, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05, isMerge) {
-        var _a, _b, _c, _d, _e, _f;
-        if (isMerge === void 0) { isMerge = false; }
+    nullCellRender(r, c, startY, startX, endY, endX, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05, isMerge = false) {
         // const checksAF = alternateformat.checksAF(r, c, afCompute); // 交替颜色
-        var checksCF = checkCF(r, c, cfCompute); // 条件格式
-        var flowdata = getFlowdata(this.sheetCtx);
+        const checksCF = checkCF(r, c, cfCompute); // 条件格式
+        const flowdata = getFlowdata(this.sheetCtx);
         if (!flowdata)
             return;
-        var borderfix = getBorderFix();
+        const borderfix = getBorderFix();
         // // 背景色
-        var fillStyle = normalizedAttr(flowdata, r, c, "bg");
+        let fillStyle = normalizedAttr(flowdata, r, c, "bg");
         // if (checksAF?.[1] {
         //   // 交替颜色
         //   fillStyle = checksAF[1];
@@ -1000,41 +990,41 @@ var Canvas = /** @class */ (function () {
         else {
             renderCtx.fillStyle = fillStyle;
         }
-        var cellsize = [
+        const cellsize = [
             startX + offsetLeft + borderfix[0],
             startY + offsetTop + borderfix[1],
             endX - startX + borderfix[2] - (isMerge ? 1 : 0),
             endY - startY + borderfix[3],
         ];
         // 单元格渲染前，考虑到合并单元格会再次渲染一遍，统一放到这里
-        if (((_b = (_a = this.sheetCtx.hooks).beforeRenderCell) === null || _b === void 0 ? void 0 : _b.call(_a, flowdata[r][c], {
+        if (this.sheetCtx.hooks.beforeRenderCell?.(flowdata[r][c], {
             row: r,
             column: c,
             startX: cellsize[0],
             startY: cellsize[1],
             endX: cellsize[2] + cellsize[0],
             endY: cellsize[3] + cellsize[1],
-        }, renderCtx)) === false) {
+        }, renderCtx) === false) {
             return;
         }
         renderCtx.fillRect(cellsize[0], cellsize[1], cellsize[2], cellsize[3]);
-        if ("".concat(r, "_").concat(c) in dynamicArrayCompute) {
-            var value = dynamicArrayCompute["".concat(r, "_").concat(c)].v;
+        if (`${r}_${c}` in dynamicArrayCompute) {
+            const value = dynamicArrayCompute[`${r}_${c}`].v;
             renderCtx.fillStyle = "#000000";
             // 文本宽度和高度
-            var fontset = defaultFont(this.sheetCtx.defaultFontSize);
+            const fontset = defaultFont(this.sheetCtx.defaultFontSize);
             renderCtx.font = fontset;
             // 水平对齐 (默认为1，左对齐)
-            var horizonAlignPos = startX + 4 + offsetLeft;
+            const horizonAlignPos = startX + 4 + offsetLeft;
             // 垂直对齐 (默认为2，下对齐)
-            var verticalAlignPos = endY + offsetTop - 2;
+            const verticalAlignPos = endY + offsetTop - 2;
             renderCtx.textBaseline = "bottom";
             renderCtx.fillText(_.isNil(value) ? "" : value, horizonAlignPos, verticalAlignPos);
         }
         // 若单元格有批注
-        if ((_d = (_c = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r]) === null || _c === void 0 ? void 0 : _c[c]) === null || _d === void 0 ? void 0 : _d.ps) {
-            var ps_w = 8 * this.sheetCtx.zoomRatio;
-            var ps_h = 8 * this.sheetCtx.zoomRatio;
+        if (flowdata?.[r]?.[c]?.ps) {
+            const ps_w = 8 * this.sheetCtx.zoomRatio;
+            const ps_h = 8 * this.sheetCtx.zoomRatio;
             renderCtx.beginPath();
             renderCtx.moveTo(endX + offsetLeft - 1 - ps_w, startY + offsetTop);
             renderCtx.lineTo(endX + offsetLeft - 1, startY + offsetTop);
@@ -1044,7 +1034,7 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         // 此单元格 与  溢出单元格关系
-        var cellOverflow_colInObj = this.cellOverflow_colIn(cellOverflowMap, r, c, colStart, colEnd);
+        const cellOverflow_colInObj = this.cellOverflow_colIn(cellOverflowMap, r, c, colStart, colEnd);
         // 此单元格 为 溢出单元格渲染范围最后一列，绘制溢出单元格内容
         if (cellOverflow_colInObj.colLast &&
             !_.isNil(cellOverflow_colInObj.rowIndex) &&
@@ -1081,7 +1071,7 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         // 单元格渲染后
-        (_f = (_e = this.sheetCtx.hooks).afterRenderCell) === null || _f === void 0 ? void 0 : _f.call(_e, flowdata[r][c], {
+        this.sheetCtx.hooks.afterRenderCell?.(flowdata[r][c], {
             row: r,
             column: c,
             startY: cellsize[1],
@@ -1089,30 +1079,28 @@ var Canvas = /** @class */ (function () {
             endY: cellsize[3] + cellsize[1],
             endX: cellsize[2] + cellsize[0],
         }, renderCtx);
-    };
-    Canvas.prototype.cellRender = function (r, c, startY, startX, endY, endX, value, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05, isMerge) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-        if (isMerge === void 0) { isMerge = false; }
-        var flowdata = getFlowdata(this.sheetCtx);
+    }
+    cellRender(r, c, startY, startX, endY, endX, value, renderCtx, afCompute, cfCompute, offsetLeft, offsetTop, dynamicArrayCompute, cellOverflowMap, colStart, colEnd, scrollHeight, scrollWidth, bodrder05, isMerge = false) {
+        const flowdata = getFlowdata(this.sheetCtx);
         if (!flowdata) {
             return;
         }
-        var cell = flowdata[r][c];
-        var cellWidth = endX - startX - 2;
-        var cellHeight = endY - startY - 2;
-        var space_width = 2;
-        var space_height = 2; // 宽高方向 间隙
+        const cell = flowdata[r][c];
+        const cellWidth = endX - startX - 2;
+        const cellHeight = endY - startY - 2;
+        const space_width = 2;
+        const space_height = 2; // 宽高方向 间隙
         // 水平对齐
-        var horizonAlign = Number(normalizedAttr(flowdata, r, c, "ht"));
+        const horizonAlign = Number(normalizedAttr(flowdata, r, c, "ht"));
         // 垂直对齐
-        var verticalAlign = Number(normalizedAttr(flowdata, r, c, "vt"));
+        const verticalAlign = Number(normalizedAttr(flowdata, r, c, "vt"));
         // 交替颜色
         // const checksAF = alternateformat.checksAF(r, c, afCompute);
-        var checksAF = {};
+        const checksAF = {};
         // 条件格式
-        var checksCF = checkCF(r, c, cfCompute);
+        const checksCF = checkCF(r, c, cfCompute);
         // 单元格 背景颜色
-        var fillStyle = normalizedAttr(flowdata, r, c, "bg");
+        let fillStyle = normalizedAttr(flowdata, r, c, "bg");
         // if (checksAF?.[1]) {
         //   // 若单元格有交替颜色 背景颜色
         //   fillStyle = checksAF[1];
@@ -1127,33 +1115,33 @@ var Canvas = /** @class */ (function () {
         else {
             renderCtx.fillStyle = fillStyle;
         }
-        var borderfix = getBorderFix();
-        var cellsize = [
+        const borderfix = getBorderFix();
+        const cellsize = [
             startX + offsetLeft + borderfix[0],
             startY + offsetTop + borderfix[1],
             endX - startX + borderfix[2] - (isMerge ? 1 : 0),
             endY - startY + borderfix[3],
         ];
         // 单元格渲染前，考虑到合并单元格会再次渲染一遍，统一放到这里
-        if (((_b = (_a = this.sheetCtx.hooks).beforeRenderCell) === null || _b === void 0 ? void 0 : _b.call(_a, flowdata[r][c], {
+        if (this.sheetCtx.hooks.beforeRenderCell?.(flowdata[r][c], {
             row: r,
             column: c,
             startY: cellsize[1],
             startX: cellsize[0],
             endY: cellsize[3] + cellsize[1],
             endX: cellsize[2] + cellsize[0],
-        }, renderCtx)) === false) {
+        }, renderCtx) === false) {
             return;
         }
         renderCtx.fillRect(cellsize[0], cellsize[1], cellsize[2], cellsize[3]);
         // const { dataVerification } = dataVerificationCtrl;
-        var index = getSheetIndex(this.sheetCtx, this.sheetCtx.currentSheetId);
-        var dataVerification = this.sheetCtx.luckysheetfile[index].dataVerification;
-        if ((dataVerification === null || dataVerification === void 0 ? void 0 : dataVerification["".concat(r, "_").concat(c)]) &&
-            !validateCellData(this.sheetCtx, dataVerification["".concat(r, "_").concat(c)], value)) {
+        const index = getSheetIndex(this.sheetCtx, this.sheetCtx.currentSheetId);
+        const { dataVerification } = this.sheetCtx.luckysheetfile[index];
+        if (dataVerification?.[`${r}_${c}`] &&
+            !validateCellData(this.sheetCtx, dataVerification[`${r}_${c}`], value)) {
             // 单元格左上角红色小三角标示
-            var dv_w = 5 * this.sheetCtx.zoomRatio;
-            var dv_h = 5 * this.sheetCtx.zoomRatio; // 红色小三角宽高
+            const dv_w = 5 * this.sheetCtx.zoomRatio;
+            const dv_h = 5 * this.sheetCtx.zoomRatio; // 红色小三角宽高
             renderCtx.beginPath();
             renderCtx.moveTo(startX + offsetLeft, startY + offsetTop);
             renderCtx.lineTo(startX + offsetLeft + dv_w, startY + offsetTop);
@@ -1163,9 +1151,9 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         // 若单元格有批注（单元格右上角红色小三角标示）
-        if (cell === null || cell === void 0 ? void 0 : cell.ps) {
-            var ps_w = 8 * this.sheetCtx.zoomRatio;
-            var ps_h = 8 * this.sheetCtx.zoomRatio; // 红色小三角宽高
+        if (cell?.ps) {
+            const ps_w = 8 * this.sheetCtx.zoomRatio;
+            const ps_h = 8 * this.sheetCtx.zoomRatio; // 红色小三角宽高
             renderCtx.beginPath();
             renderCtx.moveTo(endX + offsetLeft - ps_w, startY + offsetTop);
             renderCtx.lineTo(endX + offsetLeft, startY + offsetTop);
@@ -1175,9 +1163,9 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         // 若单元格强制为字符串，则显示绿色小三角
-        if ((cell === null || cell === void 0 ? void 0 : cell.qp) === 1 && isRealNum(cell === null || cell === void 0 ? void 0 : cell.v)) {
-            var ps_w = 6 * this.sheetCtx.zoomRatio;
-            var ps_h = 6 * this.sheetCtx.zoomRatio; // 红色小三角宽高
+        if (cell?.qp === 1 && isRealNum(cell?.v)) {
+            const ps_w = 6 * this.sheetCtx.zoomRatio;
+            const ps_h = 6 * this.sheetCtx.zoomRatio; // 红色小三角宽高
             renderCtx.beginPath();
             renderCtx.moveTo(startX + offsetLeft + ps_w - 1, startY + offsetTop);
             renderCtx.lineTo(startX + offsetLeft - 1, startY + offsetTop);
@@ -1187,9 +1175,9 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         // 溢出单元格
-        var cellOverflow_bd_r_render = true; // 溢出单元格右边框是否需要绘制
-        var cellOverflow_colInObj = this.cellOverflow_colIn(cellOverflowMap, r, c, colStart, colEnd);
-        if ((cell === null || cell === void 0 ? void 0 : cell.tb) === "1" && cellOverflow_colInObj.colIn) {
+        let cellOverflow_bd_r_render = true; // 溢出单元格右边框是否需要绘制
+        const cellOverflow_colInObj = this.cellOverflow_colIn(cellOverflowMap, r, c, colStart, colEnd);
+        if (cell?.tb === "1" && cellOverflow_colInObj.colIn) {
             // 此单元格 为 溢出单元格渲染范围最后一列，绘制溢出单元格内容
             if (cellOverflow_colInObj.colLast &&
                 !_.isNil(cellOverflow_colInObj.rowIndex) &&
@@ -1203,19 +1191,19 @@ var Canvas = /** @class */ (function () {
             }
         }
         // 数据验证 复选框
-        else if (((_c = dataVerification === null || dataVerification === void 0 ? void 0 : dataVerification["".concat(r, "_").concat(c)]) === null || _c === void 0 ? void 0 : _c.type) === "checkbox") {
-            var pos_x = startX + offsetLeft;
-            var pos_y = startY + offsetTop + 1;
+        else if (dataVerification?.[`${r}_${c}`]?.type === "checkbox") {
+            const pos_x = startX + offsetLeft;
+            const pos_y = startY + offsetTop + 1;
             renderCtx.save();
             renderCtx.beginPath();
             renderCtx.rect(pos_x, pos_y, cellWidth, cellHeight);
             renderCtx.clip();
             renderCtx.scale(this.sheetCtx.zoomRatio, this.sheetCtx.zoomRatio);
-            var measureText = getMeasureText(value, renderCtx, this.sheetCtx);
-            var textMetrics = measureText.width + 14;
-            var oneLineTextHeight = measureText.actualBoundingBoxDescent +
+            const measureText = getMeasureText(value, renderCtx, this.sheetCtx);
+            const textMetrics = measureText.width + 14;
+            const oneLineTextHeight = measureText.actualBoundingBoxDescent +
                 measureText.actualBoundingBoxAscent;
-            var horizonAlignPos = pos_x + space_width; // 默认为1，左对齐
+            let horizonAlignPos = pos_x + space_width; // 默认为1，左对齐
             if (horizonAlign === 0) {
                 // 居中对齐
                 horizonAlignPos = pos_x + cellWidth / 2 - textMetrics / 2;
@@ -1224,10 +1212,10 @@ var Canvas = /** @class */ (function () {
                 // 右对齐
                 horizonAlignPos = pos_x + cellWidth - space_width - textMetrics;
             }
-            var verticalCellHeight = cellHeight > oneLineTextHeight ? cellHeight : oneLineTextHeight;
-            var verticalAlignPos_text = pos_y + verticalCellHeight - space_height; // 文本垂直方向基准线
+            const verticalCellHeight = cellHeight > oneLineTextHeight ? cellHeight : oneLineTextHeight;
+            let verticalAlignPos_text = pos_y + verticalCellHeight - space_height; // 文本垂直方向基准线
             renderCtx.textBaseline = "bottom";
-            var verticalAlignPos_checkbox = verticalAlignPos_text - 13 * this.sheetCtx.zoomRatio;
+            let verticalAlignPos_checkbox = verticalAlignPos_text - 13 * this.sheetCtx.zoomRatio;
             if (verticalAlign === 0) {
                 // 居中对齐
                 verticalAlignPos_text = pos_y + verticalCellHeight / 2;
@@ -1249,7 +1237,7 @@ var Canvas = /** @class */ (function () {
             renderCtx.lineWidth = 1;
             renderCtx.strokeStyle = "#000";
             renderCtx.strokeRect(horizonAlignPos, verticalAlignPos_checkbox, 10, 10);
-            if (dataVerification["".concat(r, "_").concat(c)].checked) {
+            if (dataVerification[`${r}_${c}`].checked) {
                 renderCtx.beginPath();
                 renderCtx.lineTo(horizonAlignPos + 1, verticalAlignPos_checkbox + 6);
                 renderCtx.lineTo(horizonAlignPos + 4, verticalAlignPos_checkbox + 9);
@@ -1264,21 +1252,21 @@ var Canvas = /** @class */ (function () {
         }
         else {
             // 若单元格有条件格式数据条
-            if (((_d = checksCF === null || checksCF === void 0 ? void 0 : checksCF.dataBar) === null || _d === void 0 ? void 0 : _d.valueLen) &&
-                ((_f = (_e = checksCF === null || checksCF === void 0 ? void 0 : checksCF.dataBar) === null || _e === void 0 ? void 0 : _e.valueLen) === null || _f === void 0 ? void 0 : _f.toString()) !== "NaN") {
-                var x = startX + offsetLeft + space_width;
-                var y = startY + offsetTop + space_height;
-                var w = cellWidth - space_width * 2;
-                var h = cellHeight - space_height * 2;
-                var valueType = checksCF.dataBar.valueType;
-                var valueLen = checksCF.dataBar.valueLen;
-                var format = checksCF.dataBar.format;
+            if (checksCF?.dataBar?.valueLen &&
+                checksCF?.dataBar?.valueLen?.toString() !== "NaN") {
+                const x = startX + offsetLeft + space_width;
+                const y = startY + offsetTop + space_height;
+                const w = cellWidth - space_width * 2;
+                const h = cellHeight - space_height * 2;
+                const { valueType } = checksCF.dataBar;
+                const { valueLen } = checksCF.dataBar;
+                const { format } = checksCF.dataBar;
                 if (valueType === "minus") {
                     // 负数
-                    var minusLen = checksCF.dataBar.minusLen;
+                    const { minusLen } = checksCF.dataBar;
                     if (format.length > 1) {
                         // 渐变
-                        var my_gradient = renderCtx.createLinearGradient(x + w * minusLen * (1 - valueLen), y, x + w * minusLen, y);
+                        const my_gradient = renderCtx.createLinearGradient(x + w * minusLen * (1 - valueLen), y, x + w * minusLen, y);
                         my_gradient.addColorStop(0, "#ffffff");
                         my_gradient.addColorStop(1, "#ff0000");
                         renderCtx.fillStyle = my_gradient;
@@ -1301,18 +1289,18 @@ var Canvas = /** @class */ (function () {
                 }
                 else if (valueType === "plus") {
                     // 正数
-                    var plusLen = checksCF.dataBar.plusLen;
+                    const { plusLen } = checksCF.dataBar;
                     if (plusLen === 1) {
                         if (format.length > 1) {
                             // 渐变
-                            var my_gradient = renderCtx.createLinearGradient(x, y, x + w * valueLen, y);
+                            const my_gradient = renderCtx.createLinearGradient(x, y, x + w * valueLen, y);
                             my_gradient.addColorStop(0, format[0]);
                             my_gradient.addColorStop(1, format[1]);
                             renderCtx.fillStyle = my_gradient;
                         }
                         else {
                             // 单色
-                            renderCtx.fillStyle = format[0];
+                            [renderCtx.fillStyle] = format;
                         }
                         renderCtx.fillRect(x, y, w * valueLen, h);
                         renderCtx.beginPath();
@@ -1322,22 +1310,22 @@ var Canvas = /** @class */ (function () {
                         renderCtx.lineTo(x + w * valueLen, y);
                         renderCtx.lineTo(x, y);
                         renderCtx.lineWidth = 1;
-                        renderCtx.strokeStyle = format[0];
+                        [renderCtx.strokeStyle] = format;
                         renderCtx.stroke();
                         renderCtx.closePath();
                     }
                     else {
-                        var minusLen = checksCF.dataBar.minusLen;
+                        const { minusLen } = checksCF.dataBar;
                         if (format.length > 1) {
                             // 渐变
-                            var my_gradient = renderCtx.createLinearGradient(x + w * minusLen, y, x + w * minusLen + w * plusLen * valueLen, y);
+                            const my_gradient = renderCtx.createLinearGradient(x + w * minusLen, y, x + w * minusLen + w * plusLen * valueLen, y);
                             my_gradient.addColorStop(0, format[0]);
                             my_gradient.addColorStop(1, format[1]);
                             renderCtx.fillStyle = my_gradient;
                         }
                         else {
                             // 单色
-                            renderCtx.fillStyle = format[0];
+                            [renderCtx.fillStyle] = format;
                         }
                         renderCtx.fillRect(x + w * minusLen, y, w * plusLen * valueLen, h);
                         renderCtx.beginPath();
@@ -1347,35 +1335,35 @@ var Canvas = /** @class */ (function () {
                         renderCtx.lineTo(x + w * minusLen + w * plusLen * valueLen, y);
                         renderCtx.lineTo(x + w * minusLen, y);
                         renderCtx.lineWidth = 1;
-                        renderCtx.strokeStyle = format[0];
+                        [renderCtx.strokeStyle] = format;
                         renderCtx.stroke();
                         renderCtx.closePath();
                     }
                 }
             }
-            var pos_x = startX + offsetLeft;
-            var pos_y = startY + offsetTop + 1;
+            const pos_x = startX + offsetLeft;
+            const pos_y = startY + offsetTop + 1;
             renderCtx.save();
             renderCtx.beginPath();
             renderCtx.rect(pos_x, pos_y, cellWidth, cellHeight);
             renderCtx.clip();
             renderCtx.scale(this.sheetCtx.zoomRatio, this.sheetCtx.zoomRatio);
-            var textInfo = cell
+            const textInfo = cell
                 ? getCellTextInfo(cell, renderCtx, this.sheetCtx, {
-                    cellWidth: cellWidth,
-                    cellHeight: cellHeight,
-                    space_width: space_width,
-                    space_height: space_height,
-                    r: r,
-                    c: c,
+                    cellWidth,
+                    cellHeight,
+                    space_width,
+                    space_height,
+                    r,
+                    c,
                 }, this.sheetCtx)
                 : undefined;
             // 若单元格有条件格式图标集
-            if ((checksCF === null || checksCF === void 0 ? void 0 : checksCF.icons) && textInfo.type === "plain") {
-                var l = checksCF.icons.left;
-                var t = checksCF.icons.top;
-                var _value = textInfo.values[0];
-                var verticalAlignPos = pos_y + _value.top - textInfo.textHeightAll;
+            if (checksCF?.icons && textInfo.type === "plain") {
+                const l = checksCF.icons.left;
+                const t = checksCF.icons.top;
+                const _value = textInfo.values[0];
+                let verticalAlignPos = pos_y + _value.top - textInfo.textHeightAll;
                 if (verticalAlign === 0) {
                     // 居中对齐
                     verticalAlignPos =
@@ -1395,22 +1383,22 @@ var Canvas = /** @class */ (function () {
             // 单元格 文本颜色
             renderCtx.fillStyle = normalizedAttr(flowdata, r, c, "fc");
             // 若单元格有交替颜色 文本颜色
-            if (checksAF === null || checksAF === void 0 ? void 0 : checksAF[0]) {
-                renderCtx.fillStyle = checksAF[0];
+            if (checksAF?.[0]) {
+                [renderCtx.fillStyle] = checksAF;
             }
             // 若单元格有条件格式 文本颜色
-            if (checksCF === null || checksCF === void 0 ? void 0 : checksCF.textColor) {
+            if (checksCF?.textColor) {
                 renderCtx.fillStyle = checksCF.textColor;
             }
             // 若单元格格式为自定义数字格式（[red]） 文本颜色为红色
-            if (((_j = (_h = (_g = cell === null || cell === void 0 ? void 0 : cell.ct) === null || _g === void 0 ? void 0 : _g.fa) === null || _h === void 0 ? void 0 : _h.indexOf("[Red]")) !== null && _j !== void 0 ? _j : -1) > -1 &&
-                ((_k = cell === null || cell === void 0 ? void 0 : cell.ct) === null || _k === void 0 ? void 0 : _k.t) === "n" &&
-                (cell === null || cell === void 0 ? void 0 : cell.v) < 0) {
+            if ((cell?.ct?.fa?.indexOf("[Red]") ?? -1) > -1 &&
+                cell?.ct?.t === "n" &&
+                cell?.v < 0) {
                 renderCtx.fillStyle = "#ff0000";
             }
             this.cellTextRender(textInfo, renderCtx, {
-                pos_x: pos_x,
-                pos_y: pos_y,
+                pos_x,
+                pos_y,
             });
             renderCtx.restore();
         }
@@ -1439,7 +1427,7 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         // 单元格渲染后
-        (_m = (_l = this.sheetCtx.hooks).afterRenderCell) === null || _m === void 0 ? void 0 : _m.call(_l, (_o = flowdata[r]) === null || _o === void 0 ? void 0 : _o[c], {
+        this.sheetCtx.hooks.afterRenderCell?.(flowdata[r]?.[c], {
             row: r,
             column: c,
             startX: cellsize[0],
@@ -1447,113 +1435,113 @@ var Canvas = /** @class */ (function () {
             endX: cellsize[2] + cellsize[0],
             endY: cellsize[3] + cellsize[1],
         }, renderCtx);
-    };
+    }
     // 溢出单元格渲染
-    Canvas.prototype.cellOverflowRender = function (r, c, stc, edc, renderCtx, scrollHeight, scrollWidth, offsetLeft, offsetTop, 
+    cellOverflowRender(r, c, stc, edc, renderCtx, scrollHeight, scrollWidth, offsetLeft, offsetTop, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     afCompute, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     cfCompute) {
         // 溢出单元格 起止行列坐标
-        var startY;
+        let startY;
         if (r === 0) {
             startY = -scrollHeight - 1;
         }
         else {
             startY = this.sheetCtx.visibledatarow[r - 1] - scrollHeight - 1;
         }
-        var endY = this.sheetCtx.visibledatarow[r] - scrollHeight;
-        var startX;
+        const endY = this.sheetCtx.visibledatarow[r] - scrollHeight;
+        let startX;
         if (stc === 0) {
             startX = -scrollWidth;
         }
         else {
             startX = this.sheetCtx.visibledatacolumn[stc - 1] - scrollWidth;
         }
-        var endX = this.sheetCtx.visibledatacolumn[edc] - scrollWidth;
+        const endX = this.sheetCtx.visibledatacolumn[edc] - scrollWidth;
         //
-        var flowdata = getFlowdata(this.sheetCtx);
+        const flowdata = getFlowdata(this.sheetCtx);
         if (!flowdata) {
             return;
         }
-        var cell = flowdata[r][c];
-        var cellWidth = endX - startX - 2;
-        var cellHeight = endY - startY - 2;
-        var space_width = 2;
-        var space_height = 2; // 宽高方向 间隙
-        var pos_x = startX + offsetLeft;
-        var pos_y = startY + offsetTop + 1;
-        var fontset = getFontSet(cell, this.sheetCtx.defaultFontSize, this.sheetCtx);
+        const cell = flowdata[r][c];
+        const cellWidth = endX - startX - 2;
+        const cellHeight = endY - startY - 2;
+        const space_width = 2;
+        const space_height = 2; // 宽高方向 间隙
+        const pos_x = startX + offsetLeft;
+        const pos_y = startY + offsetTop + 1;
+        const fontset = getFontSet(cell, this.sheetCtx.defaultFontSize, this.sheetCtx);
         renderCtx.font = fontset;
         renderCtx.save();
         renderCtx.beginPath();
         renderCtx.rect(pos_x, pos_y, cellWidth, cellHeight);
         renderCtx.clip();
         renderCtx.scale(this.sheetCtx.zoomRatio, this.sheetCtx.zoomRatio);
-        var textInfo = cell
+        const textInfo = cell
             ? getCellTextInfo(cell, renderCtx, this.sheetCtx, {
-                cellWidth: cellWidth,
-                cellHeight: cellHeight,
-                space_width: space_width,
-                space_height: space_height,
-                r: r,
-                c: c,
+                cellWidth,
+                cellHeight,
+                space_width,
+                space_height,
+                r,
+                c,
             }, this.sheetCtx)
             : undefined;
         // 交替颜色
         // const checksAF = alternateformat.checksAF(r, c, afCompute);
-        var checksAF = {};
+        const checksAF = {};
         // 条件格式
         // const checksCF = conditionformat.checksCF(r, c, cfCompute);
-        var checksCF = checkCF(r, c, cfCompute);
+        const checksCF = checkCF(r, c, cfCompute);
         // 单元格 文本颜色
         renderCtx.fillStyle = normalizedAttr(flowdata, r, c, "fc");
         // 若单元格有交替颜色 文本颜色
-        if (checksAF === null || checksAF === void 0 ? void 0 : checksAF[0]) {
-            renderCtx.fillStyle = checksAF[0];
+        if (checksAF?.[0]) {
+            [renderCtx.fillStyle] = checksAF;
         }
         // 若单元格有条件格式 文本颜色
-        if (checksCF === null || checksCF === void 0 ? void 0 : checksCF.textColor) {
+        if (checksCF?.textColor) {
             renderCtx.fillStyle = checksCF.textColor;
         }
         this.cellTextRender(textInfo, renderCtx, {
-            pos_x: pos_x,
-            pos_y: pos_y,
+            pos_x,
+            pos_y,
         });
         renderCtx.restore();
-    };
-    Canvas.prototype.cellOverflow_trace = function (r, curC, traceC, traceDir, horizonAlign, textMetrics) {
-        var flowdata = getFlowdata(this.sheetCtx);
+    }
+    cellOverflow_trace(r, curC, traceC, traceDir, horizonAlign, textMetrics) {
+        const flowdata = getFlowdata(this.sheetCtx);
         if (!flowdata)
             return {};
-        var data = flowdata;
+        const data = flowdata;
         // 追溯单元格列超出数组范围 则追溯终止
         if (traceDir === "forward" && traceC < 0) {
             return {
                 success: false,
-                r: r,
+                r,
                 c: traceC,
             };
         }
         if (traceDir === "backward" && traceC > data[r].length - 1) {
             return {
                 success: false,
-                r: r,
+                r,
                 c: traceC,
             };
         }
         // 追溯单元格是 非空单元格或合并单元格 则追溯终止
-        var cell = data[r][traceC];
+        const cell = data[r][traceC];
         if (cell && (!_.isEmpty(cell.v) || cell.mc)) {
             return {
                 success: false,
-                r: r,
+                r,
                 c: traceC,
             };
         }
-        var start_curC = curC - 1 < 0 ? 0 : this.sheetCtx.visibledatacolumn[curC - 1];
-        var end_curC = this.sheetCtx.visibledatacolumn[curC];
-        var w = textMetrics - (end_curC - start_curC);
+        let start_curC = curC - 1 < 0 ? 0 : this.sheetCtx.visibledatacolumn[curC - 1];
+        let end_curC = this.sheetCtx.visibledatacolumn[curC];
+        const w = textMetrics - (end_curC - start_curC);
         if (horizonAlign === "0") {
             // 居中对齐
             start_curC -= w / 2;
@@ -1567,8 +1555,8 @@ var Canvas = /** @class */ (function () {
             // 右对齐
             start_curC -= w;
         }
-        var start_traceC = traceC - 1 < 0 ? 0 : this.sheetCtx.visibledatacolumn[traceC - 1];
-        var end_traceC = this.sheetCtx.visibledatacolumn[traceC];
+        const start_traceC = traceC - 1 < 0 ? 0 : this.sheetCtx.visibledatacolumn[traceC - 1];
+        const end_traceC = this.sheetCtx.visibledatacolumn[traceC];
         if (traceDir === "forward") {
             if (start_curC < start_traceC) {
                 return this.cellOverflow_trace(r, curC, traceC - 1, traceDir, horizonAlign, textMetrics);
@@ -1576,13 +1564,13 @@ var Canvas = /** @class */ (function () {
             if (start_curC < end_traceC) {
                 return {
                     success: true,
-                    r: r,
+                    r,
                     c: traceC,
                 };
             }
             return {
                 success: false,
-                r: r,
+                r,
                 c: traceC,
             };
         }
@@ -1593,27 +1581,27 @@ var Canvas = /** @class */ (function () {
             if (end_curC > start_traceC) {
                 return {
                     success: true,
-                    r: r,
+                    r,
                     c: traceC,
                 };
             }
             return {
                 success: false,
-                r: r,
+                r,
                 c: traceC,
             };
         }
         return null;
-    };
-    Canvas.prototype.cellOverflow_colIn = function (map, r, c, col_st, col_ed) {
-        var colIn = false; // 此单元格 是否在 某个溢出单元格的渲染范围
-        var colLast = false; // 此单元格 是否是 某个溢出单元格的渲染范围的最后一列
-        var rowIndex; // 溢出单元格 行下标
-        var colIndex; // 溢出单元格 列下标
-        var stc;
-        var edc;
-        _.forEach(map, function (row, rkey) {
-            _.forEach(row, function (mapItem, ckey) {
+    }
+    cellOverflow_colIn(map, r, c, col_st, col_ed) {
+        let colIn = false; // 此单元格 是否在 某个溢出单元格的渲染范围
+        let colLast = false; // 此单元格 是否是 某个溢出单元格的渲染范围的最后一列
+        let rowIndex; // 溢出单元格 行下标
+        let colIndex; // 溢出单元格 列下标
+        let stc;
+        let edc;
+        _.forEach(map, (row, rkey) => {
+            _.forEach(row, (mapItem, ckey) => {
                 rowIndex = Number(rkey);
                 colIndex = Number(ckey);
                 stc = mapItem.stc;
@@ -1632,21 +1620,21 @@ var Canvas = /** @class */ (function () {
             return !colLast;
         });
         return {
-            colIn: colIn,
-            colLast: colLast,
-            rowIndex: rowIndex,
-            colIndex: colIndex,
-            stc: stc,
-            edc: edc,
+            colIn,
+            colLast,
+            rowIndex,
+            colIndex,
+            stc,
+            edc,
         };
-    };
-    Canvas.prototype.cellTextRender = function (textInfo, ctx, option) {
+    }
+    cellTextRender(textInfo, ctx, option) {
         if (!textInfo) {
             return;
         }
-        var values = textInfo.values;
-        var pos_x = option.pos_x;
-        var pos_y = option.pos_y;
+        const { values } = textInfo;
+        const { pos_x } = option;
+        const { pos_y } = option;
         if (!values) {
             return;
         }
@@ -1664,8 +1652,8 @@ var Canvas = /** @class */ (function () {
             ctx.rotate((-textInfo.rotate * Math.PI) / 180);
             ctx.translate(-(textInfo.textLeftAll + pos_x) / this.sheetCtx.zoomRatio, -(pos_y + textInfo.textTopAll) / this.sheetCtx.zoomRatio);
         }
-        for (var i = 0; i < values.length; i += 1) {
-            var word = values[i];
+        for (let i = 0; i < values.length; i += 1) {
+            const word = values[i];
             if (word.inline === true && word.style) {
                 ctx.font = word.style.fontset;
                 ctx.fillStyle = word.style.fc;
@@ -1674,10 +1662,10 @@ var Canvas = /** @class */ (function () {
                 ctx.font = word.style;
             }
             // 暂时未排查到word.content第一次会是object，先做下判断来渲染，后续找到问题再复原
-            var txt = _.isPlainObject(word.content) ? word.content.m : word.content;
+            const txt = _.isPlainObject(word.content) ? word.content.m : word.content;
             ctx.fillText(txt, (pos_x + word.left) / this.sheetCtx.zoomRatio, (pos_y + word.top) / this.sheetCtx.zoomRatio);
             if (word.cancelLine) {
-                var c = word.cancelLine;
+                const c = word.cancelLine;
                 ctx.beginPath();
                 ctx.moveTo(Math.floor((pos_x + c.startX) / this.sheetCtx.zoomRatio) + 0.5, Math.floor((pos_y + c.startY) / this.sheetCtx.zoomRatio) + 0.5);
                 ctx.lineTo(Math.floor((pos_x + c.endX) / this.sheetCtx.zoomRatio) + 0.5, Math.floor((pos_y + c.endY) / this.sheetCtx.zoomRatio) + 0.5);
@@ -1687,9 +1675,9 @@ var Canvas = /** @class */ (function () {
                 ctx.closePath();
             }
             if (word.underLine) {
-                var underLines = word.underLine;
-                for (var a = 0; a < underLines.length; a += 1) {
-                    var item = underLines[a];
+                const underLines = word.underLine;
+                for (let a = 0; a < underLines.length; a += 1) {
+                    const item = underLines[a];
                     ctx.beginPath();
                     ctx.moveTo(Math.floor((pos_x + item.startX) / this.sheetCtx.zoomRatio) + 0.5, Math.floor((pos_y + item.startY) / this.sheetCtx.zoomRatio));
                     ctx.lineTo(Math.floor((pos_x + item.endX) / this.sheetCtx.zoomRatio) + 0.5, Math.floor((pos_y + item.endY) / this.sheetCtx.zoomRatio) + 0.5);
@@ -1703,10 +1691,9 @@ var Canvas = /** @class */ (function () {
         if (textInfo.rotate !== 0 && textInfo.type !== "verticalWrap") {
             ctx.restore();
         }
-    };
-    Canvas.prototype.drawFreezeLine = function (_a) {
-        var horizontalTop = _a.horizontalTop, verticalLeft = _a.verticalLeft;
-        var renderCtx = this.canvasElement.getContext("2d");
+    }
+    drawFreezeLine({ horizontalTop, verticalLeft, }) {
+        const renderCtx = this.canvasElement.getContext("2d");
         if (!renderCtx)
             return;
         renderCtx.save();
@@ -1728,7 +1715,5 @@ var Canvas = /** @class */ (function () {
             renderCtx.closePath();
         }
         renderCtx.restore();
-    };
-    return Canvas;
-}());
-export { Canvas };
+    }
+}

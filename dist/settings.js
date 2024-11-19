@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-export var defaultSettings = {
+export const defaultSettings = {
     column: 60,
     row: 84,
     addRows: 50,
@@ -125,7 +125,7 @@ export var defaultSettings = {
         // "|",
         "filter-by-value",
     ],
-    generateSheetId: function () { return uuidv4(); },
+    generateSheetId: () => uuidv4(),
     hooks: {},
     customToolbarItems: [],
     currency: "¥",

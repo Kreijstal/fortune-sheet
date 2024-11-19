@@ -4,10 +4,10 @@ import { initSheetData } from "../api/sheet";
 import { locale } from "../locale";
 import { generateRandomSheetName, getSheetIndex } from "../utils";
 function storeSheetParam(ctx) {
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (index == null)
         return;
-    var file = ctx.luckysheetfile[index];
+    const file = ctx.luckysheetfile[index];
     file.config = ctx.config;
     // file.visibledatarow = ctx.visibledatarow;
     // file.visibledatacolumn = ctx.visibledatacolumn;
@@ -19,7 +19,7 @@ function storeSheetParam(ctx) {
 }
 export function storeSheetParamALL(ctx) {
     storeSheetParam(ctx);
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (index == null)
         return;
     ctx.luckysheetfile[index].config = ctx.config;
@@ -35,12 +35,11 @@ isCopySheet) {
     //     // alert("非编辑模式下不允许该操作！");
     //     return;
     //   }
-    var _a, _b;
     if (id === ctx.currentSheetId) {
         return;
     }
-    var file = ctx.luckysheetfile[getSheetIndex(ctx, id)];
-    if (((_b = (_a = ctx.hooks).beforeActivateSheet) === null || _b === void 0 ? void 0 : _b.call(_a, id)) === false) {
+    const file = ctx.luckysheetfile[getSheetIndex(ctx, id)];
+    if (ctx.hooks.beforeActivateSheet?.(id) === false) {
         return;
     }
     storeSheetParamALL(ctx);
@@ -61,29 +60,23 @@ isCopySheet) {
     //   luckysheetFreezen.initialFreezen(index);
     //   _this.restoreselect();
     if (ctx.hooks.afterActivateSheet) {
-        setTimeout(function () {
-            var _a, _b;
-            (_b = (_a = ctx.hooks).afterActivateSheet) === null || _b === void 0 ? void 0 : _b.call(_a, id);
+        setTimeout(() => {
+            ctx.hooks.afterActivateSheet?.(id);
         });
     }
 }
-export function addSheet(ctx, settings, newSheetID, // if action is from websocket, there will be a new sheetID
-isPivotTable, sheetName, sheetData) {
-    var _a, _b;
-    if (newSheetID === void 0) { newSheetID = undefined; }
-    if (isPivotTable === void 0) { isPivotTable = false; }
-    if (sheetName === void 0) { sheetName = undefined; }
-    if (sheetData === void 0) { sheetData = undefined; }
+export function addSheet(ctx, settings, newSheetID = undefined, // if action is from websocket, there will be a new sheetID
+isPivotTable = false, sheetName = undefined, sheetData = undefined) {
     if ( /* isEditMode() || */ctx.allowEdit === false) {
         // alert("非编辑模式下不允许该操作！");
         return;
     }
-    var order = ctx.luckysheetfile.length;
-    var id = newSheetID !== null && newSheetID !== void 0 ? newSheetID : settings === null || settings === void 0 ? void 0 : settings.generateSheetId();
-    var sheetname = sheetName || generateRandomSheetName(ctx.luckysheetfile, isPivotTable, ctx);
+    const order = ctx.luckysheetfile.length;
+    const id = newSheetID ?? settings?.generateSheetId();
+    const sheetname = sheetName || generateRandomSheetName(ctx.luckysheetfile, isPivotTable, ctx);
     if (!_.isNil(sheetData)) {
         delete sheetData.data;
-        ctx.luckysheetfile.forEach(function (sheet) {
+        ctx.luckysheetfile.forEach((sheet) => {
             sheet.order =
                 sheet.order < sheetData.order
                     ? sheet.order
@@ -91,12 +84,12 @@ isPivotTable, sheetName, sheetData) {
             return sheet;
         });
     }
-    var sheetconfig = _.isNil(sheetData)
+    const sheetconfig = _.isNil(sheetData)
         ? {
             name: sheetName === undefined ? sheetname : sheetName,
             status: 0,
-            order: order,
-            id: id,
+            order,
+            id,
             row: ctx.defaultrowNum,
             column: ctx.defaultcolumnNum,
             config: {},
@@ -109,7 +102,7 @@ isPivotTable, sheetName, sheetData) {
         sheetconfig.name = sheetName;
     if (sheetconfig.id === undefined)
         sheetconfig.id = uuidv4();
-    if (((_b = (_a = ctx.hooks).beforeAddSheet) === null || _b === void 0 ? void 0 : _b.call(_a, sheetconfig)) === false) {
+    if (ctx.hooks.beforeAddSheet?.(sheetconfig) === false) {
         return;
     }
     ctx.luckysheetfile.push(sheetconfig);
@@ -118,29 +111,27 @@ isPivotTable, sheetName, sheetData) {
         changeSheet(ctx, id, isPivotTable, true);
     }
     if (ctx.hooks.afterAddSheet) {
-        setTimeout(function () {
-            var _a, _b;
-            (_b = (_a = ctx.hooks).afterAddSheet) === null || _b === void 0 ? void 0 : _b.call(_a, sheetconfig);
+        setTimeout(() => {
+            ctx.hooks.afterAddSheet?.(sheetconfig);
         });
     }
 }
 export function deleteSheet(ctx, id) {
-    var _a, _b, _c;
     if (ctx.allowEdit === false) {
         return;
     }
-    var arrIndex = getSheetIndex(ctx, id);
+    const arrIndex = getSheetIndex(ctx, id);
     if (arrIndex == null) {
         return;
     }
     // const file = ctx.luckysheetfile[arrIndex];
-    if (((_b = (_a = ctx.hooks).beforeDeleteSheet) === null || _b === void 0 ? void 0 : _b.call(_a, id)) === false) {
+    if (ctx.hooks.beforeDeleteSheet?.(id) === false) {
         return;
     }
     // _this.setSheetHide(index, true);
     // $(`#luckysheet-sheets-item${index}`).remove();
     // $(`#luckysheet-datavisual-selection-set-${index}`).remove();
-    ctx.luckysheetfile = ctx.luckysheetfile.map(function (sheet) {
+    ctx.luckysheetfile = ctx.luckysheetfile.map((sheet) => {
         sheet.order =
             sheet.order < ctx.luckysheetfile[arrIndex].order
                 ? sheet.order
@@ -151,38 +142,35 @@ export function deleteSheet(ctx, id) {
     // _this.reOrderAllSheet();
     // server.saveParam("shd", null, { deleIndex: index });
     if (id === ctx.currentSheetId) {
-        var shownSheets = _.cloneDeep(ctx.luckysheetfile).filter(function (singleSheet) { return _.isUndefined(singleSheet.hide) || singleSheet.hide !== 1; });
-        var orderSheets = _.sortBy(shownSheets, function (sheet) { return sheet.order; });
-        ctx.currentSheetId = (_c = orderSheets === null || orderSheets === void 0 ? void 0 : orderSheets[0]) === null || _c === void 0 ? void 0 : _c.id;
+        const shownSheets = _.cloneDeep(ctx.luckysheetfile).filter((singleSheet) => _.isUndefined(singleSheet.hide) || singleSheet.hide !== 1);
+        const orderSheets = _.sortBy(shownSheets, (sheet) => sheet.order);
+        ctx.currentSheetId = orderSheets?.[0]?.id;
     }
     if (ctx.hooks.afterDeleteSheet) {
-        setTimeout(function () {
-            var _a, _b;
-            (_b = (_a = ctx.hooks).afterDeleteSheet) === null || _b === void 0 ? void 0 : _b.call(_a, id);
+        setTimeout(() => {
+            ctx.hooks.afterDeleteSheet?.(id);
         });
     }
 }
 export function updateSheet(ctx, newData) {
-    newData.forEach(function (newDatum) {
-        var data = newDatum.data, row = newDatum.row, column = newDatum.column;
-        var index = getSheetIndex(ctx, newDatum.id);
+    newData.forEach((newDatum) => {
+        const { data, row, column } = newDatum;
+        const index = getSheetIndex(ctx, newDatum.id);
         if (data != null) {
             // 如果row和column存在的话则进行row和column和data进行比较，如果row和column不存在的话则进行data和default进行比较。
-            var lastRowNum = data.length;
-            var lastColNum_1 = data[0].length;
+            let lastRowNum = data.length;
+            let lastColNum = data[0].length;
             if (row != null && column != null && row > 0 && column > 0) {
                 lastRowNum = Math.max(lastRowNum, row);
-                lastColNum_1 = Math.max(lastColNum_1, column);
+                lastColNum = Math.max(lastColNum, column);
             }
             else {
                 lastRowNum = Math.max(lastRowNum, ctx.defaultrowNum);
-                lastColNum_1 = Math.max(lastColNum_1, ctx.defaultcolumnNum);
+                lastColNum = Math.max(lastColNum, ctx.defaultcolumnNum);
             }
-            var expandedData = _.times(lastRowNum, function () {
-                return _.times(lastColNum_1, function () { return null; });
-            });
-            for (var i = 0; i < data.length; i += 1) {
-                for (var j = 0; j < data[i].length; j += 1) {
+            const expandedData = _.times(lastRowNum, () => _.times(lastColNum, () => null));
+            for (let i = 0; i < data.length; i += 1) {
+                for (let j = 0; j < data[i].length; j += 1) {
                     expandedData[i][j] = data[i][j];
                 }
             }
@@ -200,18 +188,17 @@ export function updateSheet(ctx, newData) {
     });
 }
 export function editSheetName(ctx, editable) {
-    var _a, _b;
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (ctx.allowEdit === false) {
         if (index == null)
             return;
         editable.innerText = ctx.luckysheetfile[index].name;
         return;
     }
-    var sheetconfig = locale(ctx).sheetconfig;
-    var oldtxt = editable.dataset.oldText || "";
-    var txt = editable.innerText;
-    if (((_b = (_a = ctx.hooks).beforeUpdateSheetName) === null || _b === void 0 ? void 0 : _b.call(_a, ctx.currentSheetId, oldtxt, txt)) === false) {
+    const { sheetconfig } = locale(ctx);
+    const oldtxt = editable.dataset.oldText || "";
+    const txt = editable.innerText;
+    if (ctx.hooks.beforeUpdateSheetName?.(ctx.currentSheetId, oldtxt, txt) === false) {
         return;
     }
     if (txt.length === 0) {
@@ -227,7 +214,7 @@ export function editSheetName(ctx, editable) {
     }
     if (index == null)
         return;
-    for (var i = 0; i < ctx.luckysheetfile.length; i += 1) {
+    for (let i = 0; i < ctx.luckysheetfile.length; i += 1) {
         if (index !== i && ctx.luckysheetfile[i].name === txt) {
             // if (isEditMode()) {
             //   alert(locale_sheetconfig.tipNameRepeat);
@@ -245,9 +232,8 @@ export function editSheetName(ctx, editable) {
     //   "luckysheet-mousedown-cancel"
     // );
     if (ctx.hooks.afterUpdateSheetName) {
-        setTimeout(function () {
-            var _a, _b;
-            (_b = (_a = ctx.hooks).afterUpdateSheetName) === null || _b === void 0 ? void 0 : _b.call(_a, ctx.currentSheetId, oldtxt, txt);
+        setTimeout(() => {
+            ctx.hooks.afterUpdateSheetName?.(ctx.currentSheetId, oldtxt, txt);
         });
     }
 }
@@ -267,17 +253,17 @@ export function expandRowsAndColumns(data, rowsToAdd, columnsToAdd) {
     if (columnsToAdd <= 0) {
         columnsToAdd = 0;
     }
-    var currentColLen = 0;
+    let currentColLen = 0;
     if (data.length > 0) {
         currentColLen = data[0].length;
     }
-    for (var r = 0; r < data.length; r += 1) {
-        for (var i = 0; i < columnsToAdd; i += 1) {
+    for (let r = 0; r < data.length; r += 1) {
+        for (let i = 0; i < columnsToAdd; i += 1) {
             data[r].push(null);
         }
     }
-    for (var r = 0; r < rowsToAdd; r += 1) {
-        data.push(_.times(currentColLen + columnsToAdd, function () { return null; }));
+    for (let r = 0; r < rowsToAdd; r += 1) {
+        data.push(_.times(currentColLen + columnsToAdd, () => null));
     }
     return data;
 }

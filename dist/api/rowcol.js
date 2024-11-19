@@ -3,15 +3,14 @@ import { deleteRowCol, insertRowCol } from "../modules";
 import { getSheet } from "./common";
 import { INVALID_PARAMS } from "./errors";
 import { getSheetIndex } from "../utils";
-export function freeze(ctx, type, range, options) {
-    if (options === void 0) { options = {}; }
-    var sheet = getSheet(ctx, options);
-    var typeMap = {
+export function freeze(ctx, type, range, options = {}) {
+    const sheet = getSheet(ctx, options);
+    const typeMap = {
         row: "rangeRow",
         column: "rangeColumn",
         both: "rangeBoth",
     };
-    var innerType = typeMap[type];
+    const innerType = typeMap[type];
     sheet.frozen = {
         // @ts-ignore
         type: innerType,
@@ -21,21 +20,20 @@ export function freeze(ctx, type, range, options) {
         },
     };
 }
-export function insertRowOrColumn(ctx, type, index, count, direction, options) {
-    if (options === void 0) { options = {}; }
+export function insertRowOrColumn(ctx, type, index, count, direction, options = {}) {
     if (!["row", "column"].includes(type) ||
         !_.isNumber(index) ||
         !_.isNumber(count) ||
         !["lefttop", "rightbottom"].includes(direction)) {
         throw INVALID_PARAMS;
     }
-    var sheet = getSheet(ctx, options);
+    const sheet = getSheet(ctx, options);
     try {
         insertRowCol(ctx, {
-            type: type,
-            index: index,
-            count: count,
-            direction: direction,
+            type,
+            index,
+            count,
+            direction,
             id: sheet.id,
         });
     }
@@ -43,24 +41,22 @@ export function insertRowOrColumn(ctx, type, index, count, direction, options) {
         console.error(e);
     }
 }
-export function deleteRowOrColumn(ctx, type, start, end, options) {
-    if (options === void 0) { options = {}; }
+export function deleteRowOrColumn(ctx, type, start, end, options = {}) {
     if (!["row", "column"].includes(type) ||
         !_.isNumber(start) ||
         !_.isNumber(end)) {
         throw INVALID_PARAMS;
     }
-    var sheet = getSheet(ctx, options);
-    deleteRowCol(ctx, { type: type, start: start, end: end, id: sheet.id });
+    const sheet = getSheet(ctx, options);
+    deleteRowCol(ctx, { type, start, end, id: sheet.id });
 }
 export function hideRowOrColumn(ctx, rowColInfo, type) {
-    var _a, _b;
     if (!["row", "column"].includes(type)) {
         throw INVALID_PARAMS;
     }
     if (!ctx || !ctx.config)
         return;
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (type === "row") {
         /* TODO: 工作表保护判断
         if (
@@ -68,9 +64,9 @@ export function hideRowOrColumn(ctx, rowColInfo, type) {
         ) {
           return ;
         } */
-        var rowhidden_1 = (_a = ctx.config.rowhidden) !== null && _a !== void 0 ? _a : {};
-        rowColInfo.forEach(function (r) {
-            rowhidden_1[r] = 0;
+        const rowhidden = ctx.config.rowhidden ?? {};
+        rowColInfo.forEach((r) => {
+            rowhidden[r] = 0;
         });
         /* 保存撤销,luck中保存撤销用以下方式实现，而在本项目中不需要另外处理
           if(Store.clearjfundo){
@@ -83,7 +79,7 @@ export function hideRowOrColumn(ctx, rowColInfo, type) {
             Store.jfundo.length  = 0;
             Store.jfredo.push(redo);
         } */
-        ctx.config.rowhidden = rowhidden_1;
+        ctx.config.rowhidden = rowhidden;
         // const rowLen = ctx.luckysheetfile[index].data!.length;
         /**
          * 计算要隐藏的行是否是最后一列
@@ -93,23 +89,22 @@ export function hideRowOrColumn(ctx, rowColInfo, type) {
     }
     else if (type === "column") {
         // 隐藏列
-        var colhidden_1 = (_b = ctx.config.colhidden) !== null && _b !== void 0 ? _b : {};
-        rowColInfo.forEach(function (r) {
-            colhidden_1[r] = 0;
+        const colhidden = ctx.config.colhidden ?? {};
+        rowColInfo.forEach((r) => {
+            colhidden[r] = 0;
         });
-        ctx.config.colhidden = colhidden_1;
+        ctx.config.colhidden = colhidden;
         // const columnLen = ctx.luckysheetfile[index].data![0].length;
     }
     ctx.luckysheetfile[index].config = ctx.config;
 }
 export function showRowOrColumn(ctx, rowColInfo, type) {
-    var _a, _b;
     if (!["row", "column"].includes(type)) {
         throw INVALID_PARAMS;
     }
     if (!ctx || !ctx.config)
         return;
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (type === "row") {
         /* TODO: 工作表保护判断
         if (
@@ -117,9 +112,9 @@ export function showRowOrColumn(ctx, rowColInfo, type) {
         ) {
           return ;
         } */
-        var rowhidden_2 = (_a = ctx.config.rowhidden) !== null && _a !== void 0 ? _a : {};
-        rowColInfo.forEach(function (r) {
-            delete rowhidden_2[r];
+        const rowhidden = ctx.config.rowhidden ?? {};
+        rowColInfo.forEach((r) => {
+            delete rowhidden[r];
         });
         /* 保存撤销,luck中保存撤销用以下方式实现，而在本项目中不需要另外处理
           if(Store.clearjfundo){
@@ -132,7 +127,7 @@ export function showRowOrColumn(ctx, rowColInfo, type) {
             Store.jfundo.length  = 0;
             Store.jfredo.push(redo);
         } */
-        ctx.config.rowhidden = rowhidden_2;
+        ctx.config.rowhidden = rowhidden;
         // const rowLen = ctx.luckysheetfile[index].data!.length;
         /**
          * 计算要隐藏的行是否是最后一列
@@ -142,33 +137,30 @@ export function showRowOrColumn(ctx, rowColInfo, type) {
     }
     else if (type === "column") {
         // 隐藏列
-        var colhidden_2 = (_b = ctx.config.colhidden) !== null && _b !== void 0 ? _b : {};
-        rowColInfo.forEach(function (r) {
-            delete colhidden_2[r];
+        const colhidden = ctx.config.colhidden ?? {};
+        rowColInfo.forEach((r) => {
+            delete colhidden[r];
         });
-        ctx.config.colhidden = colhidden_2;
+        ctx.config.colhidden = colhidden;
         // const columnLen = ctx.luckysheetfile[index].data![0].length;
     }
     ctx.luckysheetfile[index].config = ctx.config;
 }
-export function setRowHeight(ctx, rowInfo, options, custom) {
-    if (options === void 0) { options = {}; }
-    if (custom === void 0) { custom = false; }
+export function setRowHeight(ctx, rowInfo, options = {}, custom = false) {
     if (!_.isPlainObject(rowInfo)) {
         throw INVALID_PARAMS;
     }
-    var sheet = getSheet(ctx, options);
-    var cfg = sheet.config || {};
+    const sheet = getSheet(ctx, options);
+    const cfg = sheet.config || {};
     if (cfg.rowlen == null) {
         cfg.rowlen = {};
     }
-    _.forEach(rowInfo, function (len, r) {
-        var _a;
+    _.forEach(rowInfo, (len, r) => {
         if (Number(r) >= 0) {
             if (Number(len) >= 0) {
                 cfg.rowlen[Number(r)] = Number(len);
                 if (custom && _.isUndefined(cfg.customHeight)) {
-                    cfg.customHeight = (_a = {}, _a[r] = 1, _a);
+                    cfg.customHeight = { [r]: 1 };
                 }
                 else if (custom) {
                     cfg.customHeight[r] = 1;
@@ -182,24 +174,21 @@ export function setRowHeight(ctx, rowInfo, options, custom) {
     }
     // server.saveParam("cg", file.id, cfg.rowlen, { k: "rowlen" });
 }
-export function setColumnWidth(ctx, columnInfo, options, custom) {
-    if (options === void 0) { options = {}; }
-    if (custom === void 0) { custom = false; }
+export function setColumnWidth(ctx, columnInfo, options = {}, custom = false) {
     if (!_.isPlainObject(columnInfo)) {
         throw INVALID_PARAMS;
     }
-    var sheet = getSheet(ctx, options);
-    var cfg = sheet.config || {};
+    const sheet = getSheet(ctx, options);
+    const cfg = sheet.config || {};
     if (cfg.columnlen == null) {
         cfg.columnlen = {};
     }
-    _.forEach(columnInfo, function (len, c) {
-        var _a;
+    _.forEach(columnInfo, (len, c) => {
         if (Number(c) >= 0) {
             if (Number(len) >= 0) {
                 cfg.columnlen[Number(c)] = Number(len);
                 if (custom && _.isUndefined(cfg.customWidth)) {
-                    cfg.customWidth = (_a = {}, _a[c] = 1, _a);
+                    cfg.customWidth = { [c]: 1 };
                 }
                 else if (custom) {
                     cfg.customWidth[c] = 1;
@@ -213,35 +202,33 @@ export function setColumnWidth(ctx, columnInfo, options, custom) {
     }
     // server.saveParam("cg", file.id, cfg.columnlen, { k: "columnlen" });
 }
-export function getRowHeight(ctx, rows, options) {
-    if (options === void 0) { options = {}; }
+export function getRowHeight(ctx, rows, options = {}) {
     if (!_.isArray(rows) || rows.length === 0) {
         throw INVALID_PARAMS;
     }
-    var sheet = getSheet(ctx, options);
-    var cfg = sheet.config || {};
-    var rowlen = cfg.rowlen || {};
-    var rowlenObj = {};
-    rows.forEach(function (item) {
+    const sheet = getSheet(ctx, options);
+    const cfg = sheet.config || {};
+    const rowlen = cfg.rowlen || {};
+    const rowlenObj = {};
+    rows.forEach((item) => {
         if (Number(item) >= 0) {
-            var size = rowlen[Number(item)] || ctx.defaultrowlen;
+            const size = rowlen[Number(item)] || ctx.defaultrowlen;
             rowlenObj[Number(item)] = size;
         }
     });
     return rowlenObj;
 }
-export function getColumnWidth(ctx, columns, options) {
-    if (options === void 0) { options = {}; }
+export function getColumnWidth(ctx, columns, options = {}) {
     if (!_.isArray(columns) || columns.length === 0) {
         throw INVALID_PARAMS;
     }
-    var sheet = getSheet(ctx, options);
-    var cfg = sheet.config || {};
-    var columnlen = cfg.columnlen || {};
-    var columnlenObj = {};
-    columns.forEach(function (item) {
+    const sheet = getSheet(ctx, options);
+    const cfg = sheet.config || {};
+    const columnlen = cfg.columnlen || {};
+    const columnlenObj = {};
+    columns.forEach((item) => {
         if (Number(item) >= 0) {
-            var size = columnlen[Number(item)] || ctx.defaultcollen;
+            const size = columnlen[Number(item)] || ctx.defaultcollen;
             columnlenObj[Number(item)] = size;
         }
     });

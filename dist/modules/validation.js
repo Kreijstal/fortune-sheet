@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import _ from "lodash";
 import { hasChinaword } from "./text";
-export var error = {
+export const error = {
     v: "#VALUE!",
     n: "#NAME?",
     na: "#N/A",
@@ -11,7 +11,7 @@ export var error = {
     nl: "#NULL!",
     sp: "#SPILL!", // 数组范围有其它值
 };
-var errorValues = Object.values(error);
+const errorValues = Object.values(error);
 export function valueIsError(value) {
     return errorValues.includes(value);
 }
@@ -30,14 +30,14 @@ export function isRealNum(val) {
     return !Number.isNaN(Number(val));
 }
 function checkDateTime(str) {
-    var reg1 = /^(\d{4})-(\d{1,2})-(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
-    var reg2 = /^(\d{4})\/(\d{1,2})\/(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
+    const reg1 = /^(\d{4})-(\d{1,2})-(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
+    const reg2 = /^(\d{4})\/(\d{1,2})\/(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
     if (!reg1.test(str) && !reg2.test(str)) {
         return false;
     }
-    var year = Number(RegExp.$1);
-    var month = Number(RegExp.$2);
-    var day = Number(RegExp.$3);
+    const year = Number(RegExp.$1);
+    const month = Number(RegExp.$2);
+    const day = Number(RegExp.$3);
     if (year < 1900) {
         return false;
     }
@@ -70,7 +70,7 @@ export function diff(now, then) {
     return dayjs(now).diff(dayjs(then));
 }
 export function isdatatypemulti(s) {
-    var type = {};
+    const type = {};
     if (isdatetime(s)) {
         type.date = true;
     }
@@ -80,7 +80,7 @@ export function isdatatypemulti(s) {
     return type;
 }
 export function isdatatype(s) {
-    var type = "string";
+    let type = "string";
     if (isdatetime(s)) {
         type = "date";
     }
@@ -91,8 +91,8 @@ export function isdatatype(s) {
 }
 // 范围是否只包含部分合并单元格
 export function hasPartMC(ctx, cfg, r1, r2, c1, c2) {
-    var ret = false;
-    _.forEach(ctx.config.merge, function (mc) {
+    let ret = false;
+    _.forEach(ctx.config.merge, (mc) => {
         if (r1 < mc.r) {
             if (r2 >= mc.r && r2 < mc.r + mc.rs - 1) {
                 if (c1 >= mc.c && c1 <= mc.c + mc.cs - 1) {

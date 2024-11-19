@@ -1,11 +1,11 @@
 export function cfSplitRange(range1, range2, range3, type) {
-    var range = [];
-    var offset_r = range3.row[0] - range2.row[0];
-    var offset_c = range3.column[0] - range2.column[0];
-    var r1 = range1.row[0];
-    var r2 = range1.row[1];
-    var c1 = range1.column[0];
-    var c2 = range1.column[1];
+    let range = [];
+    const offset_r = range3.row[0] - range2.row[0];
+    const offset_c = range3.column[0] - range2.column[0];
+    const r1 = range1.row[0];
+    const r2 = range1.row[1];
+    const c1 = range1.column[0];
+    const c2 = range1.column[1];
     if (r1 >= range2.row[0] &&
         r2 <= range2.row[1] &&
         c1 >= range2.column[0] &&

@@ -237,29 +237,27 @@ export function defaultContext(refs) {
         groupValuesRefreshData: [],
         formulaCache: new FormulaCache(),
         hooks: {},
-        getRefs: function () { return refs; },
+        getRefs: () => refs,
     };
 }
 export function getFlowdata(ctx, id) {
-    var _a, _b;
     if (!ctx)
         return null;
-    var i = getSheetIndex(ctx, id || ctx.currentSheetId);
+    const i = getSheetIndex(ctx, id || ctx.currentSheetId);
     if (_.isNil(i)) {
         return null;
     }
-    return (_b = (_a = ctx.luckysheetfile) === null || _a === void 0 ? void 0 : _a[i]) === null || _b === void 0 ? void 0 : _b.data;
+    return ctx.luckysheetfile?.[i]?.data;
 }
 function calcRowColSize(ctx, rowCount, colCount) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     ctx.visibledatarow = [];
     ctx.rh_height = 0;
-    for (var r = 0; r < rowCount; r += 1) {
-        var rowlen = ctx.defaultrowlen;
-        if ((_a = ctx.config.rowlen) === null || _a === void 0 ? void 0 : _a[r]) {
-            rowlen = (_c = (_b = ctx.config) === null || _b === void 0 ? void 0 : _b.rowlen) === null || _c === void 0 ? void 0 : _c[r];
+    for (let r = 0; r < rowCount; r += 1) {
+        let rowlen = ctx.defaultrowlen;
+        if (ctx.config.rowlen?.[r]) {
+            rowlen = ctx.config?.rowlen?.[r];
         }
-        if (((_e = (_d = ctx.config) === null || _d === void 0 ? void 0 : _d.rowhidden) === null || _e === void 0 ? void 0 : _e[r]) != null) {
+        if (ctx.config?.rowhidden?.[r] != null) {
             ctx.visibledatarow.push(ctx.rh_height);
             continue;
         }
@@ -281,15 +279,15 @@ function calcRowColSize(ctx, rowCount, colCount) {
     ctx.rh_height += 80; // 最底部增加空白
     ctx.visibledatacolumn = [];
     ctx.ch_width = 0;
-    var maxColumnlen = 120;
-    var flowdata = getFlowdata(ctx);
-    for (var c = 0; c < colCount; c += 1) {
-        var firstcolumnlen = ctx.defaultcollen;
-        if ((_g = (_f = ctx.config) === null || _f === void 0 ? void 0 : _f.columnlen) === null || _g === void 0 ? void 0 : _g[c]) {
+    const maxColumnlen = 120;
+    const flowdata = getFlowdata(ctx);
+    for (let c = 0; c < colCount; c += 1) {
+        let firstcolumnlen = ctx.defaultcollen;
+        if (ctx.config?.columnlen?.[c]) {
             firstcolumnlen = ctx.config.columnlen[c];
         }
         else {
-            if ((_h = flowdata === null || flowdata === void 0 ? void 0 : flowdata[0]) === null || _h === void 0 ? void 0 : _h[c]) {
+            if (flowdata?.[0]?.[c]) {
                 if (firstcolumnlen > 300) {
                     firstcolumnlen = 300;
                 }
@@ -297,14 +295,14 @@ function calcRowColSize(ctx, rowCount, colCount) {
                     firstcolumnlen = ctx.defaultcollen;
                 }
                 if (firstcolumnlen !== ctx.defaultcollen) {
-                    if (!((_j = ctx.config) === null || _j === void 0 ? void 0 : _j.columnlen)) {
+                    if (!ctx.config?.columnlen) {
                         ctx.config.columnlen = {};
                     }
                     ctx.config.columnlen[c] = firstcolumnlen;
                 }
             }
         }
-        if (((_l = (_k = ctx.config) === null || _k === void 0 ? void 0 : _k.colhidden) === null || _l === void 0 ? void 0 : _l[c]) != null) {
+        if (ctx.config?.colhidden?.[c] != null) {
             ctx.visibledatacolumn.push(ctx.ch_width);
             continue;
         }
@@ -322,42 +320,42 @@ function calcRowColSize(ctx, rowCount, colCount) {
     ctx.ch_width += maxColumnlen;
 }
 export function ensureSheetIndex(data, generateSheetId) {
-    if ((data === null || data === void 0 ? void 0 : data.length) > 0) {
-        var hasActive_1 = false;
-        var indexs_1 = [];
-        data.forEach(function (item) {
+    if (data?.length > 0) {
+        let hasActive = false;
+        const indexs = [];
+        data.forEach((item) => {
             if (item.id == null) {
                 item.id = generateSheetId();
             }
-            if (indexs_1.includes(item.id)) {
+            if (indexs.includes(item.id)) {
                 item.id = generateSheetId();
             }
             else {
-                indexs_1.push(item.id);
+                indexs.push(item.id);
             }
             if (item.status == null) {
                 item.status = 0;
             }
             if (item.status === 1) {
-                if (hasActive_1) {
+                if (hasActive) {
                     item.status = 0;
                 }
                 else {
-                    hasActive_1 = true;
+                    hasActive = true;
                 }
             }
         });
-        if (!hasActive_1) {
+        if (!hasActive) {
             data[0].status = 1;
         }
     }
 }
 export function initSheetIndex(ctx) {
     // get current sheet
-    var shownSheets = ctx.luckysheetfile.filter(function (singleSheet) { return _.isUndefined(singleSheet.hide) || singleSheet.hide !== 1; });
-    ctx.currentSheetId = _.sortBy(shownSheets, function (sheet) { return sheet.order; })[0]
+    const shownSheets = ctx.luckysheetfile.filter((singleSheet) => _.isUndefined(singleSheet.hide) || singleSheet.hide !== 1);
+    ctx.currentSheetId = _.sortBy(shownSheets, (sheet) => sheet.order)[0]
         .id;
-    for (var i = 0; i < ctx.luckysheetfile.length; i += 1) {
+    for (let i = 0; i < ctx.luckysheetfile.length; i += 1) {
         if (ctx.luckysheetfile[i].status === 1 &&
             ctx.luckysheetfile[i].hide !== 1) {
             ctx.currentSheetId = ctx.luckysheetfile[i].id;
@@ -366,8 +364,8 @@ export function initSheetIndex(ctx) {
     }
 }
 export function updateContextWithSheetData(ctx, data) {
-    var rowCount = data.length;
-    var colCount = rowCount === 0 ? 0 : data[0].length;
+    const rowCount = data.length;
+    const colCount = rowCount === 0 ? 0 : data[0].length;
     calcRowColSize(ctx, rowCount, colCount);
     normalizeSelection(ctx, ctx.luckysheet_select_save);
 }
@@ -378,8 +376,8 @@ export function updateContextWithCanvas(ctx, canvas, placeholder) {
     ];
     ctx.cellmainHeight = placeholder.clientHeight - ctx.columnHeaderHeight;
     ctx.cellmainWidth = placeholder.clientWidth - ctx.rowHeaderWidth;
-    canvas.style.width = "".concat(ctx.luckysheetTableContentHW[0], "px");
-    canvas.style.height = "".concat(ctx.luckysheetTableContentHW[1], "px");
+    canvas.style.width = `${ctx.luckysheetTableContentHW[0]}px`;
+    canvas.style.height = `${ctx.luckysheetTableContentHW[1]}px`;
     canvas.width = Math.ceil(ctx.luckysheetTableContentHW[0] * ctx.devicePixelRatio);
     canvas.height = Math.ceil(ctx.luckysheetTableContentHW[1] * ctx.devicePixelRatio);
 }

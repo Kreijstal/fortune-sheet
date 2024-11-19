@@ -1,7 +1,7 @@
 import _ from "lodash";
 export function mousePosition(x, y, ctx) {
-    var newX = x - ctx.rowHeaderWidth;
-    var newY = y -
+    const newX = x - ctx.rowHeaderWidth;
+    const newY = y -
         // ctx.infobarHeight -
         ctx.toolbarHeight -
         ctx.calculatebarHeight -
@@ -9,8 +9,8 @@ export function mousePosition(x, y, ctx) {
     return [newX, newY];
 }
 export function rowLocationByIndex(row_index, visibleRow) {
-    var row = 0;
-    var row_pre = 0;
+    let row = 0;
+    let row_pre = 0;
     row = visibleRow[row_index];
     if (row_index === 0) {
         row_pre = 0;
@@ -21,7 +21,7 @@ export function rowLocationByIndex(row_index, visibleRow) {
     return [row_pre, row, row_index];
 }
 export function rowLocation(y, visibleRow) {
-    var row_index = _.sortedIndex(visibleRow, y);
+    let row_index = _.sortedIndex(visibleRow, y);
     if (row_index >= visibleRow.length && y > 0) {
         row_index = visibleRow.length - 1;
     }
@@ -31,8 +31,8 @@ export function rowLocation(y, visibleRow) {
     return rowLocationByIndex(row_index, visibleRow);
 }
 export function colLocationByIndex(col_index, visibleCol) {
-    var col = 0;
-    var col_pre = 0;
+    let col = 0;
+    let col_pre = 0;
     col = visibleCol[col_index];
     if (col_index === 0) {
         col_pre = 0;
@@ -43,7 +43,7 @@ export function colLocationByIndex(col_index, visibleCol) {
     return [col_pre, col, col_index];
 }
 export function colLocation(x, visibleCol) {
-    var col_index = _.sortedIndex(visibleCol, x);
+    let col_index = _.sortedIndex(visibleCol, x);
     if (col_index >= visibleCol.length && x > 0) {
         col_index = visibleCol.length - 1;
     }

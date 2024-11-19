@@ -8,139 +8,133 @@ import { normalizeSelection } from "./selection";
 import { changeSheet } from "./sheet";
 import { locale } from "../locale";
 export function getCellRowColumn(ctx, e, container, scrollX, scrollY) {
-    var _a, _b;
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (flowdata == null)
         return undefined;
-    var scrollLeft = scrollX.scrollLeft;
-    var scrollTop = scrollY.scrollTop;
-    var rect = container.getBoundingClientRect();
-    var x = e.pageX - rect.left - ctx.rowHeaderWidth;
-    var y = e.pageY - rect.top - ctx.columnHeaderHeight;
+    const { scrollLeft } = scrollX;
+    const { scrollTop } = scrollY;
+    const rect = container.getBoundingClientRect();
+    let x = e.pageX - rect.left - ctx.rowHeaderWidth;
+    let y = e.pageY - rect.top - ctx.columnHeaderHeight;
     x += scrollLeft;
     y += scrollTop;
-    var r = rowLocation(y, ctx.visibledatarow)[2];
-    var c = colLocation(x, ctx.visibledatacolumn)[2];
-    var margeset = mergeBorder(ctx, flowdata, r, c);
+    let r = rowLocation(y, ctx.visibledatarow)[2];
+    let c = colLocation(x, ctx.visibledatacolumn)[2];
+    const margeset = mergeBorder(ctx, flowdata, r, c);
     if (margeset) {
-        _a = margeset.row, r = _a[2];
-        _b = margeset.column, c = _b[2];
+        [, , r] = margeset.row;
+        [, , c] = margeset.column;
     }
-    return { r: r, c: c };
+    return { r, c };
 }
 export function getCellHyperlink(ctx, r, c) {
-    var _a;
-    var sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
+    const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
     if (sheetIndex != null) {
-        return (_a = ctx.luckysheetfile[sheetIndex].hyperlink) === null || _a === void 0 ? void 0 : _a["".concat(r, "_").concat(c)];
+        return ctx.luckysheetfile[sheetIndex].hyperlink?.[`${r}_${c}`];
     }
     return undefined;
 }
 export function saveHyperlink(ctx, r, c, linkText, linkType, linkAddress) {
-    var sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
-    var flowdata = getFlowdata(ctx);
+    const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
+    const flowdata = getFlowdata(ctx);
     if (sheetIndex != null && flowdata != null && linkType && linkAddress) {
-        var cell = flowdata[r][c];
+        let cell = flowdata[r][c];
         if (cell == null)
             cell = {};
-        _.set(ctx.luckysheetfile[sheetIndex], ["hyperlink", "".concat(r, "_").concat(c)], {
-            linkType: linkType,
-            linkAddress: linkAddress,
+        _.set(ctx.luckysheetfile[sheetIndex], ["hyperlink", `${r}_${c}`], {
+            linkType,
+            linkAddress,
         });
         cell.fc = "rgb(0, 0, 255)";
         cell.un = 1;
         cell.v = linkText || linkAddress;
         cell.m = linkText || linkAddress;
-        cell.hl = { r: r, c: c, id: ctx.currentSheetId };
+        cell.hl = { r, c, id: ctx.currentSheetId };
         flowdata[r][c] = cell;
         ctx.linkCard = undefined;
     }
 }
 export function removeHyperlink(ctx, r, c) {
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (!allowEdit)
         return;
-    var sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
-    var flowdata = getFlowdata(ctx);
+    const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
+    const flowdata = getFlowdata(ctx);
     if (flowdata != null && sheetIndex != null) {
-        var hyperlink = _.omit(ctx.luckysheetfile[sheetIndex].hyperlink, "".concat(r, "_").concat(c));
+        const hyperlink = _.omit(ctx.luckysheetfile[sheetIndex].hyperlink, `${r}_${c}`);
         _.set(ctx.luckysheetfile[sheetIndex], "hyperlink", hyperlink);
-        var cell = flowdata[r][c];
+        const cell = flowdata[r][c];
         if (cell != null) {
             flowdata[r][c] = { v: cell.v, m: cell.m };
         }
     }
     ctx.linkCard = undefined;
 }
-export function showLinkCard(ctx, r, c, isEditing, isMouseDown) {
-    var _a, _b, _c, _d, _e, _f, _g;
-    if (isEditing === void 0) { isEditing = false; }
-    if (isMouseDown === void 0) { isMouseDown = false; }
-    if ((_a = ctx.linkCard) === null || _a === void 0 ? void 0 : _a.selectingCellRange)
+export function showLinkCard(ctx, r, c, isEditing = false, isMouseDown = false) {
+    if (ctx.linkCard?.selectingCellRange)
         return;
-    if ("".concat(r, "_").concat(c) === ((_b = ctx.linkCard) === null || _b === void 0 ? void 0 : _b.rc))
+    if (`${r}_${c}` === ctx.linkCard?.rc)
         return;
-    var link = getCellHyperlink(ctx, r, c);
-    var cell = (_d = (_c = getFlowdata(ctx)) === null || _c === void 0 ? void 0 : _c[r]) === null || _d === void 0 ? void 0 : _d[c];
+    const link = getCellHyperlink(ctx, r, c);
+    const cell = getFlowdata(ctx)?.[r]?.[c];
     if (!isEditing &&
         link == null &&
         (isMouseDown ||
-            !((_e = ctx.linkCard) === null || _e === void 0 ? void 0 : _e.isEditing) ||
+            !ctx.linkCard?.isEditing ||
             ctx.linkCard.sheetId !== ctx.currentSheetId)) {
         ctx.linkCard = undefined;
         return;
     }
     if (isEditing ||
-        (link != null && (!((_f = ctx.linkCard) === null || _f === void 0 ? void 0 : _f.isEditing) || isMouseDown)) ||
-        ((_g = ctx.linkCard) === null || _g === void 0 ? void 0 : _g.sheetId) !== ctx.currentSheetId) {
-        var col_pre = c - 1 === -1 ? 0 : ctx.visibledatacolumn[c - 1];
-        var row = ctx.visibledatarow[r];
+        (link != null && (!ctx.linkCard?.isEditing || isMouseDown)) ||
+        ctx.linkCard?.sheetId !== ctx.currentSheetId) {
+        const col_pre = c - 1 === -1 ? 0 : ctx.visibledatacolumn[c - 1];
+        const row = ctx.visibledatarow[r];
         ctx.linkCard = {
             sheetId: ctx.currentSheetId,
-            r: r,
-            c: c,
-            rc: "".concat(r, "_").concat(c),
-            originText: (cell === null || cell === void 0 ? void 0 : cell.v) == null ? "" : "".concat(cell.v),
-            originType: (link === null || link === void 0 ? void 0 : link.linkType) || "webpage",
-            originAddress: (link === null || link === void 0 ? void 0 : link.linkAddress) || "",
+            r,
+            c,
+            rc: `${r}_${c}`,
+            originText: cell?.v == null ? "" : `${cell.v}`,
+            originType: link?.linkType || "webpage",
+            originAddress: link?.linkAddress || "",
             position: {
                 cellLeft: col_pre,
                 cellBottom: row,
             },
-            isEditing: isEditing,
+            isEditing,
         };
     }
 }
 export function goToLink(ctx, r, c, linkType, linkAddress, scrollbarX, scrollbarY) {
-    var _a;
-    var currSheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
+    const currSheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
     if (currSheetIndex == null)
         return;
-    if (((_a = ctx.luckysheetfile[currSheetIndex].hyperlink) === null || _a === void 0 ? void 0 : _a["".concat(r, "_").concat(c)]) == null) {
+    if (ctx.luckysheetfile[currSheetIndex].hyperlink?.[`${r}_${c}`] == null) {
         return;
     }
     if (linkType === "webpage") {
         if (!/^http[s]?:\/\//.test(linkAddress)) {
-            linkAddress = "https://".concat(linkAddress);
+            linkAddress = `https://${linkAddress}`;
         }
         window.open(linkAddress);
     }
     else if (linkType === "sheet") {
-        var sheetId_1;
-        _.forEach(ctx.luckysheetfile, function (f) {
+        let sheetId;
+        _.forEach(ctx.luckysheetfile, (f) => {
             if (linkAddress === f.name) {
-                sheetId_1 = f.id;
+                sheetId = f.id;
             }
         });
-        if (sheetId_1 != null)
-            changeSheet(ctx, sheetId_1);
+        if (sheetId != null)
+            changeSheet(ctx, sheetId);
     }
     else {
-        var range = _.cloneDeep(getcellrange(ctx, linkAddress));
+        const range = _.cloneDeep(getcellrange(ctx, linkAddress));
         if (range == null)
             return;
-        var row_pre = range.row[0] - 1 === -1 ? 0 : ctx.visibledatarow[range.row[0] - 1];
-        var col_pre = range.column[0] - 1 === -1
+        const row_pre = range.row[0] - 1 === -1 ? 0 : ctx.visibledatarow[range.row[0] - 1];
+        const col_pre = range.column[0] - 1 === -1
             ? 0
             : ctx.visibledatacolumn[range.column[0] - 1];
         scrollbarX.scrollLeft = col_pre;
@@ -153,10 +147,10 @@ export function goToLink(ctx, r, c, linkType, linkAddress, scrollbarX, scrollbar
 export function isLinkValid(ctx, linkType, linkAddress) {
     if (!linkAddress)
         return { isValid: false, tooltip: "" };
-    var insertLink = locale(ctx).insertLink;
+    const { insertLink } = locale(ctx);
     if (linkType === "webpage") {
         if (!/^http[s]?:\/\//.test(linkAddress)) {
-            linkAddress = "https://".concat(linkAddress);
+            linkAddress = `https://${linkAddress}`;
         }
         if (
         // eslint-disable-next-line no-useless-escape
@@ -169,35 +163,34 @@ export function isLinkValid(ctx, linkType, linkAddress) {
     return { isValid: true, tooltip: "" };
 }
 export function onRangeSelectionModalMoveStart(ctx, globalCache, e) {
-    var box = document.querySelector("div.fortune-link-modify-modal.range-selection-modal");
+    const box = document.querySelector("div.fortune-link-modify-modal.range-selection-modal");
     if (!box)
         return;
-    var _a = box.getBoundingClientRect(), width = _a.width, height = _a.height;
-    var left = box.offsetLeft;
-    var top = box.offsetTop;
-    var initialPosition = { left: left, top: top, width: width, height: height };
+    const { width, height } = box.getBoundingClientRect();
+    const left = box.offsetLeft;
+    const top = box.offsetTop;
+    const initialPosition = { left, top, width, height };
     _.set(globalCache, "linkCard.rangeSelectionModal", {
         cursorMoveStartPosition: {
             x: e.pageX,
             y: e.pageY,
         },
-        initialPosition: initialPosition,
+        initialPosition,
     });
 }
 export function onRangeSelectionModalMove(globalCache, e) {
-    var _a;
-    var moveProps = (_a = globalCache.linkCard) === null || _a === void 0 ? void 0 : _a.rangeSelectionModal;
+    const moveProps = globalCache.linkCard?.rangeSelectionModal;
     if (moveProps == null)
         return;
-    var modal = document.querySelector("div.fortune-link-modify-modal.range-selection-modal");
-    var _b = moveProps.cursorMoveStartPosition, startX = _b.x, startY = _b.y;
-    var _c = moveProps.initialPosition, top = _c.top, left = _c.left;
+    const modal = document.querySelector("div.fortune-link-modify-modal.range-selection-modal");
+    const { x: startX, y: startY } = moveProps.cursorMoveStartPosition;
+    let { top, left } = moveProps.initialPosition;
     left += e.pageX - startX;
     top += e.pageY - startY;
     if (top < 0)
         top = 0;
-    modal.style.left = "".concat(left, "px");
-    modal.style.top = "".concat(top, "px");
+    modal.style.left = `${left}px`;
+    modal.style.top = `${top}px`;
 }
 export function onRangeSelectionModalMoveEnd(globalCache) {
     _.set(globalCache, "linkCard.rangeSelectionModal", undefined);

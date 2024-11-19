@@ -10783,7 +10783,7 @@ export default {
         { name: "चिली पेसो", pos: "before", value: "$" },
         { name: "सीएफए फ्रैंक बीईएसी", pos: "before", value: "FCFA" },
     ],
-    defaultFmt: function (currency) { return [
+    defaultFmt: (currency) => [
         { text: "स्वचालित", value: "General", example: "" },
         { text: "सादा टेक्स्ट", value: "@", example: "" },
         { text: "", value: "split", example: "" },
@@ -10793,10 +10793,10 @@ export default {
         { text: "", value: "split", example: "" },
         {
             text: "लेखांकन",
-            value: "".concat(currency, "(0.00)"),
-            example: "".concat(currency, "(1200.09)"),
+            value: `${currency}(0.00)`,
+            example: `${currency}(1200.09)`,
         },
-        { text: "मुद्रा", value: "".concat(currency, "0.00"), example: "".concat(currency, "1200.09") },
+        { text: "मुद्रा", value: `${currency}0.00`, example: `${currency}1200.09` },
         { text: "", value: "split", example: "" },
         { text: "दिनांक", value: "yyyy-MM-dd", example: "2017-11-29" },
         { text: "समय", value: "hh:mm AM/PM", example: "3:00 PM" },
@@ -10818,7 +10818,7 @@ export default {
             example: "",
             icon: "rightArrow",
         },
-    ]; },
+    ],
     dateFmtList: [
         {
             name: "1930-08-05",

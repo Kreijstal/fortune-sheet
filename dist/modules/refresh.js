@@ -2,10 +2,10 @@ import { getFlowdata } from "../context";
 import { execFunctionGroup } from "./formula";
 function runExecFunction(ctx, range, index, data) {
     ctx.formulaCache.execFunctionExist = [];
-    for (var s = 0; s < range.length; s += 1) {
-        for (var r = range[s].row[0]; r <= range[s].row[1]; r += 1) {
-            for (var c = range[s].column[0]; c <= range[s].column[1]; c += 1) {
-                ctx.formulaCache.execFunctionExist.push({ r: r, c: c, i: index });
+    for (let s = 0; s < range.length; s += 1) {
+        for (let r = range[s].row[0]; r <= range[s].row[1]; r += 1) {
+            for (let c = range[s].column[0]; c <= range[s].column[1]; c += 1) {
+                ctx.formulaCache.execFunctionExist.push({ r, c, i: index });
             }
         }
     }
@@ -14,8 +14,7 @@ function runExecFunction(ctx, range, index, data) {
     execFunctionGroup(ctx, null, null, null, null, data);
     ctx.formulaCache.execFunctionGlobalData = null;
 }
-export function jfrefreshgrid(ctx, data, range, isRunExecFunction) {
-    if (isRunExecFunction === void 0) { isRunExecFunction = true; }
+export function jfrefreshgrid(ctx, data, range, isRunExecFunction = true) {
     if (data == null) {
         data = getFlowdata(ctx);
     }

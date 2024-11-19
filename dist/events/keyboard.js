@@ -10,10 +10,9 @@ import { getNowDateTime, getSheetIndex, isAllowEdit } from "../utils";
 import { handleCopy } from "./copy";
 import { jfrefreshgrid } from "../modules/refresh";
 export function handleGlobalEnter(ctx, cellInput, e, canvas) {
-    var _a, _b, _c;
     // const flowdata = getFlowdata(ctx);
     if ((e.altKey || e.metaKey) && ctx.luckysheetCellUpdate.length > 0) {
-        var last = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1];
+        const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
         if (last && !_.isNil(last.row_focus) && !_.isNil(last.column_focus)) {
             // const row_index = last.row_focus;
             // const col_index = last.column_focus;
@@ -32,7 +31,7 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
         //     )
         //   );
         // } else {
-        var lastCellUpdate = _.clone(ctx.luckysheetCellUpdate);
+        const lastCellUpdate = _.clone(ctx.luckysheetCellUpdate);
         updateCell(ctx, ctx.luckysheetCellUpdate[0], ctx.luckysheetCellUpdate[1], cellInput, undefined, canvas);
         ctx.luckysheet_select_save = [
             {
@@ -61,10 +60,10 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
         // ) {
         //   return;
         // }
-        if (((_c = (_b = ctx.luckysheet_select_save) === null || _b === void 0 ? void 0 : _b.length) !== null && _c !== void 0 ? _c : 0) > 0) {
-            var last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
-            var row_index = last.row_focus;
-            var col_index = last.column_focus;
+        if ((ctx.luckysheet_select_save?.length ?? 0) > 0) {
+            const last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
+            const row_index = last.row_focus;
+            const col_index = last.column_focus;
             ctx.luckysheetCellUpdate = [row_index, col_index];
             // luckysheetupdateCell(row_index, col_index, ctx.flowdata);
             e.preventDefault();
@@ -72,8 +71,7 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
     }
 }
 function moveToEdge(sheetData, key, curr, rowDelta, colDelta, startR, endR, startC, endC, maxRow, maxCol) {
-    var _a, _b, _c, _d, _e, _f;
-    var selectedLimit = -1;
+    let selectedLimit = -1;
     if (key === "ArrowUp")
         selectedLimit = startR - 1;
     else if (key === "ArrowDown")
@@ -82,13 +80,13 @@ function moveToEdge(sheetData, key, curr, rowDelta, colDelta, startR, endR, star
         selectedLimit = startC - 1;
     else if (key === "ArrowRight")
         selectedLimit = endC + 1;
-    var maxRowCol = colDelta === 0 ? maxRow : maxCol;
-    var r = colDelta === 0 ? selectedLimit : curr;
-    var c = colDelta === 0 ? curr : selectedLimit;
+    const maxRowCol = colDelta === 0 ? maxRow : maxCol;
+    let r = colDelta === 0 ? selectedLimit : curr;
+    let c = colDelta === 0 ? curr : selectedLimit;
     while (r >= 0 && c >= 0 && (colDelta === 0 ? r : c) < maxRowCol - 1) {
-        if (!_.isNil((_b = (_a = sheetData === null || sheetData === void 0 ? void 0 : sheetData[r]) === null || _a === void 0 ? void 0 : _a[c]) === null || _b === void 0 ? void 0 : _b.v) &&
-            (_.isNil((_d = (_c = sheetData === null || sheetData === void 0 ? void 0 : sheetData[r - rowDelta]) === null || _c === void 0 ? void 0 : _c[c - colDelta]) === null || _d === void 0 ? void 0 : _d.v) ||
-                _.isNil((_f = (_e = sheetData === null || sheetData === void 0 ? void 0 : sheetData[r + rowDelta]) === null || _e === void 0 ? void 0 : _e[c + colDelta]) === null || _f === void 0 ? void 0 : _f.v))) {
+        if (!_.isNil(sheetData?.[r]?.[c]?.v) &&
+            (_.isNil(sheetData?.[r - rowDelta]?.[c - colDelta]?.v) ||
+                _.isNil(sheetData?.[r + rowDelta]?.[c + colDelta]?.v))) {
             break;
         }
         else {
@@ -101,33 +99,33 @@ function moveToEdge(sheetData, key, curr, rowDelta, colDelta, startR, endR, star
 function handleControlPlusArrowKey(ctx, e, shiftPressed) {
     if (ctx.luckysheetCellUpdate.length > 0)
         return;
-    var idx = getSheetIndex(ctx, ctx.currentSheetId);
+    const idx = getSheetIndex(ctx, ctx.currentSheetId);
     if (_.isNil(idx))
         return;
-    var file = ctx.luckysheetfile[idx];
+    const file = ctx.luckysheetfile[idx];
     if (!file || !file.row || !file.column)
         return;
-    var maxRow = file.row;
-    var maxCol = file.column;
-    var last;
+    const maxRow = file.row;
+    const maxCol = file.column;
+    let last;
     if (ctx.luckysheet_select_save && ctx.luckysheet_select_save.length > 0)
         last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
     if (!last)
         return;
-    var currR = last.row_focus;
-    var currC = last.column_focus;
+    const currR = last.row_focus;
+    const currC = last.column_focus;
     if (_.isNil(currR) || _.isNil(currC))
         return;
-    var startR = last.row[0];
-    var endR = last.row[1];
-    var startC = last.column[0];
-    var endC = last.column[1];
-    var horizontalOffset = currC - endC !== 0 ? currC - endC : currC - startC;
-    var verticalOffset = currR - endR !== 0 ? currR - endR : currR - startR;
-    var sheetData = file.data;
+    const startR = last.row[0];
+    const endR = last.row[1];
+    const startC = last.column[0];
+    const endC = last.column[1];
+    const horizontalOffset = currC - endC !== 0 ? currC - endC : currC - startC;
+    const verticalOffset = currR - endR !== 0 ? currR - endR : currR - startR;
+    const sheetData = file.data;
     if (!sheetData)
         return;
-    var selectedLimit;
+    let selectedLimit;
     switch (e.key) {
         case "ArrowUp":
             selectedLimit = moveToEdge(sheetData, e.key, currC, -1, 0, startR, endR, startC, endC, maxRow, maxCol);
@@ -174,27 +172,26 @@ function handleControlPlusArrowKey(ctx, e, shiftPressed) {
     }
 }
 export function handleWithCtrlOrMetaKey(ctx, cache, e, cellInput, fxInput, handleUndo, handleRedo) {
-    var _a, _b, _c, _d;
-    var flowdata = getFlowdata(ctx);
+    const flowdata = getFlowdata(ctx);
     if (!flowdata)
         return;
     if (e.shiftKey) {
-        ctx.luckysheet_shiftpositon = _.cloneDeep((_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1]);
+        ctx.luckysheet_shiftpositon = _.cloneDeep(ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]);
         ctx.luckysheet_shiftkeydown = true;
         if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
             // Ctrl + Shift + 方向键  调整选区
             handleControlPlusArrowKey(ctx, e, true);
         }
         else if (_.includes([";", '"', ":", "'"], e.key)) {
-            var last = (_b = ctx.luckysheet_select_save) === null || _b === void 0 ? void 0 : _b[ctx.luckysheet_select_save.length - 1];
+            const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
             if (!last)
                 return;
-            var row_index = last.row_focus;
-            var col_index = last.column_focus;
+            const row_index = last.row_focus;
+            const col_index = last.column_focus;
             updateCell(ctx, row_index, col_index, cellInput);
             ctx.luckysheetCellUpdate = [row_index, col_index];
             cache.ignoreWriteCell = true;
-            var value = getNowDateTime(2);
+            const value = getNowDateTime(2);
             cellInput.innerText = value;
             // $("#luckysheet-rich-text-editor").html(value);
             // luckysheetRangeLast($("#luckysheet-rich-text-editor")[0]);
@@ -244,7 +241,7 @@ export function handleWithCtrlOrMetaKey(ctx, cache, e, cellInput, fxInput, handl
         // if ($(event.target).hasClass("formulaInputFocus")) {
         //   return;
         // }
-        if (((_d = (_c = ctx.luckysheet_select_save) === null || _c === void 0 ? void 0 : _c.length) !== null && _d !== void 0 ? _d : 0) > 1) {
+        if ((ctx.luckysheet_select_save?.length ?? 0) > 1) {
             // if (isEditMode()) {
             //   alert(locale_drag.noPaste);
             // } else {
@@ -263,18 +260,18 @@ export function handleWithCtrlOrMetaKey(ctx, cache, e, cellInput, fxInput, handl
         if (ctx.luckysheetPaintModelOn) {
             cancelPaintModel(ctx);
         }
-        var selection = ctx.luckysheet_select_save;
+        const selection = ctx.luckysheet_select_save;
         if (!selection || _.isEmpty(selection)) {
             return;
         }
         // 复制范围内包含部分合并单元格，提示
         if (ctx.config.merge != null) {
-            var has_PartMC = false;
-            for (var s = 0; s < selection.length; s += 1) {
-                var r1 = selection[s].row[0];
-                var r2 = selection[s].row[1];
-                var c1 = selection[s].column[0];
-                var c2 = selection[s].column[1];
+            let has_PartMC = false;
+            for (let s = 0; s < selection.length; s += 1) {
+                const r1 = selection[s].row[0];
+                const r2 = selection[s].row[1];
+                const c1 = selection[s].column[0];
+                const c2 = selection[s].column[1];
                 has_PartMC = hasPartMC(ctx, ctx.config, r1, r2, c1, c2);
                 if (has_PartMC) {
                     break;
@@ -395,13 +392,12 @@ export function handleWithCtrlOrMetaKey(ctx, cache, e, cellInput, fxInput, handl
     e.preventDefault();
 }
 function handleShiftWithArrowKey(ctx, e) {
-    var _a;
     if (ctx.luckysheetCellUpdate.length > 0
     // || $(event.target).hasClass("formulaInputFocus")
     ) {
         return;
     }
-    ctx.luckysheet_shiftpositon = _.cloneDeep((_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1]);
+    ctx.luckysheet_shiftpositon = _.cloneDeep(ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]);
     ctx.luckysheet_shiftkeydown = true;
     /*
     if (
@@ -440,7 +436,7 @@ export function handleArrowKey(ctx, e) {
     ) {
         return;
     }
-    var moveCount = hideCRCount(ctx, e.key);
+    const moveCount = hideCRCount(ctx, e.key);
     switch (e.key) {
         case "ArrowUp":
             moveHighlightCell(ctx, "down", -moveCount, "rangeOfSelect");
@@ -459,17 +455,16 @@ export function handleArrowKey(ctx, e) {
     }
 }
 export function handleGlobalKeyDown(ctx, cellInput, fxInput, e, cache, handleUndo, handleRedo, canvas) {
-    var _a;
     ctx.luckysheet_select_status = false;
-    var kcode = e.keyCode;
-    var kstr = e.key;
+    const kcode = e.keyCode;
+    const kstr = e.key;
     if (!_.isEmpty(ctx.contextMenu) || ctx.filterContextMenu) {
         return;
     }
     if (kstr === "Escape" && !!ctx.luckysheet_selection_range) {
         ctx.luckysheet_selection_range = [];
     }
-    var allowEdit = isAllowEdit(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (
     // $("#luckysheet-modal-dialog-mask").is(":visible") ||
     // $(event.target).hasClass("luckysheet-mousedown-cancel") ||
@@ -559,11 +554,11 @@ export function handleGlobalKeyDown(ctx, cellInput, fxInput, e, cache, handleUnd
         if (ctx.luckysheetCellUpdate.length > 0) {
             return;
         }
-        var last = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1];
+        const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
         if (!last)
             return;
-        var row_index = last.row_focus;
-        var col_index = last.column_focus;
+        const row_index = last.row_focus;
+        const col_index = last.column_focus;
         ctx.luckysheetCellUpdate = [row_index, col_index];
         e.preventDefault();
     }
@@ -640,9 +635,9 @@ export function handleGlobalKeyDown(ctx, cellInput, fxInput, e, cache, handleUnd
                 kstr !== "Win" &&
                 kcode !== 18) {
                 // 激活输入框，并将按键输入到输入框
-                var last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
-                var row_index = last.row_focus;
-                var col_index = last.column_focus;
+                const last = ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
+                const row_index = last.row_focus;
+                const col_index = last.column_focus;
                 ctx.luckysheetCellUpdate = [row_index, col_index];
                 cache.overwriteCell = true;
                 // if (kstr === "Backspace") {
@@ -658,7 +653,7 @@ export function handleGlobalKeyDown(ctx, cellInput, fxInput, e, cache, handleUnd
         }
     }
     if (cellInput !== document.activeElement) {
-        cellInput === null || cellInput === void 0 ? void 0 : cellInput.focus();
+        cellInput?.focus();
     }
     e.stopPropagation();
 }

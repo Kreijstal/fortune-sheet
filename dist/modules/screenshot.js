@@ -29,12 +29,12 @@ export function handleScreenShot(ctx) {
     }
     // 截图范围内包含部分合并单元格，提示
     if (ctx.config.merge != null) {
-        var has_PartMC = false;
-        for (var s = 0; s < ctx.luckysheet_select_save.length; s += 1) {
-            var r1 = ctx.luckysheet_select_save[s].row[0];
-            var r2 = ctx.luckysheet_select_save[s].row[1];
-            var c1 = ctx.luckysheet_select_save[s].column[0];
-            var c2 = ctx.luckysheet_select_save[s].column[1];
+        let has_PartMC = false;
+        for (let s = 0; s < ctx.luckysheet_select_save.length; s += 1) {
+            const r1 = ctx.luckysheet_select_save[s].row[0];
+            const r2 = ctx.luckysheet_select_save[s].row[1];
+            const c1 = ctx.luckysheet_select_save[s].column[0];
+            const c2 = ctx.luckysheet_select_save[s].column[1];
             has_PartMC = hasPartMC(ctx, ctx.config, r1, r2, c1, c2);
             if (has_PartMC) {
                 break;
@@ -52,12 +52,12 @@ export function handleScreenShot(ctx) {
             return undefined;
         }
     }
-    var st_r = ctx.luckysheet_select_save[0].row[0];
-    var ed_r = ctx.luckysheet_select_save[0].row[1];
-    var st_c = ctx.luckysheet_select_save[0].column[0];
-    var ed_c = ctx.luckysheet_select_save[0].column[1];
-    var scrollHeight;
-    var rh_height;
+    const st_r = ctx.luckysheet_select_save[0].row[0];
+    const ed_r = ctx.luckysheet_select_save[0].row[1];
+    const st_c = ctx.luckysheet_select_save[0].column[0];
+    const ed_c = ctx.luckysheet_select_save[0].column[1];
+    let scrollHeight;
+    let rh_height;
     if (st_r - 1 < 0) {
         scrollHeight = 0;
         rh_height = ctx.visibledatarow[ed_r];
@@ -66,8 +66,8 @@ export function handleScreenShot(ctx) {
         scrollHeight = ctx.visibledatarow[st_r - 1];
         rh_height = ctx.visibledatarow[ed_r] - ctx.visibledatarow[st_r - 1];
     }
-    var scrollWidth;
-    var ch_width;
+    let scrollWidth;
+    let ch_width;
     if (st_c - 1 < 0) {
         scrollWidth = 0;
         ch_width = ctx.visibledatacolumn[ed_c];
@@ -76,22 +76,22 @@ export function handleScreenShot(ctx) {
         scrollWidth = ctx.visibledatacolumn[st_c - 1];
         ch_width = ctx.visibledatacolumn[ed_c] - ctx.visibledatacolumn[st_c - 1];
     }
-    var newCanvasElement = document.createElement("canvas");
+    const newCanvasElement = document.createElement("canvas");
     newCanvasElement.width = Math.ceil(ch_width * devicePixelRatio);
     newCanvasElement.height = Math.ceil(rh_height * devicePixelRatio);
-    newCanvasElement.style.width = "".concat(ch_width, "px");
-    newCanvasElement.style.height = "".concat(rh_height, "px");
-    var newCanvas = new Canvas(newCanvasElement, ctx);
+    newCanvasElement.style.width = `${ch_width}px`;
+    newCanvasElement.style.height = `${rh_height}px`;
+    const newCanvas = new Canvas(newCanvasElement, ctx);
     newCanvas.drawMain({
-        scrollWidth: scrollWidth,
-        scrollHeight: scrollHeight,
+        scrollWidth,
+        scrollHeight,
         drawWidth: ch_width,
         drawHeight: rh_height,
         offsetLeft: 1,
         offsetTop: 1,
         clear: true,
     });
-    var ctx_newCanvas = newCanvasElement.getContext("2d");
+    const ctx_newCanvas = newCanvasElement.getContext("2d");
     if (ctx_newCanvas == null)
         return undefined;
     // 补上 左边框和上边框
@@ -109,8 +109,8 @@ export function handleScreenShot(ctx) {
     ctx_newCanvas.strokeStyle = defaultStyle.strokeStyle;
     ctx_newCanvas.stroke();
     ctx_newCanvas.closePath();
-    var image = new Image();
-    var url = newCanvasElement.toDataURL("image/png");
+    const image = new Image();
+    const url = newCanvasElement.toDataURL("image/png");
     image.src = url;
     if (ch_width > rh_height) {
         image.style.width = "100%";

@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { getCellValue, getFontStyleByCell } from "./cell";
 import { selectTextContent, selectTextContentCross } from "./cursor";
-export var attrToCssName = {
+export const attrToCssName = {
     bl: "font-weight",
     it: "font-style",
     ff: "font-family",
@@ -10,7 +10,7 @@ export var attrToCssName = {
     cl: "text-decoration",
     un: "border-bottom",
 };
-export var inlineStyleAffectAttribute = {
+export const inlineStyleAffectAttribute = {
     bl: 1,
     it: 1,
     ff: 1,
@@ -19,7 +19,7 @@ export var inlineStyleAffectAttribute = {
     fs: 1,
     fc: 1,
 };
-export var inlineStyleAffectCssName = {
+export const inlineStyleAffectCssName = {
     "font-weight": 1,
     "font-style": 1,
     "font-family": 1,
@@ -29,20 +29,18 @@ export var inlineStyleAffectCssName = {
     color: 1,
 };
 export function isInlineStringCell(cell) {
-    var _a, _b, _c, _d;
-    return ((_a = cell === null || cell === void 0 ? void 0 : cell.ct) === null || _a === void 0 ? void 0 : _a.t) === "inlineStr" && ((_d = (_c = (_b = cell === null || cell === void 0 ? void 0 : cell.ct) === null || _b === void 0 ? void 0 : _b.s) === null || _c === void 0 ? void 0 : _c.length) !== null && _d !== void 0 ? _d : 0) > 0;
+    return cell?.ct?.t === "inlineStr" && (cell?.ct?.s?.length ?? 0) > 0;
 }
 export function isInlineStringCT(ct) {
-    var _a, _b;
-    return (ct === null || ct === void 0 ? void 0 : ct.t) === "inlineStr" && ((_b = (_a = ct === null || ct === void 0 ? void 0 : ct.s) === null || _a === void 0 ? void 0 : _a.length) !== null && _b !== void 0 ? _b : 0) > 0;
+    return ct?.t === "inlineStr" && (ct?.s?.length ?? 0) > 0;
 }
 export function getInlineStringNoStyle(r, c, data) {
-    var ct = getCellValue(r, c, data, "ct");
+    const ct = getCellValue(r, c, data, "ct");
     if (isInlineStringCT(ct)) {
-        var strings = ct.s;
-        var value = "";
-        for (var i = 0; i < strings.length; i += 1) {
-            var strObj = strings[i];
+        const strings = ct.s;
+        let value = "";
+        for (let i = 0; i < strings.length; i += 1) {
+            const strObj = strings[i];
             if (strObj.v) {
                 value += strObj.v;
             }
@@ -55,8 +53,8 @@ export function convertCssToStyleList(cssText, originCell) {
     if (_.isEmpty(cssText)) {
         return {};
     }
-    var cssTextArray = cssText.split(";");
-    var styleList = {
+    const cssTextArray = cssText.split(";");
+    const styleList = {
         // ff: locale_fontarray[0], // font family
         fc: originCell.fc || "#000000",
         fs: originCell.fs || 10,
@@ -66,10 +64,10 @@ export function convertCssToStyleList(cssText, originCell) {
         it: originCell.it || 0,
         ff: originCell.ff || 0, // font family
     };
-    cssTextArray.forEach(function (s) {
+    cssTextArray.forEach((s) => {
         s = s.toLowerCase();
-        var key = _.trim(s.substring(0, s.indexOf(":")));
-        var value = _.trim(s.substring(s.indexOf(":") + 1));
+        const key = _.trim(s.substring(0, s.indexOf(":")));
+        const value = _.trim(s.substring(s.indexOf(":") + 1));
         if (key === "font-weight") {
             if (value === "bold") {
                 styleList.bl = 1;
@@ -112,15 +110,15 @@ export function convertCssToStyleList(cssText, originCell) {
 export function convertSpanToShareString(
 // eslint-disable-next-line no-undef
 $dom, originCell) {
-    var styles = [];
-    var preStyleList;
-    var preStyleListString = null;
-    for (var i = 0; i < $dom.length; i += 1) {
-        var span = $dom[i];
-        var styleList = convertCssToStyleList(span.style.cssText, originCell);
-        var curStyleListString = JSON.stringify(styleList);
+    const styles = [];
+    let preStyleList;
+    let preStyleListString = null;
+    for (let i = 0; i < $dom.length; i += 1) {
+        const span = $dom[i];
+        const styleList = convertCssToStyleList(span.style.cssText, originCell);
+        const curStyleListString = JSON.stringify(styleList);
         // let v = span.innerHTML;
-        var v = span.innerText;
+        let v = span.innerText;
         v = v.replace(/\n/g, "\r\n");
         if (i === $dom.length - 1) {
             if (v.endsWith("\r\n") && !v.endsWith("\r\n\r\n")) {
@@ -143,26 +141,26 @@ export function updateInlineStringFormatOutside(cell, key, value) {
     if (_.isNil(cell.ct)) {
         return;
     }
-    var s = cell.ct.s;
+    const { s } = cell.ct;
     if (_.isNil(s)) {
         return;
     }
-    for (var i = 0; i < s.length; i += 1) {
-        var item = s[i];
+    for (let i = 0; i < s.length; i += 1) {
+        const item = s[i];
         item[key] = value;
     }
 }
 function getClassWithcss(cssText, ukey) {
-    var cssTextArray = cssText.split(";");
+    const cssTextArray = cssText.split(";");
     if (ukey == null || ukey.length === 0) {
         return cssText;
     }
     if (cssText.indexOf(ukey) > -1) {
-        for (var i = 0; i < cssTextArray.length; i += 1) {
-            var s = cssTextArray[i];
+        for (let i = 0; i < cssTextArray.length; i += 1) {
+            let s = cssTextArray[i];
             s = s.toLowerCase();
-            var key = _.trim(s.substring(0, s.indexOf(":")));
-            var value = _.trim(s.substring(s.indexOf(":") + 1));
+            const key = _.trim(s.substring(0, s.indexOf(":")));
+            const value = _.trim(s.substring(s.indexOf(":") + 1));
             if (key === ukey) {
                 return value;
             }
@@ -171,35 +169,35 @@ function getClassWithcss(cssText, ukey) {
     return "";
 }
 function upsetClassWithCss(cssText, ukey, uvalue) {
-    var cssTextArray = cssText.split(";");
-    var newCss = "";
+    const cssTextArray = cssText.split(";");
+    let newCss = "";
     if (ukey == null || ukey.length === 0) {
         return cssText;
     }
     if (cssText.indexOf(ukey) > -1) {
-        for (var i = 0; i < cssTextArray.length; i += 1) {
-            var s = cssTextArray[i];
+        for (let i = 0; i < cssTextArray.length; i += 1) {
+            let s = cssTextArray[i];
             s = s.toLowerCase();
-            var key = _.trim(s.substring(0, s.indexOf(":")));
-            var value = _.trim(s.substring(s.indexOf(":") + 1));
+            const key = _.trim(s.substring(0, s.indexOf(":")));
+            const value = _.trim(s.substring(s.indexOf(":") + 1));
             if (key === ukey) {
-                newCss += "".concat(key, ":").concat(uvalue, ";");
+                newCss += `${key}:${uvalue};`;
             }
             else if (key.length > 0) {
-                newCss += "".concat(key, ":").concat(value, ";");
+                newCss += `${key}:${value};`;
             }
         }
     }
     else if (ukey.length > 0) {
-        cssText += "".concat(ukey, ":").concat(uvalue, ";");
+        cssText += `${ukey}:${uvalue};`;
         newCss = cssText;
     }
     return newCss;
 }
 function removeClassWidthCss(cssText, ukey) {
-    var cssTextArray = cssText.split(";");
-    var newCss = "";
-    var oUkey = ukey;
+    const cssTextArray = cssText.split(";");
+    let newCss = "";
+    const oUkey = ukey;
     if (ukey == null || ukey.length === 0) {
         return cssText;
     }
@@ -208,18 +206,18 @@ function removeClassWidthCss(cssText, ukey) {
         ukey = attrToCssName[ukey];
     }
     if (cssText.indexOf(ukey) > -1) {
-        for (var i = 0; i < cssTextArray.length; i += 1) {
-            var s = cssTextArray[i];
+        for (let i = 0; i < cssTextArray.length; i += 1) {
+            let s = cssTextArray[i];
             s = s.toLowerCase();
-            var key = _.trim(s.substring(0, s.indexOf(":")));
-            var value = _.trim(s.substring(s.indexOf(":") + 1));
+            const key = _.trim(s.substring(0, s.indexOf(":")));
+            const value = _.trim(s.substring(s.indexOf(":") + 1));
             if (key === ukey ||
                 (oUkey === "cl" && key === "lucky-strike") ||
                 (oUkey === "un" && key === "lucky-underline")) {
                 continue;
             }
             else if (key.length > 0) {
-                newCss += "".concat(key, ":").concat(value, ";");
+                newCss += `${key}:${value};`;
             }
         }
     }
@@ -229,151 +227,149 @@ function removeClassWidthCss(cssText, ukey) {
     return newCss;
 }
 function getCssText(cssText, attr, value) {
-    var styleObj = {};
+    const styleObj = {};
     styleObj[attr] = value;
     if (attr === "un") {
-        var fontColor = getClassWithcss(cssText, "color");
+        let fontColor = getClassWithcss(cssText, "color");
         if (fontColor === "") {
             fontColor = "#000000";
         }
-        var fs = getClassWithcss(cssText, "font-size");
+        let fs = getClassWithcss(cssText, "font-size");
         if (fs === "") {
             fs = "11";
         }
         styleObj._fontSize = Number(fs);
         styleObj._color = fontColor;
     }
-    var s = getFontStyleByCell(styleObj, undefined, undefined, false);
-    var ukey = _.kebabCase(Object.keys(s)[0]);
-    var uvalue = Object.values(s)[0];
+    const s = getFontStyleByCell(styleObj, undefined, undefined, false);
+    const ukey = _.kebabCase(Object.keys(s)[0]);
+    const uvalue = Object.values(s)[0];
     // let cssText = span.style.cssText;
     cssText = removeClassWidthCss(cssText, attr);
     cssText = upsetClassWithCss(cssText, ukey, uvalue);
     return cssText;
 }
-function extendCssText(origin, cover, isLimit) {
-    if (isLimit === void 0) { isLimit = true; }
-    var originArray = origin.split(";");
-    var coverArray = cover.split(";");
-    var newCss = "";
-    var addKeyList = {};
-    for (var i = 0; i < originArray.length; i += 1) {
-        var so = originArray[i];
-        var isAdd = true;
+function extendCssText(origin, cover, isLimit = true) {
+    const originArray = origin.split(";");
+    const coverArray = cover.split(";");
+    let newCss = "";
+    const addKeyList = {};
+    for (let i = 0; i < originArray.length; i += 1) {
+        let so = originArray[i];
+        let isAdd = true;
         so = so.toLowerCase();
-        var okey = _.trim(so.substring(0, so.indexOf(":")));
+        const okey = _.trim(so.substring(0, so.indexOf(":")));
         /* 不设置文字的大小，解决设置删除线等后字体变大的问题 */
         if (okey === "font-size") {
             continue;
         }
-        var ovalue = _.trim(so.substring(so.indexOf(":") + 1));
+        const ovalue = _.trim(so.substring(so.indexOf(":") + 1));
         if (isLimit) {
             if (!(okey in inlineStyleAffectCssName)) {
                 continue;
             }
         }
-        for (var a = 0; a < coverArray.length; a += 1) {
-            var sc = coverArray[a];
+        for (let a = 0; a < coverArray.length; a += 1) {
+            let sc = coverArray[a];
             sc = sc.toLowerCase();
-            var ckey = _.trim(sc.substring(0, sc.indexOf(":")));
-            var cvalue = _.trim(sc.substring(sc.indexOf(":") + 1));
+            const ckey = _.trim(sc.substring(0, sc.indexOf(":")));
+            const cvalue = _.trim(sc.substring(sc.indexOf(":") + 1));
             if (okey === ckey) {
-                newCss += "".concat(ckey, ":").concat(cvalue, ";");
+                newCss += `${ckey}:${cvalue};`;
                 isAdd = false;
                 continue;
             }
         }
         if (isAdd) {
-            newCss += "".concat(okey, ":").concat(ovalue, ";");
+            newCss += `${okey}:${ovalue};`;
         }
         addKeyList[okey] = 1;
     }
-    for (var a = 0; a < coverArray.length; a += 1) {
-        var sc = coverArray[a];
+    for (let a = 0; a < coverArray.length; a += 1) {
+        let sc = coverArray[a];
         sc = sc.toLowerCase();
-        var ckey = _.trim(sc.substring(0, sc.indexOf(":")));
-        var cvalue = _.trim(sc.substring(sc.indexOf(":") + 1));
+        const ckey = _.trim(sc.substring(0, sc.indexOf(":")));
+        const cvalue = _.trim(sc.substring(sc.indexOf(":") + 1));
         if (isLimit) {
             if (!(ckey in inlineStyleAffectCssName)) {
                 continue;
             }
         }
         if (!(ckey in addKeyList)) {
-            newCss += "".concat(ckey, ":").concat(cvalue, ";");
+            newCss += `${ckey}:${cvalue};`;
         }
     }
     return newCss;
 }
 export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
-    var _a, _b, _c;
     // let s = ctx.inlineStringEditCache;
-    var w = window.getSelection();
+    const w = window.getSelection();
     if (!w)
         return;
     if (w.rangeCount === 0)
         return;
-    var range = w.getRangeAt(0);
-    var $textEditor = cellInput;
+    const range = w.getRangeAt(0);
+    const $textEditor = cellInput;
     if (range.collapsed === true) {
         return;
     }
-    var endContainer = range.endContainer;
-    var startContainer = range.startContainer;
-    var endOffset = range.endOffset;
-    var startOffset = range.startOffset;
+    const { endContainer } = range;
+    const { startContainer } = range;
+    const { endOffset } = range;
+    const { startOffset } = range;
     if ($textEditor) {
         if (startContainer === endContainer) {
-            var span = startContainer.parentNode;
-            var spanIndex = void 0;
-            var inherit = false;
-            var content = (span === null || span === void 0 ? void 0 : span.innerHTML) || "";
-            var fullContent = $textEditor.innerHTML;
+            const span = startContainer.parentNode;
+            let spanIndex;
+            let inherit = false;
+            const content = span?.innerHTML || "";
+            const fullContent = $textEditor.innerHTML;
             if (fullContent.substring(0, 5) !== "<span") {
                 inherit = true;
             }
             if (span) {
-                var left = "";
-                var mid = "";
-                var right = "";
-                var s1 = 0;
-                var s2 = startOffset;
-                var s3 = endOffset;
-                var s4 = content.length;
+                let left = "";
+                let mid = "";
+                let right = "";
+                const s1 = 0;
+                const s2 = startOffset;
+                const s3 = endOffset;
+                const s4 = content.length;
                 left = content.substring(s1, s2);
                 mid = content.substring(s2, s3);
                 right = content.substring(s3, s4);
-                var cont = "";
+                let cont = "";
                 if (left !== "") {
-                    var cssText = span.style.cssText;
+                    let { cssText } = span.style;
                     if (inherit) {
-                        var box = span.closest("#luckysheet-input-box");
+                        const box = span.closest("#luckysheet-input-box");
                         if (box != null) {
                             cssText = extendCssText(box.style.cssText, cssText);
                         }
                     }
-                    cont += "<span style='".concat(cssText, "'>").concat(left, "</span>");
+                    cont += `<span style='${cssText}'>${left}</span>`;
                 }
                 if (mid !== "") {
-                    var cssText = getCssText(span.style.cssText, attr, value);
+                    let cssText = getCssText(span.style.cssText, attr, value);
                     if (inherit) {
-                        var box = span.closest("#luckysheet-input-box");
+                        const box = span.closest("#luckysheet-input-box");
                         if (box != null) {
                             cssText = extendCssText(box.style.cssText, cssText);
                         }
                     }
-                    cont += "<span style='".concat(cssText, "'>").concat(mid, "</span>");
+                    cont += `<span style='${cssText}'>${mid}</span>`;
                 }
                 if (right !== "") {
-                    var cssText = span.style.cssText;
+                    let { cssText } = span.style;
                     if (inherit) {
-                        var box = span.closest("#luckysheet-input-box");
+                        const box = span.closest("#luckysheet-input-box");
                         if (box != null) {
                             cssText = extendCssText(box.style.cssText, cssText);
                         }
                     }
-                    cont += "<span style='".concat(cssText, "'>").concat(right, "</span>");
+                    cont += `<span style='${cssText}'>${right}</span>`;
                 }
-                if (((_a = startContainer.parentElement) === null || _a === void 0 ? void 0 : _a.tagName) === "SPAN") {
+                if (startContainer.parentElement?.tagName === "SPAN") {
                     spanIndex = _.indexOf($textEditor.querySelectorAll("span"), span);
                     span.outerHTML = cont;
                 }
@@ -381,7 +377,7 @@ export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
                     spanIndex = 0;
                     span.innerHTML = cont;
                 }
-                var seletedNodeIndex = 0;
+                let seletedNodeIndex = 0;
                 if (s1 === s2) {
                     seletedNodeIndex = spanIndex;
                 }
@@ -392,66 +388,66 @@ export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
             }
         }
         else {
-            if (((_b = startContainer.parentElement) === null || _b === void 0 ? void 0 : _b.tagName) === "SPAN" &&
-                ((_c = endContainer.parentElement) === null || _c === void 0 ? void 0 : _c.tagName) === "SPAN") {
-                var startSpan = startContainer.parentNode;
-                var endSpan = endContainer.parentNode;
-                var allSpans = $textEditor.querySelectorAll("span");
-                var startSpanIndex = _.indexOf(allSpans, startSpan);
-                var endSpanIndex = _.indexOf(allSpans, endSpan);
-                var startContent = (startSpan === null || startSpan === void 0 ? void 0 : startSpan.innerHTML) || "";
-                var endContent = (endSpan === null || endSpan === void 0 ? void 0 : endSpan.innerHTML) || "";
-                var sleft = "";
-                var sright = "";
-                var eleft = "";
-                var eright = "";
-                var s1 = 0;
-                var s2 = startOffset;
-                var s3 = endOffset;
-                var s4 = endContent.length;
+            if (startContainer.parentElement?.tagName === "SPAN" &&
+                endContainer.parentElement?.tagName === "SPAN") {
+                const startSpan = startContainer.parentNode;
+                const endSpan = endContainer.parentNode;
+                const allSpans = $textEditor.querySelectorAll("span");
+                const startSpanIndex = _.indexOf(allSpans, startSpan);
+                const endSpanIndex = _.indexOf(allSpans, endSpan);
+                const startContent = startSpan?.innerHTML || "";
+                const endContent = endSpan?.innerHTML || "";
+                let sleft = "";
+                let sright = "";
+                let eleft = "";
+                let eright = "";
+                const s1 = 0;
+                const s2 = startOffset;
+                const s3 = endOffset;
+                const s4 = endContent.length;
                 sleft = startContent.substring(s1, s2);
                 sright = startContent.substring(s2, startContent.length);
                 eleft = endContent.substring(0, s3);
                 eright = endContent.substring(s3, s4);
-                var spans = $textEditor.querySelectorAll("span");
+                let spans = $textEditor.querySelectorAll("span");
                 // const replaceSpans = spans.slice(startSpanIndex, endSpanIndex + 1);
-                var cont = "";
-                for (var i = 0; i < startSpanIndex; i += 1) {
-                    var span = spans[i];
-                    var content = span.innerHTML;
-                    cont += "<span style='".concat(span.style.cssText, "'>").concat(content, "</span>");
+                let cont = "";
+                for (let i = 0; i < startSpanIndex; i += 1) {
+                    const span = spans[i];
+                    const content = span.innerHTML;
+                    cont += `<span style='${span.style.cssText}'>${content}</span>`;
                 }
                 if (sleft !== "") {
-                    cont += "<span style='".concat(startSpan.style.cssText, "'>").concat(sleft, "</span>");
+                    cont += `<span style='${startSpan.style.cssText}'>${sleft}</span>`;
                 }
                 if (sright !== "") {
-                    var cssText = getCssText(startSpan.style.cssText, attr, value);
-                    cont += "<span style='".concat(cssText, "'>").concat(sright, "</span>");
+                    const cssText = getCssText(startSpan.style.cssText, attr, value);
+                    cont += `<span style='${cssText}'>${sright}</span>`;
                 }
                 if (startSpanIndex < endSpanIndex) {
-                    for (var i = startSpanIndex + 1; i < endSpanIndex; i += 1) {
-                        var span = spans[i];
-                        var content = span.innerHTML;
-                        cont += "<span style='".concat(span.style.cssText, "'>").concat(content, "</span>");
+                    for (let i = startSpanIndex + 1; i < endSpanIndex; i += 1) {
+                        const span = spans[i];
+                        const content = span.innerHTML;
+                        cont += `<span style='${span.style.cssText}'>${content}</span>`;
                     }
                 }
                 if (eleft !== "") {
-                    var cssText = getCssText(endSpan.style.cssText, attr, value);
-                    cont += "<span style='".concat(cssText, "'>").concat(eleft, "</span>");
+                    const cssText = getCssText(endSpan.style.cssText, attr, value);
+                    cont += `<span style='${cssText}'>${eleft}</span>`;
                 }
                 if (eright !== "") {
-                    cont += "<span style='".concat(endSpan.style.cssText, "'>").concat(eright, "</span>");
+                    cont += `<span style='${endSpan.style.cssText}'>${eright}</span>`;
                 }
-                for (var i = endSpanIndex + 1; i < spans.length; i += 1) {
-                    var span = spans[i];
-                    var content = span.innerHTML;
-                    cont += "<span style='".concat(span.style.cssText, "'>").concat(content, "</span>");
+                for (let i = endSpanIndex + 1; i < spans.length; i += 1) {
+                    const span = spans[i];
+                    const content = span.innerHTML;
+                    cont += `<span style='${span.style.cssText}'>${content}</span>`;
                 }
                 $textEditor.innerHTML = cont;
                 // console.log(replaceSpans, cont);
                 // replaceSpans.replaceWith(cont);
-                var startSeletedNodeIndex = void 0;
-                var endSeletedNodeIndex = void 0;
+                let startSeletedNodeIndex;
+                let endSeletedNodeIndex;
                 if (s1 === s2) {
                     startSeletedNodeIndex = startSpanIndex;
                     endSeletedNodeIndex = endSpanIndex;

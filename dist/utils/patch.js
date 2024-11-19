@@ -1,29 +1,9 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import _ from "lodash";
 import { getSheetIndex } from ".";
 import { getFlowdata } from "../context";
-var addtionalMergeOps = function (ops, id) {
-    var merge_new = {};
-    ops.some(function (op) {
+const addtionalMergeOps = (ops, id) => {
+    let merge_new = {};
+    ops.some((op) => {
         if (op.op === "replace" &&
             op.path[0] === "config" &&
             op.path[1] === "merge") {
@@ -32,23 +12,22 @@ var addtionalMergeOps = function (ops, id) {
         }
         return false;
     });
-    var new_ops = [];
-    Object.entries(merge_new).forEach(function (_a) {
-        var v = _a[1];
-        var _b = v, r = _b.r, c = _b.c, rs = _b.rs, cs = _b.cs;
-        var headerOp = {
+    const new_ops = [];
+    Object.entries(merge_new).forEach(([, v]) => {
+        const { r, c, rs, cs } = v;
+        const headerOp = {
             op: "replace",
             path: ["data", r, c, "mc"],
-            id: id,
+            id,
             value: v,
         };
-        for (var i = r; i < r + rs; i += 1) {
-            for (var j = c; j < c + cs; j += 1) {
+        for (let i = r; i < r + rs; i += 1) {
+            for (let j = c; j < c + cs; j += 1) {
                 new_ops.push({
                     op: "replace",
                     path: ["data", i, j, "mc"],
-                    id: id,
-                    value: { r: r, c: c },
+                    id,
+                    value: { r, c },
                 });
             }
         }
@@ -57,21 +36,21 @@ var addtionalMergeOps = function (ops, id) {
     return new_ops;
 };
 function additionalCellOps(ctx, insertRowColOp) {
-    var id = insertRowColOp.id, index = insertRowColOp.index, direction = insertRowColOp.direction, count = insertRowColOp.count, type = insertRowColOp.type;
-    var d = getFlowdata(ctx, id);
-    var startIndex = index + (direction === "rightbottom" ? 1 : 0);
+    const { id, index, direction, count, type } = insertRowColOp;
+    const d = getFlowdata(ctx, id);
+    const startIndex = index + (direction === "rightbottom" ? 1 : 0);
     if (d == null) {
         return [];
     }
-    var cellOps = [];
+    const cellOps = [];
     if (type === "row") {
-        for (var i = 0; i < d[startIndex].length; i += 1) {
-            var cell = d[startIndex][i];
+        for (let i = 0; i < d[startIndex].length; i += 1) {
+            const cell = d[startIndex][i];
             if (cell != null) {
-                for (var j = 0; j < count; j += 1) {
+                for (let j = 0; j < count; j += 1) {
                     cellOps.push({
                         op: "replace",
-                        id: id,
+                        id,
                         path: ["data", startIndex + j, i],
                         value: cell,
                     });
@@ -80,13 +59,13 @@ function additionalCellOps(ctx, insertRowColOp) {
         }
     }
     else {
-        for (var i = 0; i < d.length; i += 1) {
-            var cell = d[i][startIndex];
+        for (let i = 0; i < d.length; i += 1) {
+            const cell = d[i][startIndex];
             if (cell != null) {
-                for (var j = 0; j < count; j += 1) {
+                for (let j = 0; j < count; j += 1) {
                     cellOps.push({
                         op: "replace",
-                        id: id,
+                        id,
                         path: ["data", i, startIndex + j],
                         value: cell,
                     });
@@ -97,31 +76,28 @@ function additionalCellOps(ctx, insertRowColOp) {
     return cellOps;
 }
 export function filterPatch(patches) {
-    return _.filter(patches, function (p) {
-        return p.path[0] === "luckysheetfile" && p.path[2] !== "luckysheet_select_save";
-    });
+    return _.filter(patches, (p) => p.path[0] === "luckysheetfile" && p.path[2] !== "luckysheet_select_save");
 }
 export function extractFormulaCellOps(ops) {
     // ops are ensured to be cell data ops
-    var formulaOps = [];
-    ops.forEach(function (op) {
-        var _a, _b;
+    const formulaOps = [];
+    ops.forEach((op) => {
         if (op.op === "remove")
             return;
         if (op.path.length === 2 && Array.isArray(op.value)) {
             // entire row op
-            for (var i = 0; i < op.value.length; i += 1) {
-                if ((_a = op.value[i]) === null || _a === void 0 ? void 0 : _a.f) {
+            for (let i = 0; i < op.value.length; i += 1) {
+                if (op.value[i]?.f) {
                     formulaOps.push({
                         op: "replace",
                         id: op.id,
-                        path: __spreadArray(__spreadArray([], op.path, true), [i], false),
+                        path: [...op.path, i],
                         value: op.value[i],
                     });
                 }
             }
         }
-        else if (op.path.length === 3 && ((_b = op.value) === null || _b === void 0 ? void 0 : _b.f)) {
+        else if (op.path.length === 3 && op.value?.f) {
             formulaOps.push(op);
         }
         else if (op.path.length === 4 && op.path[3] === "f") {
@@ -130,17 +106,15 @@ export function extractFormulaCellOps(ops) {
     });
     return formulaOps;
 }
-export function patchToOp(ctx, patches, options, undo) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-    if (undo === void 0) { undo = false; }
-    var ops = patches.map(function (p) {
-        var op = {
+export function patchToOp(ctx, patches, options, undo = false) {
+    let ops = patches.map((p) => {
+        const op = {
             op: p.op,
             value: p.value,
             path: p.path,
         };
         if (p.path[0] === "luckysheetfile" && _.isNumber(p.path[1])) {
-            var id = ctx.luckysheetfile[p.path[1]].id;
+            const id = ctx.luckysheetfile[p.path[1]].id;
             op.id = id;
             op.path = p.path.slice(2);
             if (_.isEqual(op.path, ["calcChain", "length"])) {
@@ -150,25 +124,24 @@ export function patchToOp(ctx, patches, options, undo) {
         }
         return op;
     });
-    _.every(ops, function (p) {
-        var _a;
+    _.every(ops, (p) => {
         if (p.op === "replace" &&
-            !_.isNil((_a = p.value) === null || _a === void 0 ? void 0 : _a.hl) &&
+            !_.isNil(p.value?.hl) &&
             p.path.length === 3 &&
             p.path[0] === "data") {
-            var index = getSheetIndex(ctx, p.id);
+            const index = getSheetIndex(ctx, p.id);
             ops.push({
                 id: p.id,
                 op: "replace",
-                path: ["hyperlink", "".concat(p.path[1], "_").concat(p.path[2])],
-                value: ctx.luckysheetfile[index].hyperlink["".concat(p.value.hl.r, "_").concat(p.value.hl.c)],
+                path: ["hyperlink", `${p.path[1]}_${p.path[2]}`],
+                value: ctx.luckysheetfile[index].hyperlink[`${p.value.hl.r}_${p.value.hl.c}`],
             });
         }
     });
-    if (options === null || options === void 0 ? void 0 : options.insertRowColOp) {
-        var _p = _.partition(ops, function (p) { return p.path[0] !== "data"; }), nonDataOps = _p[0], dataOps = _p[1];
+    if (options?.insertRowColOp) {
+        const [nonDataOps, dataOps] = _.partition(ops, (p) => p.path[0] !== "data");
         // find out formula cells as their formula range may be changed
-        var formulaOps = extractFormulaCellOps(dataOps);
+        const formulaOps = extractFormulaCellOps(dataOps);
         ops = nonDataOps;
         ops.push({
             op: "insertRowCol",
@@ -176,19 +149,19 @@ export function patchToOp(ctx, patches, options, undo) {
             path: [],
             value: options.insertRowColOp,
         });
-        ops = __spreadArray(__spreadArray([], ops, true), formulaOps, true);
-        var mergeOps = addtionalMergeOps(ops, ctx.currentSheetId);
-        ops = __spreadArray(__spreadArray([], ops, true), mergeOps, true);
-        if (options === null || options === void 0 ? void 0 : options.restoreDeletedCells) {
+        ops = [...ops, ...formulaOps];
+        const mergeOps = addtionalMergeOps(ops, ctx.currentSheetId);
+        ops = [...ops, ...mergeOps];
+        if (options?.restoreDeletedCells) {
             // undoing deleted row/col, find out cells to restore
-            var restoreCellsOps = [];
-            var flowdata = getFlowdata(ctx);
+            const restoreCellsOps = [];
+            const flowdata = getFlowdata(ctx);
             if (flowdata) {
-                var rowlen = flowdata.length;
-                var collen = flowdata[0].length;
-                for (var i = 0; i < rowlen; i += 1) {
-                    for (var j = 0; j < collen; j += 1) {
-                        var cell = flowdata[i][j];
+                const rowlen = flowdata.length;
+                const collen = flowdata[0].length;
+                for (let i = 0; i < rowlen; i += 1) {
+                    for (let j = 0; j < collen; j += 1) {
+                        const cell = flowdata[i][j];
                         if (!cell)
                             continue;
                         if ((options.insertRowColOp.type === "row" &&
@@ -209,17 +182,17 @@ export function patchToOp(ctx, patches, options, undo) {
                     }
                 }
             }
-            ops = __spreadArray(__spreadArray([], ops, true), restoreCellsOps, true);
+            ops = [...ops, ...restoreCellsOps];
         }
         else {
-            var cellOps = additionalCellOps(ctx, options.insertRowColOp);
-            ops = __spreadArray(__spreadArray([], ops, true), cellOps, true);
+            const cellOps = additionalCellOps(ctx, options.insertRowColOp);
+            ops = [...ops, ...cellOps];
         }
     }
-    else if (options === null || options === void 0 ? void 0 : options.deleteRowColOp) {
-        var _q = _.partition(ops, function (p) { return p.path[0] !== "data"; }), nonDataOps = _q[0], dataOps = _q[1];
+    else if (options?.deleteRowColOp) {
+        const [nonDataOps, dataOps] = _.partition(ops, (p) => p.path[0] !== "data");
         // find out formula cells as their formula range may be changed
-        var formulaOps = extractFormulaCellOps(dataOps);
+        const formulaOps = extractFormulaCellOps(dataOps);
         ops = nonDataOps;
         ops.push({
             op: "deleteRowCol",
@@ -227,32 +200,32 @@ export function patchToOp(ctx, patches, options, undo) {
             path: [],
             value: options.deleteRowColOp,
         });
-        ops = __spreadArray(__spreadArray([], ops, true), formulaOps, true);
-        var mergeOps = addtionalMergeOps(ops, ctx.currentSheetId);
-        ops = __spreadArray(__spreadArray([], ops, true), mergeOps, true);
+        ops = [...ops, ...formulaOps];
+        const mergeOps = addtionalMergeOps(ops, ctx.currentSheetId);
+        ops = [...ops, ...mergeOps];
     }
-    else if (options === null || options === void 0 ? void 0 : options.addSheetOp) {
-        var _r = _.partition(ops, function (op) { return op.path.length === 0 && op.op === "add"; }), addSheetOps = _r[0], otherOps = _r[1];
+    else if (options?.addSheetOp) {
+        const [addSheetOps, otherOps] = _.partition(ops, (op) => op.path.length === 0 && op.op === "add");
         options.id = options.addSheet.id;
         if (undo) {
             // 撤消增表
-            var index = getSheetIndex(ctx, options.addSheet.id);
-            var order_1 = (_b = (_a = options.addSheet) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.order;
+            const index = getSheetIndex(ctx, options.addSheet.id);
+            const order = options.addSheet?.value?.order;
             ops = otherOps;
             ops.push({
                 op: "deleteSheet",
-                id: (_c = options.addSheet) === null || _c === void 0 ? void 0 : _c.id,
+                id: options.addSheet?.id,
                 path: [],
                 value: options.addSheet,
             });
             if (index !== ctx.luckysheetfile.length) {
-                var sheetsRight = ctx.luckysheetfile.filter(function (sheet) { return (sheet === null || sheet === void 0 ? void 0 : sheet.order) >= order_1; });
-                _.forEach(sheetsRight, function (sheet) {
+                const sheetsRight = ctx.luckysheetfile.filter((sheet) => sheet?.order >= order);
+                _.forEach(sheetsRight, (sheet) => {
                     ops.push({
                         id: sheet.id,
                         op: "replace",
                         path: ["order"],
-                        value: (sheet === null || sheet === void 0 ? void 0 : sheet.order) - 1,
+                        value: sheet?.order - 1,
                     });
                 });
             }
@@ -262,13 +235,13 @@ export function patchToOp(ctx, patches, options, undo) {
             ops = otherOps;
             ops.push({
                 op: "addSheet",
-                id: (_d = options.addSheet) === null || _d === void 0 ? void 0 : _d.id,
+                id: options.addSheet?.id,
                 path: [],
-                value: (_e = addSheetOps[0]) === null || _e === void 0 ? void 0 : _e.value,
+                value: addSheetOps[0]?.value,
             });
         }
     }
-    else if (options === null || options === void 0 ? void 0 : options.deleteSheetOp) {
+    else if (options?.deleteSheetOp) {
         options.id = options.deleteSheetOp.id;
         if (undo) {
             // 撤销删表
@@ -277,27 +250,24 @@ export function patchToOp(ctx, patches, options, undo) {
                     op: "addSheet",
                     id: options.deleteSheetOp.id,
                     path: [],
-                    value: (_f = options.deletedSheet) === null || _f === void 0 ? void 0 : _f.value,
+                    value: options.deletedSheet?.value,
                 },
                 {
                     id: options.deleteSheetOp.id,
                     op: "replace",
                     path: ["name"],
-                    value: (_h = (_g = options.deletedSheet) === null || _g === void 0 ? void 0 : _g.value) === null || _h === void 0 ? void 0 : _h.name,
+                    value: options.deletedSheet?.value?.name,
                 },
             ];
-            var order_2 = (_k = (_j = options.deletedSheet) === null || _j === void 0 ? void 0 : _j.value) === null || _k === void 0 ? void 0 : _k.order;
-            var sheetsRight = ctx.luckysheetfile.filter(function (sheet) {
-                var _a;
-                return (sheet === null || sheet === void 0 ? void 0 : sheet.order) >= order_2 &&
-                    sheet.id !== ((_a = options.deleteSheetOp) === null || _a === void 0 ? void 0 : _a.id);
-            });
-            _.forEach(sheetsRight, function (sheet) {
+            const order = options.deletedSheet?.value?.order;
+            const sheetsRight = ctx.luckysheetfile.filter((sheet) => sheet?.order >= order &&
+                sheet.id !== options.deleteSheetOp?.id);
+            _.forEach(sheetsRight, (sheet) => {
                 ops.push({
                     id: sheet.id,
                     op: "replace",
                     path: ["order"],
-                    value: sheet === null || sheet === void 0 ? void 0 : sheet.order,
+                    value: sheet?.order,
                 });
             });
         }
@@ -311,15 +281,15 @@ export function patchToOp(ctx, patches, options, undo) {
                     value: options.deletedSheet,
                 },
             ];
-            var order_3 = (_m = (_l = options.deletedSheet) === null || _l === void 0 ? void 0 : _l.value) === null || _m === void 0 ? void 0 : _m.order;
-            if (((_o = options.deletedSheet) === null || _o === void 0 ? void 0 : _o.order) !== ctx.luckysheetfile.length) {
-                var sheetsRight = ctx.luckysheetfile.filter(function (sheet) { return (sheet === null || sheet === void 0 ? void 0 : sheet.order) >= order_3; });
-                _.forEach(sheetsRight, function (sheet) {
+            const order = options.deletedSheet?.value?.order;
+            if (options.deletedSheet?.order !== ctx.luckysheetfile.length) {
+                const sheetsRight = ctx.luckysheetfile.filter((sheet) => sheet?.order >= order);
+                _.forEach(sheetsRight, (sheet) => {
                     ops.push({
                         id: sheet.id,
                         op: "replace",
                         path: ["order"],
-                        value: sheet === null || sheet === void 0 ? void 0 : sheet.order,
+                        value: sheet?.order,
                     });
                 });
             }
@@ -328,24 +298,24 @@ export function patchToOp(ctx, patches, options, undo) {
     return ops;
 }
 export function opToPatch(ctx, ops) {
-    var _a = _.partition(ops, function (op) { return op.op === "add" || op.op === "remove" || op.op === "replace"; }), normalOps = _a[0], specialOps = _a[1];
-    var additionalPatches = [];
-    var patches = normalOps.map(function (op) {
-        var patch = {
+    const [normalOps, specialOps] = _.partition(ops, (op) => op.op === "add" || op.op === "remove" || op.op === "replace");
+    const additionalPatches = [];
+    const patches = normalOps.map((op) => {
+        const patch = {
             op: op.op,
             value: op.value,
             path: op.path,
         };
         if (op.id) {
-            var i = getSheetIndex(ctx, op.id);
+            const i = getSheetIndex(ctx, op.id);
             if (i != null) {
-                patch.path = __spreadArray(["luckysheetfile", i], op.path, true);
+                patch.path = ["luckysheetfile", i, ...op.path];
             }
             else {
                 // throw new Error(`sheet id: ${op.id} not found`);
             }
             if (op.path[0] === "images" && op.id === ctx.currentSheetId) {
-                additionalPatches.push(__assign(__assign({}, patch), { path: ["insertedImgs"] }));
+                additionalPatches.push({ ...patch, path: ["insertedImgs"] });
             }
         }
         return patch;
@@ -356,7 +326,7 @@ export function inverseRowColOptions(options) {
     if (!options)
         return options;
     if (options.insertRowColOp) {
-        var index = options.insertRowColOp.index;
+        let { index } = options.insertRowColOp;
         if (options.insertRowColOp.direction === "rightbottom") {
             index += 1;
         }

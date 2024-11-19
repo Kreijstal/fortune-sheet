@@ -2,9 +2,9 @@ import _ from "lodash";
 import { getFlowdata } from "../context";
 import { normalizeSelection } from "./selection";
 export function deleteCellInSave(cellSave, range) {
-    for (var r = range.row[0]; r <= range.row[1]; r += 1) {
-        for (var c = range.column[0]; c <= range.column[1]; c += 1) {
-            delete cellSave["".concat(r, "_").concat(c)];
+    for (let r = range.row[0]; r <= range.row[1]; r += 1) {
+        for (let c = range.column[0]; c <= range.column[1]; c += 1) {
+            delete cellSave[`${r}_${c}`];
         }
     }
     return cellSave;
@@ -15,7 +15,6 @@ maxR, // 选区行终点
 minC, // 选区列起点
 maxC, // 选区列终点
 cellSave, rangeArr, ctx) {
-    var _a, _b, _c;
     // 判断有没有符合条件的cell，为0说明没有符合条件的，直接返回。
     if (Object.keys(cellSave).length === 0) {
         return rangeArr;
@@ -24,23 +23,23 @@ cellSave, rangeArr, ctx) {
      * str=>startRow, edr=>endRow, stc=>startColumn, edc=>endColumn
      * 四个参数记录符合条件的cell的最大的起点值和终点值，因为符合条件的多个cell有可能是相连的，有可能是不相连的
      */
-    var stack_str = null;
-    var stack_edr = null;
-    var stack_stc = null;
-    var stack_edc = null;
-    var flowData = getFlowdata(ctx, ctx.currentSheetId);
-    for (var r = minR; r <= maxR; r += 1) {
-        for (var c = minC; c <= maxC; c += 1) {
+    let stack_str = null;
+    let stack_edr = null;
+    let stack_stc = null;
+    let stack_edc = null;
+    const flowData = getFlowdata(ctx, ctx.currentSheetId);
+    for (let r = minR; r <= maxR; r += 1) {
+        for (let c = minC; c <= maxC; c += 1) {
             if (_.isNil(flowData))
                 break;
-            var cell = flowData[r][c];
+            const cell = flowData[r][c];
             // cellSave中存储的是符合条件的cell坐标，找符合条件的cell坐标
-            if ("".concat(r, "_").concat(c) in cellSave) {
+            if (`${r}_${c}` in cellSave) {
                 // 判断是不是合并的单元格条件
-                if (!!((_a = cell === null || cell === void 0 ? void 0 : cell.mc) === null || _a === void 0 ? void 0 : _a.cs) && !!((_b = cell === null || cell === void 0 ? void 0 : cell.mc) === null || _b === void 0 ? void 0 : _b.rs) && !!((_c = cell === null || cell === void 0 ? void 0 : cell.mc) === null || _c === void 0 ? void 0 : _c.r)) {
+                if (!!cell?.mc?.cs && !!cell?.mc?.rs && !!cell?.mc?.r) {
                     if (stack_stc === null) {
                         // 记录符合合并单元格条件的cell坐标在range
-                        var range = {
+                        const range = {
                             row: [cell.mc.r, cell.mc.r + cell.mc.rs - 1],
                             column: [cell.mc.c, cell.mc.c + cell.mc.cs - 1],
                         };
@@ -51,7 +50,7 @@ cellSave, rangeArr, ctx) {
                     }
                     // 因为合并的单元格是大范围，所以小范围中符合条件的直接记录大范围的坐标
                     if (stack_edc !== null && c < stack_edc) {
-                        var range = {
+                        const range = {
                             row: [stack_str, stack_edr],
                             column: [stack_stc, stack_edc],
                         };
@@ -81,7 +80,7 @@ cellSave, rangeArr, ctx) {
                 }
                 else if (stack_edc !== null && c <= stack_edc) {
                     // 说明没有相连的符合条件的单元格了，就把上一次符合条件的多个单元格的大范围记录下来
-                    var range = {
+                    const range = {
                         row: [stack_str, stack_edr],
                         column: [stack_stc, stack_edc],
                     };
@@ -96,7 +95,7 @@ cellSave, rangeArr, ctx) {
         }
     }
     if (stack_stc !== null) {
-        var range = {
+        const range = {
             row: [stack_str, stack_edr],
             column: [stack_stc, stack_edc],
         };
@@ -108,9 +107,9 @@ cellSave, rangeArr, ctx) {
 }
 // 获取操作列表
 export function getOptionValue(constants) {
-    var tempConstans = _.cloneDeep(constants);
-    var len = _.filter(tempConstans, function (o) { return o; }).length;
-    var value;
+    const tempConstans = _.cloneDeep(constants);
+    const len = _.filter(tempConstans, (o) => o).length;
+    let value;
     if (len === 0) {
         value = "";
     }
@@ -118,43 +117,42 @@ export function getOptionValue(constants) {
         value = "all";
     }
     else {
-        var arr_1 = [];
-        _.toPairs(constants).forEach(function (entry) {
-            var k = entry[0], v = entry[1];
+        const arr = [];
+        _.toPairs(constants).forEach((entry) => {
+            const [k, v] = entry;
             if (v) {
                 if (k === "locationDate") {
-                    arr_1.push("d");
+                    arr.push("d");
                 }
                 else if (k === "locationDigital") {
-                    arr_1.push("n");
+                    arr.push("n");
                 }
                 else if (k === "locationString") {
-                    arr_1.push("s,g");
+                    arr.push("s,g");
                 }
                 else if (k === "locationBool") {
-                    arr_1.push("b");
+                    arr.push("b");
                 }
                 else if (k === "locationError") {
-                    arr_1.push("e");
+                    arr.push("e");
                 }
             }
         });
-        value = arr_1.join(",");
+        value = arr.join(",");
     }
     return value;
 }
 // 获取选区坐标
 export function getSelectRange(ctx) {
-    var _a, _b;
-    var range;
+    let range;
     // 判断选区是不是单个单元格，如果是的话则选区范围改为整张表
-    if (((_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a.length) === 0 ||
-        (((_b = ctx.luckysheet_select_save) === null || _b === void 0 ? void 0 : _b.length) === 1 &&
+    if (ctx.luckysheet_select_save?.length === 0 ||
+        (ctx.luckysheet_select_save?.length === 1 &&
             ctx.luckysheet_select_save[0].row[0] ===
                 ctx.luckysheet_select_save[0].row[1] &&
             ctx.luckysheet_select_save[0].column[0] ===
                 ctx.luckysheet_select_save[0].column[1])) {
-        var flowdata = getFlowdata(ctx, ctx.currentSheetId);
+        const flowdata = getFlowdata(ctx, ctx.currentSheetId);
         if (_.isNil(flowdata))
             return [];
         range = [
@@ -168,30 +166,29 @@ export function getSelectRange(ctx) {
 }
 // 条件定位功能
 export function applyLocation(range, type, value, ctx) {
-    var _a;
-    var rangeArr = [];
+    let rangeArr = [];
     if (type === "locationFormula" ||
         type === "locationConstant" ||
         type === "locationNull") {
         // 公式 常量 空值
-        var minR = null;
-        var maxR = null;
-        var minC = null;
-        var maxC = null;
+        let minR = null;
+        let maxR = null;
+        let minC = null;
+        let maxC = null;
         // cellSave:记录符合条件的坐标值例，0_1
-        var cellSave = {};
-        var flowData = getFlowdata(ctx, ctx.currentSheetId);
+        const cellSave = {};
+        const flowData = getFlowdata(ctx, ctx.currentSheetId);
         if (_.isNil(flowData))
             return [];
-        for (var s = 0; s < range.length; s += 1) {
+        for (let s = 0; s < range.length; s += 1) {
             // 选区行起点
-            var st_r = range[s].row[0];
+            const st_r = range[s].row[0];
             // 选区行终点
-            var ed_r = range[s].row[1];
+            const ed_r = range[s].row[1];
             // 选区列起点
-            var st_c = range[s].column[0];
+            const st_c = range[s].column[0];
             // 选区列终点
-            var ed_c = range[s].column[1];
+            const ed_c = range[s].column[1];
             if (minR === null || minR < st_r) {
                 minR = st_r;
             }
@@ -204,10 +201,10 @@ export function applyLocation(range, type, value, ctx) {
             if (maxC === null || maxC > ed_c) {
                 maxC = ed_c;
             }
-            for (var r = st_r; r <= ed_r; r += 1) {
-                for (var c = st_c; c <= ed_c; c += 1) {
-                    var cell = flowData[r][c];
-                    if (cell === null || cell === void 0 ? void 0 : cell.mc) {
+            for (let r = st_r; r <= ed_r; r += 1) {
+                for (let c = st_c; c <= ed_c; c += 1) {
+                    let cell = flowData[r][c];
+                    if (cell?.mc) {
                         cell = flowData[cell.mc.r][cell.mc.c];
                     }
                     if (type === "locationFormula" &&
@@ -219,16 +216,16 @@ export function applyLocation(range, type, value, ctx) {
                                 !!value &&
                                 !!cell.ct.t &&
                                 value.indexOf(cell.ct.t) > -1))) {
-                        cellSave["".concat(r, "_").concat(c)] = 0;
+                        cellSave[`${r}_${c}`] = 0;
                     }
                     else if (type === "locationConstant" &&
-                        (cell === null || cell === void 0 ? void 0 : cell.v) &&
-                        (value === "all" || (((_a = cell === null || cell === void 0 ? void 0 : cell.ct) === null || _a === void 0 ? void 0 : _a.t) && value.indexOf(cell.ct.t) > -1))) {
-                        cellSave["".concat(r, "_").concat(c)] = 0;
+                        cell?.v &&
+                        (value === "all" || (cell?.ct?.t && value.indexOf(cell.ct.t) > -1))) {
+                        cellSave[`${r}_${c}`] = 0;
                     }
                     else if (type === "locationNull" &&
                         (cell === null || cell.v === null)) {
-                        cellSave["".concat(r, "_").concat(c)] = 0;
+                        cellSave[`${r}_${c}`] = 0;
                     }
                 }
             }
@@ -246,15 +243,15 @@ export function applyLocation(range, type, value, ctx) {
         // }
     }
     else if (type === "locationRowSpan") {
-        for (var s = 0; s < range.length; s += 1) {
+        for (let s = 0; s < range.length; s += 1) {
             if (range[s].row[0] === range[s].row[1]) {
                 continue;
             }
-            var st_r = range[s].row[0];
-            var ed_r = range[s].row[1];
-            var st_c = range[s].column[0];
-            var ed_c = range[s].column[1];
-            for (var r = st_r; r <= ed_r; r += 1) {
+            const st_r = range[s].row[0];
+            const ed_r = range[s].row[1];
+            const st_c = range[s].column[0];
+            const ed_c = range[s].column[1];
+            for (let r = st_r; r <= ed_r; r += 1) {
                 if ((r - st_r) % 2 === 0) {
                     rangeArr.push({ row: [r, r], column: [st_c, ed_c] });
                 }
@@ -263,15 +260,15 @@ export function applyLocation(range, type, value, ctx) {
     }
     else if (type === "locationColumnSpan") {
         // 间隔列
-        for (var s = 0; s < range.length; s += 1) {
+        for (let s = 0; s < range.length; s += 1) {
             if (range[s].column[0] === range[s].column[1]) {
                 continue;
             }
-            var st_r = range[s].row[0];
-            var ed_r = range[s].row[1];
-            var st_c = range[s].column[0];
-            var ed_c = range[s].column[1];
-            for (var c = st_c; c <= ed_c; c += 1) {
+            const st_r = range[s].row[0];
+            const ed_r = range[s].row[1];
+            const st_c = range[s].column[0];
+            const ed_c = range[s].column[1];
+            for (let c = st_c; c <= ed_c; c += 1) {
                 if ((c - st_c) % 2 === 0) {
                     rangeArr.push({ row: [st_r, ed_r], column: [c, c] });
                 }

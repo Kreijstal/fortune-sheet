@@ -10885,7 +10885,7 @@ export default {
         { name: "智利比索", pos: "before", value: "$" },
         { name: "中非金融合作法郎", pos: "before", value: "FCFA" },
     ],
-    defaultFmt: function (currency) { return [
+    defaultFmt: (currency) => [
         { text: "自动", value: "General", example: "" },
         { text: "纯文本", value: "@", example: "" },
         { text: "", value: "split", example: "" },
@@ -10895,12 +10895,12 @@ export default {
         { text: "", value: "split", example: "" },
         {
             text: "会计",
-            value: "".concat(currency, "(0.00)"),
-            example: "".concat(currency, "(1200.09)"),
+            value: `${currency}(0.00)`,
+            example: `${currency}(1200.09)`,
         },
         // { "text": "财务", "value": "(#.####)", "example": "(1200.09)" },
         { text: "万元", value: "w", example: "1亿2000万2500" },
-        { text: "货币", value: "".concat(currency, "0.00"), example: "".concat(currency, "1200.09") },
+        { text: "货币", value: `${currency}0.00`, example: `${currency}1200.09` },
         // { "text": "货币整数", "value": "¥####", "example": "¥1200" },
         { text: "万元2位小数", value: "w0.00", example: "2万2500.55" },
         { text: "", value: "split", example: "" },
@@ -10924,7 +10924,7 @@ export default {
             example: "",
             icon: "rightArrow",
         },
-    ]; },
+    ],
     dateFmtList: [
         {
             name: "1930-08-05",

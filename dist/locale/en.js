@@ -10779,7 +10779,7 @@ export default {
         { name: "Chilean Peso", pos: "before", value: "$" },
         { name: "CFA Franc BEAC", pos: "before", value: "FCFA" },
     ],
-    defaultFmt: function (currency) { return [
+    defaultFmt: (currency) => [
         { text: "Automatic", value: "General", example: "" },
         { text: "Plain text", value: "@", example: "" },
         { text: "", value: "split", example: "" },
@@ -10789,13 +10789,13 @@ export default {
         { text: "", value: "split", example: "" },
         {
             text: "Accounting",
-            value: "".concat(currency, "(0.00)"),
-            example: "".concat(currency, "(1200.09)"),
+            value: `${currency}(0.00)`,
+            example: `${currency}(1200.09)`,
         },
         {
             text: "Currency",
-            value: "".concat(currency, "0.00"),
-            example: "".concat(currency, "1200.09"),
+            value: `${currency}0.00`,
+            example: `${currency}1200.09`,
         },
         { text: "", value: "split", example: "" },
         { text: "Date", value: "yyyy-MM-dd", example: "2017-11-29" },
@@ -10818,7 +10818,7 @@ export default {
             example: "",
             icon: "rightArrow",
         },
-    ]; },
+    ],
     dateFmtList: [
         {
             name: "1930-08-05",

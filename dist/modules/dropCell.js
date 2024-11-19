@@ -11,9 +11,9 @@ import { CFSplitRange } from "./ConditionFormat";
 import { normalizeSelection } from "./selection";
 import { jfrefreshgrid } from "./refresh";
 function toPx(v) {
-    return "".concat(v, "px");
+    return `${v}px`;
 }
-export var dropCellCache = {
+export const dropCellCache = {
     copyRange: {},
     applyRange: {},
     applyType: null,
@@ -42,13 +42,13 @@ export var dropCellCache = {
     chnUnitChar: ["", "十", "百", "千"],
 };
 function chineseToNumber(chnStr) {
-    var rtn = 0;
-    var section = 0;
-    var number = 0;
-    var secUnit = false;
-    var str = chnStr.split("");
-    for (var i = 0; i < str.length; i += 1) {
-        var num = dropCellCache.chnNumChar[str[i]];
+    let rtn = 0;
+    let section = 0;
+    let number = 0;
+    let secUnit = false;
+    const str = chnStr.split("");
+    for (let i = 0; i < str.length; i += 1) {
+        const num = dropCellCache.chnNumChar[str[i]];
         if (typeof num !== "undefined") {
             number = num;
             if (i === str.length - 1) {
@@ -56,7 +56,7 @@ function chineseToNumber(chnStr) {
             }
         }
         else {
-            var unit = dropCellCache.chnNameValue[str[i]].value;
+            const unit = dropCellCache.chnNameValue[str[i]].value;
             secUnit = dropCellCache.chnNameValue[str[i]].secUnit;
             if (secUnit) {
                 section = (section + number) * unit;
@@ -72,12 +72,12 @@ function chineseToNumber(chnStr) {
     return rtn + section;
 }
 function sectionToChinese(section) {
-    var strIns = "";
-    var chnStr = "";
-    var unitPos = 0;
-    var zero = true;
+    let strIns = "";
+    let chnStr = "";
+    let unitPos = 0;
+    let zero = true;
     while (section > 0) {
-        var v = section % 10;
+        const v = section % 10;
         if (v === 0) {
             if (!zero) {
                 zero = true;
@@ -96,15 +96,15 @@ function sectionToChinese(section) {
     return chnStr;
 }
 function numberToChinese(num) {
-    var strIns = "";
-    var chnStr = "";
-    var unitPos = 0;
-    var needZero = false;
+    let strIns = "";
+    let chnStr = "";
+    let unitPos = 0;
+    let needZero = false;
     if (num === 0) {
         return dropCellCache.chnNumChar2[0];
     }
     while (num > 0) {
-        var section = num % 10000;
+        const section = num % 10000;
         if (needZero) {
             chnStr = dropCellCache.chnNumChar2[0] + chnStr;
         }
@@ -122,9 +122,9 @@ function numberToChinese(num) {
 }
 function isChnNumber(txt) {
     if (typeof txt === "number") {
-        txt = "".concat(txt);
+        txt = `${txt}`;
     }
-    var result = true;
+    let result = true;
     if (txt == null) {
         result = false;
     }
@@ -137,8 +137,8 @@ function isChnNumber(txt) {
         }
     }
     else {
-        var str = txt.split("");
-        for (var i = 0; i < str.length; i += 1) {
+        const str = txt.split("");
+        for (let i = 0; i < str.length; i += 1) {
             if (!(str[i] in dropCellCache.chnNumChar ||
                 str[i] in dropCellCache.chnNameValue)) {
                 result = false;
@@ -152,17 +152,17 @@ function isExtendNumber(txt) {
     if (txt == null)
         return [false];
     if (typeof txt === "number") {
-        txt = "".concat(txt);
+        txt = `${txt}`;
     }
-    var reg = /0|([1-9]+[0-9]*)/g;
-    var result = reg.test(txt);
+    const reg = /0|([1-9]+[0-9]*)/g;
+    const result = reg.test(txt);
     if (result) {
-        var match = txt.match(reg);
+        const match = txt.match(reg);
         if (match) {
-            var matchTxt = match[match.length - 1];
-            var matchIndex = txt.lastIndexOf(matchTxt);
-            var beforeTxt = txt.slice(0, matchIndex);
-            var afterTxt = txt.slice(matchIndex + matchTxt.length);
+            const matchTxt = match[match.length - 1];
+            const matchIndex = txt.lastIndexOf(matchTxt);
+            const beforeTxt = txt.slice(0, matchIndex);
+            const afterTxt = txt.slice(matchIndex + matchTxt.length);
             return [result, Number(matchTxt), beforeTxt, afterTxt];
         }
     }
@@ -179,9 +179,9 @@ function isExtendNumber(txt) {
 //   return result;
 // }
 function isChnWeek2(txt) {
-    var result = false;
+    let result = false;
     if (typeof txt === "number") {
-        txt = "".concat(txt);
+        txt = `${txt}`;
     }
     if (txt !== undefined && txt.length === 2) {
         if (txt === "周一" ||
@@ -198,9 +198,9 @@ function isChnWeek2(txt) {
 }
 function isChnWeek3(txt) {
     if (typeof txt === "number") {
-        txt = "".concat(txt);
+        txt = `${txt}`;
     }
-    var result = false;
+    let result = false;
     if (txt !== undefined && txt.length === 3) {
         if (txt === "星期一" ||
             txt === "星期二" ||
@@ -215,9 +215,9 @@ function isChnWeek3(txt) {
     return result;
 }
 function isEqualDiff(arr) {
-    var diff = true;
-    var step = arr[1] - arr[0];
-    for (var i = 1; i < arr.length; i += 1) {
+    let diff = true;
+    const step = arr[1] - arr[0];
+    for (let i = 1; i < arr.length; i += 1) {
         if (arr[i] - arr[i - 1] !== step) {
             diff = false;
             break;
@@ -226,9 +226,9 @@ function isEqualDiff(arr) {
     return diff;
 }
 function isEqualRatio(arr) {
-    var ratio = true;
-    var step = arr[1] / arr[0];
-    for (var i = 1; i < arr.length; i += 1) {
+    let ratio = true;
+    const step = arr[1] / arr[0];
+    for (let i = 1; i < arr.length; i += 1) {
         if (arr[i] / arr[i - 1] !== step) {
             ratio = false;
             break;
@@ -237,74 +237,73 @@ function isEqualRatio(arr) {
     return ratio;
 }
 function getXArr(len) {
-    var xArr = [];
-    for (var i = 1; i <= len; i += 1) {
+    const xArr = [];
+    for (let i = 1; i <= len; i += 1) {
         xArr.push(i);
     }
     return xArr;
 }
 function forecast(x, yArr, xArr) {
     function getAverage(arr) {
-        var sum = 0;
-        for (var i = 0; i < arr.length; i += 1) {
+        let sum = 0;
+        for (let i = 0; i < arr.length; i += 1) {
             sum += arr[i];
         }
         return sum / arr.length;
     }
-    var ax = getAverage(xArr); // x数组 平均值
-    var ay = getAverage(yArr); // y数组 平均值
-    var sum_d = 0;
-    var sum_n = 0;
-    for (var j = 0; j < xArr.length; j += 1) {
+    const ax = getAverage(xArr); // x数组 平均值
+    const ay = getAverage(yArr); // y数组 平均值
+    let sum_d = 0;
+    let sum_n = 0;
+    for (let j = 0; j < xArr.length; j += 1) {
         // 分母和
         sum_d += (xArr[j] - ax) * (yArr[j] - ay);
         // 分子和
         sum_n += (xArr[j] - ax) * (xArr[j] - ax);
     }
-    var b;
+    let b;
     if (sum_n === 0) {
         b = 1;
     }
     else {
         b = sum_d / sum_n;
     }
-    var a = ay - b * ax;
+    const a = ay - b * ax;
     return Math.round((a + b * x) * 100000) / 100000;
 }
 function judgeDate(data) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
-    var isSameDay = true;
-    var isSameMonth = true;
-    var isEqualDiffDays = true;
-    var isEqualDiffMonths = true;
-    var isEqualDiffYears = true;
+    let isSameDay = true;
+    let isSameMonth = true;
+    let isEqualDiffDays = true;
+    let isEqualDiffMonths = true;
+    let isEqualDiffYears = true;
     if (data[0] == null || data[1] == null)
         return [false, false, false, false, false];
-    var sameDay = dayjs(data[0].m).date();
-    var sameMonth = dayjs(data[0].m).month();
-    var equalDiffDays = dayjs(data[1].m).diff(dayjs(data[0].m), "days");
-    var equalDiffMonths = dayjs(data[1].m).diff(dayjs(data[0].m), "months");
-    var equalDiffYears = dayjs(data[1].m).diff(dayjs(data[0].m), "years");
-    for (var i = 1; i < data.length; i += 1) {
+    const sameDay = dayjs(data[0].m).date();
+    const sameMonth = dayjs(data[0].m).month();
+    const equalDiffDays = dayjs(data[1].m).diff(dayjs(data[0].m), "days");
+    const equalDiffMonths = dayjs(data[1].m).diff(dayjs(data[0].m), "months");
+    const equalDiffYears = dayjs(data[1].m).diff(dayjs(data[0].m), "years");
+    for (let i = 1; i < data.length; i += 1) {
         // 日是否一样
-        if (dayjs((_a = data[i]) === null || _a === void 0 ? void 0 : _a.m).date() !== sameDay) {
+        if (dayjs(data[i]?.m).date() !== sameDay) {
             isSameDay = false;
         }
         // 月是否一样
-        if (dayjs((_b = data[i]) === null || _b === void 0 ? void 0 : _b.m).month() !== sameMonth) {
+        if (dayjs(data[i]?.m).month() !== sameMonth) {
             isSameMonth = false;
         }
         // 日差是否是 等差数列
-        if (dayjs((_c = data[i]) === null || _c === void 0 ? void 0 : _c.m).diff(dayjs((_d = data[i - 1]) === null || _d === void 0 ? void 0 : _d.m), "days") !== equalDiffDays) {
+        if (dayjs(data[i]?.m).diff(dayjs(data[i - 1]?.m), "days") !== equalDiffDays) {
             isEqualDiffDays = false;
         }
         // 月差是否是 等差数列
-        if (dayjs((_e = data[i]) === null || _e === void 0 ? void 0 : _e.m).diff(dayjs((_f = data[i - 1]) === null || _f === void 0 ? void 0 : _f.m), "months") !==
+        if (dayjs(data[i]?.m).diff(dayjs(data[i - 1]?.m), "months") !==
             equalDiffMonths) {
             isEqualDiffMonths = false;
         }
         // 年差是否是 等差数列
-        if (dayjs((_g = data[i]) === null || _g === void 0 ? void 0 : _g.m).diff(dayjs((_h = data[i - 1]) === null || _h === void 0 ? void 0 : _h.m), "years") !== equalDiffYears) {
+        if (dayjs(data[i]?.m).diff(dayjs(data[i - 1]?.m), "years") !== equalDiffYears) {
             isEqualDiffYears = false;
         }
     }
@@ -325,9 +324,8 @@ function judgeDate(data) {
         isEqualDiffYears,
     ];
 }
-export function showDropCellSelection(_a, container) {
-    var width = _a.width, height = _a.height, top = _a.top, left = _a.left;
-    var selectedExtend = container.querySelector(".fortune-cell-selected-extend");
+export function showDropCellSelection({ width, height, top, left }, container) {
+    const selectedExtend = container.querySelector(".fortune-cell-selected-extend");
     if (selectedExtend) {
         selectedExtend.style.left = toPx(left);
         selectedExtend.style.width = toPx(width);
@@ -337,7 +335,7 @@ export function showDropCellSelection(_a, container) {
     }
 }
 export function hideDropCellSelection(container) {
-    var selectedExtend = container.querySelector(".fortune-cell-selected-extend");
+    const selectedExtend = container.querySelector(".fortune-cell-selected-extend");
     if (selectedExtend) {
         selectedExtend.style.display = "none";
     }
@@ -345,18 +343,18 @@ export function hideDropCellSelection(container) {
 export function createDropCellRange(ctx, e, container) {
     ctx.luckysheet_cell_selected_extend = true;
     ctx.luckysheet_scroll_status = true;
-    var scrollLeft = ctx.scrollLeft, scrollTop = ctx.scrollTop;
-    var rect = container.getBoundingClientRect();
-    var x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
-    var y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
-    var row_location = rowLocation(y, ctx.visibledatarow);
-    var row_pre = row_location[0];
-    var row = row_location[1];
-    var row_index = row_location[2];
-    var col_location = colLocation(x, ctx.visibledatacolumn);
-    var col_pre = col_location[0];
-    var col = col_location[1];
-    var col_index = col_location[2];
+    const { scrollLeft, scrollTop } = ctx;
+    const rect = container.getBoundingClientRect();
+    const x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
+    const y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
+    const row_location = rowLocation(y, ctx.visibledatarow);
+    const row_pre = row_location[0];
+    const row = row_location[1];
+    const row_index = row_location[2];
+    const col_location = colLocation(x, ctx.visibledatacolumn);
+    const col_pre = col_location[0];
+    const col = col_location[1];
+    const col_index = col_location[2];
     ctx.luckysheet_cell_selected_extend_index = [row_index, col_index];
     showDropCellSelection({
         left: col_pre,
@@ -366,31 +364,31 @@ export function createDropCellRange(ctx, e, container) {
     }, container);
 }
 export function onDropCellSelect(ctx, e, scrollX, scrollY, container) {
-    var scrollLeft = scrollX.scrollLeft;
-    var scrollTop = scrollY.scrollTop;
-    var rect = container.getBoundingClientRect();
-    var x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
-    var y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
-    var row_location = rowLocation(y, ctx.visibledatarow);
-    var row = row_location[1];
-    var row_pre = row_location[0];
-    var row_index = row_location[2];
-    var col_location = colLocation(x, ctx.visibledatacolumn);
-    var col = col_location[1];
-    var col_pre = col_location[0];
-    var col_index = col_location[2];
-    var row_index_original = ctx.luckysheet_cell_selected_extend_index[0];
-    var col_index_original = ctx.luckysheet_cell_selected_extend_index[1];
+    const { scrollLeft } = scrollX;
+    const { scrollTop } = scrollY;
+    const rect = container.getBoundingClientRect();
+    const x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
+    const y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
+    const row_location = rowLocation(y, ctx.visibledatarow);
+    const row = row_location[1];
+    const row_pre = row_location[0];
+    const row_index = row_location[2];
+    const col_location = colLocation(x, ctx.visibledatacolumn);
+    const col = col_location[1];
+    const col_pre = col_location[0];
+    const col_index = col_location[2];
+    const row_index_original = ctx.luckysheet_cell_selected_extend_index[0];
+    const col_index_original = ctx.luckysheet_cell_selected_extend_index[1];
     if (!ctx.luckysheet_select_save)
         return;
-    var row_s = ctx.luckysheet_select_save[0].row[0];
-    var row_e = ctx.luckysheet_select_save[0].row[1];
-    var col_s = ctx.luckysheet_select_save[0].column[0];
-    var col_e = ctx.luckysheet_select_save[0].column[1];
-    var top = ctx.luckysheet_select_save[0].top_move;
-    var height = ctx.luckysheet_select_save[0].height_move;
-    var left = ctx.luckysheet_select_save[0].left_move;
-    var width = ctx.luckysheet_select_save[0].width_move;
+    let row_s = ctx.luckysheet_select_save[0].row[0];
+    let row_e = ctx.luckysheet_select_save[0].row[1];
+    let col_s = ctx.luckysheet_select_save[0].column[0];
+    let col_e = ctx.luckysheet_select_save[0].column[1];
+    let top = ctx.luckysheet_select_save[0].top_move;
+    let height = ctx.luckysheet_select_save[0].height_move;
+    let left = ctx.luckysheet_select_save[0].left_move;
+    let width = ctx.luckysheet_select_save[0].width_move;
     if (top == null || height == null || left == null || width == null)
         return;
     if (Math.abs(row_index_original - row_index) >
@@ -418,19 +416,19 @@ export function onDropCellSelect(ctx, e, scrollX, scrollY, container) {
     }
     if (y < 0) {
         row_s = 0;
-        row_e = ctx.luckysheet_select_save[0].row[0];
+        [row_e] = ctx.luckysheet_select_save[0].row;
     }
     if (x < 0) {
         col_s = 0;
-        col_e = ctx.luckysheet_select_save[0].column[0];
+        [col_e] = ctx.luckysheet_select_save[0].column;
     }
-    showDropCellSelection({ left: left, width: width, top: top, height: height }, container);
+    showDropCellSelection({ left, width, top, height }, container);
 }
 function fillCopy(data, len) {
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var index = (i - 1) % data.length;
-        var d = _.cloneDeep(data[index]);
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const index = (i - 1) % data.length;
+        const d = _.cloneDeep(data[index]);
         if (!_.isUndefined(d)) {
             applyData.push(d);
         }
@@ -438,10 +436,10 @@ function fillCopy(data, len) {
     return applyData;
 }
 function fillSeries(data, len, direction) {
-    var applyData = [];
-    var dataNumArr = [];
-    for (var j = 0; j < data.length; j += 1) {
-        var d = _.cloneDeep(data[j]);
+    const applyData = [];
+    const dataNumArr = [];
+    for (let j = 0; j < data.length; j += 1) {
+        const d = _.cloneDeep(data[j]);
         if (d != null) {
             dataNumArr.push(Number(d.v));
         }
@@ -451,20 +449,20 @@ function fillSeries(data, len, direction) {
         data[0] != null &&
         data[1] != null) {
         // 等比数列
-        for (var i = 1; i <= len; i += 1) {
-            var index = (i - 1) % data.length;
-            var d = _.cloneDeep(data[index]);
+        for (let i = 1; i <= len; i += 1) {
+            const index = (i - 1) % data.length;
+            const d = _.cloneDeep(data[index]);
             if (d != null) {
-                var num = void 0;
+                let num;
                 if (direction === "down" || direction === "right") {
                     num =
                         Number(data[data.length - 1].v) *
-                            Math.pow((Number(data[1].v) / Number(data[0].v)), i);
+                            (Number(data[1].v) / Number(data[0].v)) ** i;
                 }
                 else {
                     //  direction == "up" || direction == "left"
                     num =
-                        Number(data[0].v) / Math.pow((Number(data[1].v) / Number(data[0].v)), i);
+                        Number(data[0].v) / (Number(data[1].v) / Number(data[0].v)) ** i;
                 }
                 d.v = num;
                 if (d.ct != null && d.ct.fa != null) {
@@ -476,12 +474,12 @@ function fillSeries(data, len, direction) {
     }
     else {
         // 线性数列
-        var xArr = getXArr(data.length);
-        for (var i = 1; i <= len; i += 1) {
-            var index = (i - 1) % data.length;
-            var d = _.cloneDeep(data[index]);
+        const xArr = getXArr(data.length);
+        for (let i = 1; i <= len; i += 1) {
+            const index = (i - 1) % data.length;
+            const d = _.cloneDeep(data[index]);
             if (d != null) {
-                var y = void 0;
+                let y;
                 if (direction === "down" || direction === "right") {
                     y = forecast(data.length + i, dataNumArr, xArr);
                 }
@@ -499,20 +497,19 @@ function fillSeries(data, len, direction) {
     return applyData;
 }
 function fillExtendNumber(data, len, step) {
-    var _a;
-    var applyData = [];
-    var reg = /0|([1-9]+[0-9]*)/g;
-    for (var i = 1; i <= len; i += 1) {
-        var index = (i - 1) % data.length;
-        var d = _.cloneDeep(data[index]);
-        var last = (_a = data[data.length - 1]) === null || _a === void 0 ? void 0 : _a.m;
+    const applyData = [];
+    const reg = /0|([1-9]+[0-9]*)/g;
+    for (let i = 1; i <= len; i += 1) {
+        const index = (i - 1) % data.length;
+        const d = _.cloneDeep(data[index]);
+        let last = data[data.length - 1]?.m;
         if (d != null && last != null) {
-            last = "".concat(last);
-            var match = last.match(reg) || "";
-            var lastTxt = match[match.length - 1];
-            var num = Math.abs(Number(lastTxt) + step * i);
-            var lastIndex = last.lastIndexOf(lastTxt);
-            var valueTxt = last.slice(0, lastIndex) +
+            last = `${last}`;
+            const match = last.match(reg) || "";
+            const lastTxt = match[match.length - 1];
+            const num = Math.abs(Number(lastTxt) + step * i);
+            const lastIndex = last.lastIndexOf(lastTxt);
+            const valueTxt = last.slice(0, lastIndex) +
                 num.toString() +
                 last.slice(lastIndex + lastTxt.length);
             d.v = valueTxt;
@@ -523,17 +520,16 @@ function fillExtendNumber(data, len, step) {
     return applyData;
 }
 function fillDays(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var d = _.cloneDeep(data[data.length - 1]);
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const d = _.cloneDeep(data[data.length - 1]);
         if (d != null) {
-            var date = update("yyyy-MM-dd", d.v);
+            let date = update("yyyy-MM-dd", d.v);
             date = dayjs(date)
                 .add(step * i, "days")
                 .format("YYYY-MM-DD");
             // TODO generate的处理是否合适
-            d.v = (_a = genarate(date)) === null || _a === void 0 ? void 0 : _a[2];
+            d.v = genarate(date)?.[2];
             if (d.ct != null && d.ct.fa != null) {
                 d.m = update(d.ct.fa, d.v);
             }
@@ -543,16 +539,15 @@ function fillDays(data, len, step) {
     return applyData;
 }
 function fillMonths(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var d = _.cloneDeep(data[data.length - 1]);
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const d = _.cloneDeep(data[data.length - 1]);
         if (d != null) {
-            var date = update("yyyy-MM-dd", d.v);
+            let date = update("yyyy-MM-dd", d.v);
             date = dayjs(date)
                 .add(step * i, "months")
                 .format("YYYY-MM-DD");
-            d.v = (_a = genarate(date)) === null || _a === void 0 ? void 0 : _a[2];
+            d.v = genarate(date)?.[2];
             if (d.ct != null && d.ct.fa != null) {
                 d.m = update(d.ct.fa, d.v);
             }
@@ -562,16 +557,15 @@ function fillMonths(data, len, step) {
     return applyData;
 }
 function fillYears(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var d = _.cloneDeep(data[data.length - 1]);
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const d = _.cloneDeep(data[data.length - 1]);
         if (d != null) {
-            var date = update("yyyy-MM-dd", d.v);
+            let date = update("yyyy-MM-dd", d.v);
             date = dayjs(date)
                 .add(step * i, "years")
                 .format("YYYY-MM-DD");
-            d.v = (_a = genarate(date)) === null || _a === void 0 ? void 0 : _a[2];
+            d.v = genarate(date)?.[2];
             if (d.ct != null && d.ct.fa != null) {
                 d.m = update(d.ct.fa, d.v);
             }
@@ -581,24 +575,23 @@ function fillYears(data, len, step) {
     return applyData;
 }
 function fillChnWeek(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var index = (i - 1) % data.length;
-        var d = _.cloneDeep(data[index]);
-        var num = void 0;
-        var m = (_a = data[data.length - 1]) === null || _a === void 0 ? void 0 : _a.m;
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const index = (i - 1) % data.length;
+        const d = _.cloneDeep(data[index]);
+        let num;
+        const m = data[data.length - 1]?.m;
         if (m != null && d != null) {
             if (m === "日") {
                 num = 7 + step * i;
             }
             else {
-                num = chineseToNumber("".concat(m)) + step * i;
+                num = chineseToNumber(`${m}`) + step * i;
             }
             if (num < 0) {
                 num = Math.ceil(Math.abs(num) / 7) * 7 + num;
             }
-            var rsd = num % 7;
+            const rsd = num % 7;
             if (rsd === 0) {
                 d.m = "日";
                 d.v = "日";
@@ -633,26 +626,25 @@ function fillChnWeek(data, len, step) {
     return applyData;
 }
 function fillChnWeek2(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var index = (i - 1) % data.length;
-        var d = _.cloneDeep(data[index]);
-        var num = void 0;
-        var m = (_a = data[data.length - 1]) === null || _a === void 0 ? void 0 : _a.m;
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const index = (i - 1) % data.length;
+        const d = _.cloneDeep(data[index]);
+        let num;
+        const m = data[data.length - 1]?.m;
         if (m != null && d != null) {
             if (m === "周日") {
                 num = 7 + step * i;
             }
             else {
-                var last = "".concat(m);
-                var txt = last.slice(last.length - 1, 1);
+                const last = `${m}`;
+                const txt = last.slice(last.length - 1, 1);
                 num = chineseToNumber(txt) + step * i;
             }
             if (num < 0) {
                 num = Math.ceil(Math.abs(num) / 7) * 7 + num;
             }
-            var rsd = num % 7;
+            const rsd = num % 7;
             if (rsd === 0) {
                 d.m = "周日";
                 d.v = "周日";
@@ -687,26 +679,25 @@ function fillChnWeek2(data, len, step) {
     return applyData;
 }
 function fillChnWeek3(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var index = (i - 1) % data.length;
-        var d = _.cloneDeep(data[index]);
-        var num = void 0;
-        var m = (_a = data[data.length - 1]) === null || _a === void 0 ? void 0 : _a.m;
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const index = (i - 1) % data.length;
+        const d = _.cloneDeep(data[index]);
+        let num;
+        const m = data[data.length - 1]?.m;
         if (m != null && d != null) {
             if (m === "星期日") {
                 num = 7 + step * i;
             }
             else {
-                var last = "".concat(m);
-                var txt = last.slice(last.length - 1, 1);
+                const last = `${m}`;
+                const txt = last.slice(last.length - 1, 1);
                 num = chineseToNumber(txt) + step * i;
             }
             if (num < 0) {
                 num = Math.ceil(Math.abs(num) / 7) * 7 + num;
             }
-            var rsd = num % 7;
+            const rsd = num % 7;
             if (rsd === 0) {
                 d.m = "星期日";
                 d.v = "星期日";
@@ -741,15 +732,14 @@ function fillChnWeek3(data, len, step) {
     return applyData;
 }
 function fillChnNumber(data, len, step) {
-    var _a;
-    var applyData = [];
-    for (var i = 1; i <= len; i += 1) {
-        var index = (i - 1) % data.length;
-        var d = _.cloneDeep(data[index]);
-        var m = (_a = data[data.length - 1]) === null || _a === void 0 ? void 0 : _a.m;
+    const applyData = [];
+    for (let i = 1; i <= len; i += 1) {
+        const index = (i - 1) % data.length;
+        const d = _.cloneDeep(data[index]);
+        const m = data[data.length - 1]?.m;
         if (m != null && d != null) {
-            var num = chineseToNumber("".concat(m)) + step * i;
-            var txt = void 0;
+            const num = chineseToNumber(`${m}`) + step * i;
+            let txt;
             if (num <= 0) {
                 txt = "零";
             }
@@ -764,25 +754,25 @@ function fillChnNumber(data, len, step) {
     return applyData;
 }
 export function getTypeItemHide(ctx) {
-    var copyRange = dropCellCache.copyRange;
-    var str_r = copyRange.row[0];
-    var end_r = copyRange.row[1];
-    var str_c = copyRange.column[0];
-    var end_c = copyRange.column[1];
-    var hasNumber = false;
-    var hasExtendNumber = false;
-    var hasDate = false;
-    var hasChn = false;
-    var hasChnWeek1 = false;
-    var hasChnWeek2 = false;
-    var hasChnWeek3 = false;
-    var flowdata = getFlowdata(ctx);
+    const { copyRange } = dropCellCache;
+    const str_r = copyRange.row[0];
+    const end_r = copyRange.row[1];
+    const str_c = copyRange.column[0];
+    const end_c = copyRange.column[1];
+    let hasNumber = false;
+    let hasExtendNumber = false;
+    let hasDate = false;
+    let hasChn = false;
+    let hasChnWeek1 = false;
+    let hasChnWeek2 = false;
+    let hasChnWeek3 = false;
+    const flowdata = getFlowdata(ctx);
     if (flowdata == null)
         return [];
-    for (var r = str_r; r <= end_r; r += 1) {
-        for (var c = str_c; c <= end_c; c += 1) {
+    for (let r = str_r; r <= end_r; r += 1) {
+        for (let c = str_c; c <= end_c; c += 1) {
             if (flowdata[r][c]) {
-                var cell = flowdata[r][c];
+                const cell = flowdata[r][c];
                 if (cell !== null && cell.v != null && cell.f == null) {
                     if (cell.ct != null && cell.ct.t === "n") {
                         hasNumber = true;
@@ -820,8 +810,8 @@ export function getTypeItemHide(ctx) {
     ];
 }
 function getLenS(indexArr, rsd) {
-    var s = 0;
-    for (var j = 0; j < indexArr.length; j += 1) {
+    let s = 0;
+    for (let j = 0; j < indexArr.length; j += 1) {
         if (indexArr[j] <= rsd) {
             s += 1;
         }
@@ -832,18 +822,18 @@ function getLenS(indexArr, rsd) {
     return s;
 }
 function getDataIndex(csLen, asLen, indexArr) {
-    var obj = {};
-    var num = Math.floor(asLen / csLen);
-    var rsd = asLen % csLen;
-    var sum = 0;
+    const obj = {};
+    const num = Math.floor(asLen / csLen);
+    const rsd = asLen % csLen;
+    let sum = 0;
     if (num > 0) {
-        for (var i = 1; i <= num; i += 1) {
-            for (var j = 0; j < indexArr.length; j += 1) {
+        for (let i = 1; i <= num; i += 1) {
+            for (let j = 0; j < indexArr.length; j += 1) {
                 obj[indexArr[j] + (i - 1) * csLen] = sum;
                 sum += 1;
             }
         }
-        for (var a = 0; a < indexArr.length; a += 1) {
+        for (let a = 0; a < indexArr.length; a += 1) {
             if (indexArr[a] <= rsd) {
                 obj[indexArr[a] + csLen * num] = sum;
                 sum += 1;
@@ -854,7 +844,7 @@ function getDataIndex(csLen, asLen, indexArr) {
         }
     }
     else {
-        for (var a = 0; a < indexArr.length; a += 1) {
+        for (let a = 0; a < indexArr.length; a += 1) {
             if (indexArr[a] <= rsd) {
                 obj[indexArr[a]] = sum;
                 sum += 1;
@@ -867,9 +857,8 @@ function getDataIndex(csLen, asLen, indexArr) {
     return obj;
 }
 function getDataByType(data, len, direction, type, dataType) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34;
     data = _.cloneDeep(data);
-    var applyData = [];
+    let applyData = [];
     if (type === "0" || data.length === 1) {
         // 复制单元格
         if (direction === "up" || direction === "left") {
@@ -885,10 +874,10 @@ function getDataByType(data, len, direction, type, dataType) {
         }
         else if (dataType === "extendNumber") {
             // 扩展数字
-            var dataNumArr = [];
-            for (var i = 0; i < data.length; i += 1) {
-                var txt = (_a = data[i]) === null || _a === void 0 ? void 0 : _a.m;
-                var _isExtendNumber = isExtendNumber(txt);
+            const dataNumArr = [];
+            for (let i = 0; i < data.length; i += 1) {
+                const txt = data[i]?.m;
+                const _isExtendNumber = isExtendNumber(txt);
                 if (_isExtendNumber[0]) {
                     dataNumArr.push(_isExtendNumber[1]);
                 }
@@ -899,7 +888,7 @@ function getDataByType(data, len, direction, type, dataType) {
             }
             if (isEqualDiff(dataNumArr)) {
                 // 等差数列，以等差为step
-                var step = dataNumArr[1] - dataNumArr[0];
+                const step = dataNumArr[1] - dataNumArr[0];
                 applyData = fillExtendNumber(data, len, step);
             }
             else {
@@ -912,15 +901,15 @@ function getDataByType(data, len, direction, type, dataType) {
             if (direction === "up" || direction === "left") {
                 data.reverse();
             }
-            var _judgeDate = judgeDate(data);
+            const _judgeDate = judgeDate(data);
             if (_judgeDate[0] && _judgeDate[3]) {
                 // 日一样，月差为等差数列，以月差为step
-                var step = dayjs((_b = data[1]) === null || _b === void 0 ? void 0 : _b.m).diff(dayjs((_c = data[0]) === null || _c === void 0 ? void 0 : _c.m), "months");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months");
                 applyData = fillMonths(data, len, step);
             }
             else if (!_judgeDate[0] && _judgeDate[2]) {
                 // 日不一样，日差为等差数列，以日差为step
-                var step = dayjs((_d = data[1]) === null || _d === void 0 ? void 0 : _d.m).diff(dayjs((_e = data[0]) === null || _e === void 0 ? void 0 : _e.m), "days");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "days");
                 applyData = fillDays(data, len, step);
             }
             else {
@@ -928,21 +917,21 @@ function getDataByType(data, len, direction, type, dataType) {
                 applyData = fillCopy(data, len);
             }
         }
-        else if (dataType === "chnNumber" && ((_f = data[0]) === null || _f === void 0 ? void 0 : _f.m) != null) {
+        else if (dataType === "chnNumber" && data[0]?.m != null) {
             // 数据类型是 中文小写数字
-            var hasweek = false;
-            for (var i = 0; i < data.length; i += 1) {
-                if (((_g = data[i]) === null || _g === void 0 ? void 0 : _g.m) === "日") {
+            let hasweek = false;
+            for (let i = 0; i < data.length; i += 1) {
+                if (data[i]?.m === "日") {
                     hasweek = true;
                     break;
                 }
             }
-            var dataNumArr = [];
-            var weekIndex = 0;
-            for (var i = 0; i < data.length; i += 1) {
-                var m = (_h = data[i]) === null || _h === void 0 ? void 0 : _h.m;
+            const dataNumArr = [];
+            let weekIndex = 0;
+            for (let i = 0; i < data.length; i += 1) {
+                let m = data[i]?.m;
                 if (m != null) {
-                    m = "".concat(m);
+                    m = `${m}`;
                     if (m === "日") {
                         if (i === 0) {
                             dataNumArr.push(0);
@@ -971,12 +960,12 @@ function getDataByType(data, len, direction, type, dataType) {
                     (dataNumArr[dataNumArr.length - 1] < 6 && dataNumArr[0] > 0) ||
                     (dataNumArr[0] < 6 && dataNumArr[dataNumArr.length - 1] > 0)) {
                     // 以周一~周日序列填充
-                    var step = dataNumArr[1] - dataNumArr[0];
+                    const step = dataNumArr[1] - dataNumArr[0];
                     applyData = fillChnWeek(data, len, step);
                 }
                 else {
                     // 以中文小写数字序列填充
-                    var step = dataNumArr[1] - dataNumArr[0];
+                    const step = dataNumArr[1] - dataNumArr[0];
                     applyData = fillChnNumber(data, len, step);
                 }
             }
@@ -987,13 +976,13 @@ function getDataByType(data, len, direction, type, dataType) {
         }
         else if (dataType === "chnWeek2") {
             // 周一~周日
-            var dataNumArr = [];
-            var weekIndex = 0;
-            for (var i = 0; i < data.length; i += 1) {
-                var m = (_j = data[i]) === null || _j === void 0 ? void 0 : _j.m;
+            const dataNumArr = [];
+            let weekIndex = 0;
+            for (let i = 0; i < data.length; i += 1) {
+                let m = data[i]?.m;
                 if (m != null) {
-                    m = "".concat(m);
-                    var lastTxt = m.slice(m.length - 1, 1);
+                    m = `${m}`;
+                    const lastTxt = m.slice(m.length - 1, 1);
                     if (m === "周日") {
                         if (i === 0) {
                             dataNumArr.push(0);
@@ -1014,7 +1003,7 @@ function getDataByType(data, len, direction, type, dataType) {
             }
             if (isEqualDiff(dataNumArr)) {
                 // 等差数列，以等差为step
-                var step = dataNumArr[1] - dataNumArr[0];
+                const step = dataNumArr[1] - dataNumArr[0];
                 applyData = fillChnWeek2(data, len, step);
             }
             else {
@@ -1024,13 +1013,13 @@ function getDataByType(data, len, direction, type, dataType) {
         }
         else if (dataType === "chnWeek3") {
             // 星期一~星期日
-            var dataNumArr = [];
-            var weekIndex = 0;
-            for (var i = 0; i < data.length; i += 1) {
-                var m = (_k = data[i]) === null || _k === void 0 ? void 0 : _k.m;
+            const dataNumArr = [];
+            let weekIndex = 0;
+            for (let i = 0; i < data.length; i += 1) {
+                let m = data[i]?.m;
                 if (m != null) {
-                    m = "".concat(m);
-                    var lastTxt = m.slice(m.length - 1, 1);
+                    m = `${m}`;
+                    const lastTxt = m.slice(m.length - 1, 1);
                     if (m === "星期日") {
                         if (i === 0) {
                             dataNumArr.push(0);
@@ -1051,7 +1040,7 @@ function getDataByType(data, len, direction, type, dataType) {
             }
             if (isEqualDiff(dataNumArr)) {
                 // 等差数列，以等差为step
-                var step = dataNumArr[1] - dataNumArr[0];
+                const step = dataNumArr[1] - dataNumArr[0];
                 applyData = fillChnWeek3(data, len, step);
             }
             else {
@@ -1084,22 +1073,22 @@ function getDataByType(data, len, direction, type, dataType) {
             if (direction === "up" || direction === "left") {
                 data.reverse();
             }
-            var step = dayjs((_l = data[1]) === null || _l === void 0 ? void 0 : _l.m).diff(dayjs((_m = data[0]) === null || _m === void 0 ? void 0 : _m.m), "days");
+            const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "days");
             applyData = fillDays(data, len, step);
         }
         else {
             if (direction === "up" || direction === "left") {
                 data.reverse();
             }
-            var _judgeDate = judgeDate(data);
+            const _judgeDate = judgeDate(data);
             if (_judgeDate[0] && _judgeDate[3]) {
                 // 日一样，且月差为等差数列，以月差为step
-                var step = dayjs((_o = data[1]) === null || _o === void 0 ? void 0 : _o.m).diff(dayjs((_p = data[0]) === null || _p === void 0 ? void 0 : _p.m), "months");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months");
                 applyData = fillMonths(data, len, step);
             }
             else if (!_judgeDate[0] && _judgeDate[2]) {
                 // 日不一样，且日差为等差数列，以日差为step
-                var step = dayjs((_q = data[1]) === null || _q === void 0 ? void 0 : _q.m).diff(dayjs((_r = data[0]) === null || _r === void 0 ? void 0 : _r.m), "days");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "days");
                 applyData = fillDays(data, len, step);
             }
             else {
@@ -1111,22 +1100,22 @@ function getDataByType(data, len, direction, type, dataType) {
     else if (type === "5") {
         // 以工作日填充
         if (data.length === 2) {
-            if (dayjs((_s = data[1]) === null || _s === void 0 ? void 0 : _s.m).date() === dayjs((_t = data[0]) === null || _t === void 0 ? void 0 : _t.m).date() &&
-                dayjs((_u = data[1]) === null || _u === void 0 ? void 0 : _u.m).diff(dayjs((_v = data[0]) === null || _v === void 0 ? void 0 : _v.m), "months") !== 0) {
+            if (dayjs(data[1]?.m).date() === dayjs(data[0]?.m).date() &&
+                dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months") !== 0) {
                 // 日一样，且月差大于一月，以月差为step（若那天为休息日，则向前取最近的工作日）
                 if (direction === "up" || direction === "left") {
                     data.reverse();
                 }
-                var step = dayjs((_w = data[1]) === null || _w === void 0 ? void 0 : _w.m).diff(dayjs((_x = data[0]) === null || _x === void 0 ? void 0 : _x.m), "months");
-                for (var i = 1; i <= len; i += 1) {
-                    var index = (i - 1) % data.length;
-                    var d = _.cloneDeep(data[index]);
-                    var last = (_y = data[data.length - 1]) === null || _y === void 0 ? void 0 : _y.m;
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months");
+                for (let i = 1; i <= len; i += 1) {
+                    const index = (i - 1) % data.length;
+                    const d = _.cloneDeep(data[index]);
+                    const last = data[data.length - 1]?.m;
                     if (d != null && last != null) {
-                        var day = dayjs(last)
+                        const day = dayjs(last)
                             .add(step * i, "months")
                             .day();
-                        var date = void 0;
+                        let date;
                         if (day === 0) {
                             date = dayjs(last)
                                 .add(step * i, "months")
@@ -1145,16 +1134,16 @@ function getDataByType(data, len, direction, type, dataType) {
                                 .format("YYYY-MM-DD");
                         }
                         d.m = date;
-                        d.v = (_z = genarate(date)) === null || _z === void 0 ? void 0 : _z[2];
+                        d.v = genarate(date)?.[2];
                         applyData.push(d);
                     }
                 }
             }
             else {
                 // 日不一样
-                if (Math.abs(dayjs((_0 = data[1]) === null || _0 === void 0 ? void 0 : _0.m).diff(dayjs((_1 = data[0]) === null || _1 === void 0 ? void 0 : _1.m))) > 7) {
+                if (Math.abs(dayjs(data[1]?.m).diff(dayjs(data[0]?.m))) > 7) {
                     // 若日差大于7天，以一月为step（若那天是休息日，则向前取最近的工作日）
-                    var step_month = void 0;
+                    let step_month;
                     if (direction === "down" || direction === "right") {
                         step_month = 1;
                     }
@@ -1162,20 +1151,19 @@ function getDataByType(data, len, direction, type, dataType) {
                         step_month = -1;
                         data.reverse();
                     }
-                    var step = // 以数组第一个为对比
-                     void 0; // 以数组第一个为对比
-                    for (var i = 1; i <= len; i += 1) {
-                        var index = (i - 1) % data.length;
-                        var d = _.cloneDeep(data[index]);
+                    let step; // 以数组第一个为对比
+                    for (let i = 1; i <= len; i += 1) {
+                        const index = (i - 1) % data.length;
+                        const d = _.cloneDeep(data[index]);
                         if (d != null) {
-                            var num = Math.ceil(i / data.length);
+                            const num = Math.ceil(i / data.length);
                             if (index === 0) {
                                 step = dayjs(d.m)
                                     .add(step_month * num, "months")
                                     .diff(dayjs(d.m), "days");
                             }
-                            var day = dayjs(d.m).add(step, "days").day();
-                            var date = void 0;
+                            const day = dayjs(d.m).add(step, "days").day();
+                            let date;
                             if (day === 0) {
                                 date = dayjs(d.m)
                                     .add(step, "days")
@@ -1192,14 +1180,14 @@ function getDataByType(data, len, direction, type, dataType) {
                                 date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                             }
                             d.m = date;
-                            d.v = (_2 = genarate(date)) === null || _2 === void 0 ? void 0 : _2[2];
+                            d.v = genarate(date)?.[2];
                             applyData.push(d);
                         }
                     }
                 }
                 else {
                     // 若日差小于等于7天，以7天为step（若那天是休息日，则向前取最近的工作日）
-                    var step_day = void 0;
+                    let step_day;
                     if (direction === "down" || direction === "right") {
                         step_day = 7;
                     }
@@ -1207,20 +1195,19 @@ function getDataByType(data, len, direction, type, dataType) {
                         step_day = -7;
                         data.reverse();
                     }
-                    var step = // 以数组第一个为对比
-                     void 0; // 以数组第一个为对比
-                    for (var i = 1; i <= len; i += 1) {
-                        var index = (i - 1) % data.length;
-                        var d = _.cloneDeep(data[index]);
+                    let step; // 以数组第一个为对比
+                    for (let i = 1; i <= len; i += 1) {
+                        const index = (i - 1) % data.length;
+                        const d = _.cloneDeep(data[index]);
                         if (d != null) {
-                            var num = Math.ceil(i / data.length);
+                            const num = Math.ceil(i / data.length);
                             if (index === 0) {
                                 step = dayjs(d.m)
                                     .add(step_day * num, "days")
                                     .diff(dayjs(d.m), "days");
                             }
-                            var day = dayjs(d.m).add(step, "days").day();
-                            var date = void 0;
+                            const day = dayjs(d.m).add(step, "days").day();
+                            let date;
                             if (day === 0) {
                                 date = dayjs(d.m)
                                     .add(step, "days")
@@ -1237,7 +1224,7 @@ function getDataByType(data, len, direction, type, dataType) {
                                 date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                             }
                             d.m = date;
-                            d.v = (_3 = genarate(date)) === null || _3 === void 0 ? void 0 : _3[2];
+                            d.v = genarate(date)?.[2];
                             applyData.push(d);
                         }
                     }
@@ -1245,22 +1232,22 @@ function getDataByType(data, len, direction, type, dataType) {
             }
         }
         else {
-            var _judgeDate = judgeDate(data);
+            const _judgeDate = judgeDate(data);
             if (_judgeDate[0] && _judgeDate[3]) {
                 // 日一样，且月差为等差数列，以月差为step（若那天为休息日，则向前取最近的工作日）
                 if (direction === "up" || direction === "left") {
                     data.reverse();
                 }
-                var step = dayjs((_4 = data[1]) === null || _4 === void 0 ? void 0 : _4.m).diff(dayjs((_5 = data[0]) === null || _5 === void 0 ? void 0 : _5.m), "months");
-                for (var i = 1; i <= len; i += 1) {
-                    var index = (i - 1) % data.length;
-                    var d = _.cloneDeep(data[index]);
-                    var last = (_6 = data[data.length - 1]) === null || _6 === void 0 ? void 0 : _6.m;
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months");
+                for (let i = 1; i <= len; i += 1) {
+                    const index = (i - 1) % data.length;
+                    const d = _.cloneDeep(data[index]);
+                    const last = data[data.length - 1]?.m;
                     if (d != null) {
-                        var day = dayjs(last)
+                        const day = dayjs(last)
                             .add(step * i, "months")
                             .day();
-                        var date = void 0;
+                        let date;
                         if (day === 0) {
                             date = dayjs(last)
                                 .add(step * i, "months")
@@ -1279,16 +1266,16 @@ function getDataByType(data, len, direction, type, dataType) {
                                 .format("YYYY-MM-DD");
                         }
                         d.m = date;
-                        d.v = (_7 = genarate(date)) === null || _7 === void 0 ? void 0 : _7[2];
+                        d.v = genarate(date)?.[2];
                         applyData.push(d);
                     }
                 }
             }
             else if (!_judgeDate[0] && _judgeDate[2]) {
                 // 日不一样，且日差为等差数列
-                if (Math.abs(dayjs((_8 = data[1]) === null || _8 === void 0 ? void 0 : _8.m).diff(dayjs((_9 = data[0]) === null || _9 === void 0 ? void 0 : _9.m))) > 7) {
+                if (Math.abs(dayjs(data[1]?.m).diff(dayjs(data[0]?.m))) > 7) {
                     // 若日差大于7天，以一月为step（若那天是休息日，则向前取最近的工作日）
-                    var step_month = void 0;
+                    let step_month;
                     if (direction === "down" || direction === "right") {
                         step_month = 1;
                     }
@@ -1296,20 +1283,19 @@ function getDataByType(data, len, direction, type, dataType) {
                         step_month = -1;
                         data.reverse();
                     }
-                    var step = // 以数组第一个为对比
-                     void 0; // 以数组第一个为对比
-                    for (var i = 1; i <= len; i += 1) {
-                        var index = (i - 1) % data.length;
-                        var d = _.cloneDeep(data[index]);
+                    let step; // 以数组第一个为对比
+                    for (let i = 1; i <= len; i += 1) {
+                        const index = (i - 1) % data.length;
+                        const d = _.cloneDeep(data[index]);
                         if (d != null) {
-                            var num = Math.ceil(i / data.length);
+                            const num = Math.ceil(i / data.length);
                             if (index === 0) {
                                 step = dayjs(d.m)
                                     .add(step_month * num, "months")
                                     .diff(dayjs(d.m), "days");
                             }
-                            var day = dayjs(d.m).add(step, "days").day();
-                            var date = void 0;
+                            const day = dayjs(d.m).add(step, "days").day();
+                            let date;
                             if (day === 0) {
                                 date = dayjs(d.m)
                                     .add(step, "days")
@@ -1326,14 +1312,14 @@ function getDataByType(data, len, direction, type, dataType) {
                                 date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                             }
                             d.m = date;
-                            d.v = (_10 = genarate(date)) === null || _10 === void 0 ? void 0 : _10[2];
+                            d.v = genarate(date)?.[2];
                             applyData.push(d);
                         }
                     }
                 }
                 else {
                     // 若日差小于等于7天，以7天为step（若那天是休息日，则向前取最近的工作日）
-                    var step_day = void 0;
+                    let step_day;
                     if (direction === "down" || direction === "right") {
                         step_day = 7;
                     }
@@ -1341,20 +1327,19 @@ function getDataByType(data, len, direction, type, dataType) {
                         step_day = -7;
                         data.reverse();
                     }
-                    var step = // 以数组第一个为对比
-                     void 0; // 以数组第一个为对比
-                    for (var i = 1; i <= len; i += 1) {
-                        var index = (i - 1) % data.length;
-                        var d = _.cloneDeep(data[index]);
+                    let step; // 以数组第一个为对比
+                    for (let i = 1; i <= len; i += 1) {
+                        const index = (i - 1) % data.length;
+                        const d = _.cloneDeep(data[index]);
                         if (d != null) {
-                            var num = Math.ceil(i / data.length);
+                            const num = Math.ceil(i / data.length);
                             if (index === 0) {
                                 step = dayjs(d.m)
                                     .add(step_day * num, "days")
                                     .diff(dayjs(d.m), "days");
                             }
-                            var day = dayjs(d.m).add(step, "days").day();
-                            var date = void 0;
+                            const day = dayjs(d.m).add(step, "days").day();
+                            let date;
                             if (day === 0) {
                                 date = dayjs(d.m)
                                     .add(step, "days")
@@ -1371,7 +1356,7 @@ function getDataByType(data, len, direction, type, dataType) {
                                 date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                             }
                             d.m = date;
-                            d.v = (_11 = genarate(date)) === null || _11 === void 0 ? void 0 : _11[2];
+                            d.v = genarate(date)?.[2];
                             applyData.push(d);
                         }
                     }
@@ -1389,18 +1374,18 @@ function getDataByType(data, len, direction, type, dataType) {
     else if (type === "6") {
         // 以月填充
         if (data.length === 2) {
-            if (dayjs((_12 = data[1]) === null || _12 === void 0 ? void 0 : _12.m).date() === dayjs((_13 = data[0]) === null || _13 === void 0 ? void 0 : _13.m).date() &&
-                dayjs((_14 = data[1]) === null || _14 === void 0 ? void 0 : _14.m).diff(dayjs((_15 = data[0]) === null || _15 === void 0 ? void 0 : _15.m), "months") !== 0) {
+            if (dayjs(data[1]?.m).date() === dayjs(data[0]?.m).date() &&
+                dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months") !== 0) {
                 // 日一样，且月差大于一月，以月差为step
                 if (direction === "up" || direction === "left") {
                     data.reverse();
                 }
-                var step = dayjs((_16 = data[1]) === null || _16 === void 0 ? void 0 : _16.m).diff(dayjs((_17 = data[0]) === null || _17 === void 0 ? void 0 : _17.m), "months");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months");
                 applyData = fillMonths(data, len, step);
             }
             else {
                 // 以一月为step
-                var step_month = void 0;
+                let step_month;
                 if (direction === "down" || direction === "right") {
                     step_month = 1;
                 }
@@ -1408,39 +1393,38 @@ function getDataByType(data, len, direction, type, dataType) {
                     step_month = -1;
                     data.reverse();
                 }
-                var step = // 以数组第一个为对比
-                 void 0; // 以数组第一个为对比
-                for (var i = 1; i <= len; i += 1) {
-                    var index = (i - 1) % data.length;
-                    var d = _.cloneDeep(data[index]);
+                let step; // 以数组第一个为对比
+                for (let i = 1; i <= len; i += 1) {
+                    const index = (i - 1) % data.length;
+                    const d = _.cloneDeep(data[index]);
                     if (d != null) {
-                        var num = Math.ceil(i / data.length);
+                        const num = Math.ceil(i / data.length);
                         if (index === 0) {
                             step = dayjs(d.m)
                                 .add(step_month * num, "months")
                                 .diff(dayjs(d.m), "days");
                         }
-                        var date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
+                        const date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                         d.m = date;
-                        d.v = (_18 = genarate(date)) === null || _18 === void 0 ? void 0 : _18[2];
+                        d.v = genarate(date)?.[2];
                         applyData.push(d);
                     }
                 }
             }
         }
         else {
-            var _judgeDate = judgeDate(data);
+            const _judgeDate = judgeDate(data);
             if (_judgeDate[0] && _judgeDate[3]) {
                 // 日一样，且月差为等差数列，以月差为step
                 if (direction === "up" || direction === "left") {
                     data.reverse();
                 }
-                var step = dayjs((_19 = data[1]) === null || _19 === void 0 ? void 0 : _19.m).diff(dayjs((_20 = data[0]) === null || _20 === void 0 ? void 0 : _20.m), "months");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "months");
                 applyData = fillMonths(data, len, step);
             }
             else if (!_judgeDate[0] && _judgeDate[2]) {
                 // 日不一样，且日差为等差数列，以一月为step
-                var step_month = void 0;
+                let step_month;
                 if (direction === "down" || direction === "right") {
                     step_month = 1;
                 }
@@ -1448,21 +1432,20 @@ function getDataByType(data, len, direction, type, dataType) {
                     step_month = -1;
                     data.reverse();
                 }
-                var step = // 以数组第一个为对比
-                 void 0; // 以数组第一个为对比
-                for (var i = 1; i <= len; i += 1) {
-                    var index = (i - 1) % data.length;
-                    var d = _.cloneDeep(data[index]);
+                let step; // 以数组第一个为对比
+                for (let i = 1; i <= len; i += 1) {
+                    const index = (i - 1) % data.length;
+                    const d = _.cloneDeep(data[index]);
                     if (d != null) {
-                        var num = Math.ceil(i / data.length);
+                        const num = Math.ceil(i / data.length);
                         if (index === 0) {
                             step = dayjs(d.m)
                                 .add(step_month * num, "months")
                                 .diff(dayjs(d.m), "days");
                         }
-                        var date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
+                        const date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                         d.m = date;
-                        d.v = (_21 = genarate(date)) === null || _21 === void 0 ? void 0 : _21[2];
+                        d.v = genarate(date)?.[2];
                         applyData.push(d);
                     }
                 }
@@ -1479,19 +1462,19 @@ function getDataByType(data, len, direction, type, dataType) {
     else if (type === "7") {
         // 以年填充
         if (data.length === 2) {
-            if (dayjs((_22 = data[1]) === null || _22 === void 0 ? void 0 : _22.m).date() === dayjs((_23 = data[0]) === null || _23 === void 0 ? void 0 : _23.m).date() &&
-                dayjs((_24 = data[1]) === null || _24 === void 0 ? void 0 : _24.m).month() === dayjs((_25 = data[0]) === null || _25 === void 0 ? void 0 : _25.m).month() &&
-                dayjs((_26 = data[1]) === null || _26 === void 0 ? void 0 : _26.m).diff(dayjs((_27 = data[0]) === null || _27 === void 0 ? void 0 : _27.m), "years") !== 0) {
+            if (dayjs(data[1]?.m).date() === dayjs(data[0]?.m).date() &&
+                dayjs(data[1]?.m).month() === dayjs(data[0]?.m).month() &&
+                dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "years") !== 0) {
                 // 日月一样，且年差大于一年，以年差为step
                 if (direction === "up" || direction === "left") {
                     data.reverse();
                 }
-                var step = dayjs((_28 = data[1]) === null || _28 === void 0 ? void 0 : _28.m).diff(dayjs((_29 = data[0]) === null || _29 === void 0 ? void 0 : _29.m), "years");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "years");
                 applyData = fillYears(data, len, step);
             }
             else {
                 // 以一年为step
-                var step_year = void 0;
+                let step_year;
                 if (direction === "down" || direction === "right") {
                     step_year = 1;
                 }
@@ -1499,39 +1482,38 @@ function getDataByType(data, len, direction, type, dataType) {
                     step_year = -1;
                     data.reverse();
                 }
-                var step = // 以数组第一个为对比
-                 void 0; // 以数组第一个为对比
-                for (var i = 1; i <= len; i += 1) {
-                    var index = (i - 1) % data.length;
-                    var d = _.cloneDeep(data[index]);
+                let step; // 以数组第一个为对比
+                for (let i = 1; i <= len; i += 1) {
+                    const index = (i - 1) % data.length;
+                    const d = _.cloneDeep(data[index]);
                     if (d != null) {
-                        var num = Math.ceil(i / data.length);
+                        const num = Math.ceil(i / data.length);
                         if (index === 0) {
                             step = dayjs(d.m)
                                 .add(step_year * num, "years")
                                 .diff(dayjs(d.m), "days");
                         }
-                        var date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
+                        const date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                         d.m = date;
-                        d.v = (_30 = genarate(date)) === null || _30 === void 0 ? void 0 : _30[2];
+                        d.v = genarate(date)?.[2];
                         applyData.push(d);
                     }
                 }
             }
         }
         else {
-            var _judgeDate = judgeDate(data);
+            const _judgeDate = judgeDate(data);
             if (_judgeDate[0] && _judgeDate[1] && _judgeDate[4]) {
                 // 日月一样，且年差为等差数列，以年差为step
                 if (direction === "up" || direction === "left") {
                     data.reverse();
                 }
-                var step = dayjs((_31 = data[1]) === null || _31 === void 0 ? void 0 : _31.m).diff(dayjs((_32 = data[0]) === null || _32 === void 0 ? void 0 : _32.m), "years");
+                const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), "years");
                 applyData = fillYears(data, len, step);
             }
             else if ((_judgeDate[0] && _judgeDate[3]) || _judgeDate[2]) {
                 // 日一样且月差为等差数列，或天差为等差数列，以一年为step
-                var step_year = void 0;
+                let step_year;
                 if (direction === "down" || direction === "right") {
                     step_year = 1;
                 }
@@ -1539,21 +1521,20 @@ function getDataByType(data, len, direction, type, dataType) {
                     step_year = -1;
                     data.reverse();
                 }
-                var step = // 以数组第一个为对比
-                 void 0; // 以数组第一个为对比
-                for (var i = 1; i <= len; i += 1) {
-                    var index = (i - 1) % data.length;
-                    var d = _.cloneDeep(data[index]);
-                    var num = Math.ceil(i / data.length);
+                let step; // 以数组第一个为对比
+                for (let i = 1; i <= len; i += 1) {
+                    const index = (i - 1) % data.length;
+                    const d = _.cloneDeep(data[index]);
+                    const num = Math.ceil(i / data.length);
                     if (d != null) {
                         if (index === 0) {
                             step = dayjs(d.m)
                                 .add(step_year * num, "years")
                                 .diff(dayjs(d.m), "days");
                         }
-                        var date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
+                        const date = dayjs(d.m).add(step, "days").format("YYYY-MM-DD");
                         d.m = date;
-                        d.v = (_33 = genarate(date)) === null || _33 === void 0 ? void 0 : _33[2];
+                        d.v = genarate(date)?.[2];
                         applyData.push(d);
                     }
                 }
@@ -1569,11 +1550,11 @@ function getDataByType(data, len, direction, type, dataType) {
     }
     else if (type === "8") {
         // 以中文小写数字序列填充
-        var dataNumArr = [];
-        for (var i = 0; i < data.length; i += 1) {
-            var m = (_34 = data[i]) === null || _34 === void 0 ? void 0 : _34.m;
+        const dataNumArr = [];
+        for (let i = 0; i < data.length; i += 1) {
+            let m = data[i]?.m;
             if (m != null) {
-                m = "".concat(m);
+                m = `${m}`;
                 dataNumArr.push(chineseToNumber(m));
             }
         }
@@ -1582,7 +1563,7 @@ function getDataByType(data, len, direction, type, dataType) {
             dataNumArr.reverse();
         }
         if (isEqualDiff(dataNumArr)) {
-            var step = dataNumArr[1] - dataNumArr[0];
+            const step = dataNumArr[1] - dataNumArr[0];
             applyData = fillChnNumber(data, len, step);
         }
         else {
@@ -1593,11 +1574,11 @@ function getDataByType(data, len, direction, type, dataType) {
     return applyData;
 }
 function getCopyData(d, r1, r2, c1, c2, direction) {
-    var copyData = [];
-    var a1;
-    var a2;
-    var b1;
-    var b2;
+    const copyData = [];
+    let a1;
+    let a2;
+    let b1;
+    let b2;
     if (direction === "down" || direction === "up") {
         a1 = c1;
         a2 = c2;
@@ -1610,17 +1591,17 @@ function getCopyData(d, r1, r2, c1, c2, direction) {
         b1 = c1;
         b2 = c2;
     }
-    for (var a = a1; a <= a2; a += 1) {
-        var obj = {};
-        var arrData = [];
-        var arrIndex = [];
-        var text = "";
-        var extendNumberBeforeStr = null;
-        var extendNumberAfterStr = null;
-        var isSameStr = true;
-        for (var b = b1; b <= b2; b += 1) {
+    for (let a = a1; a <= a2; a += 1) {
+        const obj = {};
+        let arrData = [];
+        let arrIndex = [];
+        let text = "";
+        let extendNumberBeforeStr = null;
+        let extendNumberAfterStr = null;
+        let isSameStr = true;
+        for (let b = b1; b <= b2; b += 1) {
             // 单元格
-            var data = void 0;
+            let data;
             if (direction === "down" || direction === "up") {
                 data = d[b][a];
             }
@@ -1628,8 +1609,8 @@ function getCopyData(d, r1, r2, c1, c2, direction) {
                 data = d[a][b];
             }
             // 单元格值类型
-            var str = void 0;
-            if ((data === null || data === void 0 ? void 0 : data.v) != null && data.f == null) {
+            let str;
+            if (data?.v != null && data.f == null) {
                 if (!!data.ct && data.ct.t === "n") {
                     str = "number";
                     extendNumberBeforeStr = null;
@@ -1642,16 +1623,17 @@ function getCopyData(d, r1, r2, c1, c2, direction) {
                 }
                 else if (isExtendNumber(data.m)[0]) {
                     str = "extendNumber";
-                    var _isExtendNumber = isExtendNumber(data.m);
+                    const _isExtendNumber = isExtendNumber(data.m);
                     if (extendNumberBeforeStr == null || extendNumberAfterStr == null) {
                         isSameStr = true;
-                        extendNumberBeforeStr = _isExtendNumber[2], extendNumberAfterStr = _isExtendNumber[3];
+                        [, , extendNumberBeforeStr, extendNumberAfterStr] = _isExtendNumber;
                     }
                     else {
                         if (_isExtendNumber[2] !== extendNumberBeforeStr ||
                             _isExtendNumber[3] !== extendNumberAfterStr) {
                             isSameStr = false;
-                            extendNumberBeforeStr = _isExtendNumber[2], extendNumberAfterStr = _isExtendNumber[3];
+                            [, , extendNumberBeforeStr, extendNumberAfterStr] =
+                                _isExtendNumber;
                         }
                         else {
                             isSameStr = true;
@@ -1830,19 +1812,19 @@ function getCopyData(d, r1, r2, c1, c2, direction) {
     return copyData;
 }
 function getApplyData(copyD, csLen, asLen) {
-    var applyData = [];
-    var direction = dropCellCache.direction;
-    var type = dropCellCache.applyType;
-    var num = Math.floor(asLen / csLen);
-    var rsd = asLen % csLen;
+    const applyData = [];
+    const { direction } = dropCellCache;
+    const type = dropCellCache.applyType;
+    const num = Math.floor(asLen / csLen);
+    const rsd = asLen % csLen;
     // 纯数字类型
-    var copyD_number = copyD.number;
-    var applyD_number = [];
+    const copyD_number = copyD.number;
+    const applyD_number = [];
     if (copyD_number) {
-        for (var i = 0; i < copyD_number.length; i += 1) {
-            var s = getLenS(copyD_number[i].index, rsd);
-            var len = copyD_number[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_number.length; i += 1) {
+            const s = getLenS(copyD_number[i].index, rsd);
+            const len = copyD_number[i].index.length * num + s;
+            let arrData;
             if (type === "1" || type === "3") {
                 arrData = getDataByType(copyD_number[i].data, len, direction, type, "number");
             }
@@ -1852,18 +1834,18 @@ function getApplyData(copyD, csLen, asLen) {
             else {
                 arrData = getDataByType(copyD_number[i].data, len, direction, "0");
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_number[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_number[i].index);
             applyD_number.push({ data: arrData, index: arrIndex });
         }
     }
     // 扩展数字型（即一串字符最后面的是数字）
-    var copyD_extendNumber = copyD.extendNumber;
-    var applyD_extendNumber = [];
+    const copyD_extendNumber = copyD.extendNumber;
+    const applyD_extendNumber = [];
     if (copyD_extendNumber) {
-        for (var i = 0; i < copyD_extendNumber.length; i += 1) {
-            var s = getLenS(copyD_extendNumber[i].index, rsd);
-            var len = copyD_extendNumber[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_extendNumber.length; i += 1) {
+            const s = getLenS(copyD_extendNumber[i].index, rsd);
+            const len = copyD_extendNumber[i].index.length * num + s;
+            let arrData;
             if (type === "1" || type === "3") {
                 arrData = getDataByType(copyD_extendNumber[i].data, len, direction, type, "extendNumber");
             }
@@ -1873,18 +1855,18 @@ function getApplyData(copyD, csLen, asLen) {
             else {
                 arrData = getDataByType(copyD_extendNumber[i].data, len, direction, "0");
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_extendNumber[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_extendNumber[i].index);
             applyD_extendNumber.push({ data: arrData, index: arrIndex });
         }
     }
     // 日期类型
-    var copyD_date = copyD.date;
-    var applyD_date = [];
+    const copyD_date = copyD.date;
+    const applyD_date = [];
     if (copyD_date) {
-        for (var i = 0; i < copyD_date.length; i += 1) {
-            var s = getLenS(copyD_date[i].index, rsd);
-            var len = copyD_date[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_date.length; i += 1) {
+            const s = getLenS(copyD_date[i].index, rsd);
+            const len = copyD_date[i].index.length * num + s;
+            let arrData;
             if (type === "1" || type === "3") {
                 arrData = getDataByType(copyD_date[i].data, len, direction, type, "date");
             }
@@ -1894,18 +1876,18 @@ function getApplyData(copyD, csLen, asLen) {
             else {
                 arrData = getDataByType(copyD_date[i].data, len, direction, type);
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_date[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_date[i].index);
             applyD_date.push({ data: arrData, index: arrIndex });
         }
     }
     // 中文小写数字 或 一~日
-    var copyD_chnNumber = copyD.chnNumber;
-    var applyD_chnNumber = [];
+    const copyD_chnNumber = copyD.chnNumber;
+    const applyD_chnNumber = [];
     if (copyD_chnNumber) {
-        for (var i = 0; i < copyD_chnNumber.length; i += 1) {
-            var s = getLenS(copyD_chnNumber[i].index, rsd);
-            var len = copyD_chnNumber[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_chnNumber.length; i += 1) {
+            const s = getLenS(copyD_chnNumber[i].index, rsd);
+            const len = copyD_chnNumber[i].index.length * num + s;
+            let arrData;
             if (type === "1" || type === "3") {
                 arrData = getDataByType(copyD_chnNumber[i].data, len, direction, type, "chnNumber");
             }
@@ -1915,18 +1897,18 @@ function getApplyData(copyD, csLen, asLen) {
             else {
                 arrData = getDataByType(copyD_chnNumber[i].data, len, direction, "0");
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_chnNumber[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_chnNumber[i].index);
             applyD_chnNumber.push({ data: arrData, index: arrIndex });
         }
     }
     // 周一~周日
-    var copyD_chnWeek2 = copyD.chnWeek2;
-    var applyD_chnWeek2 = [];
+    const copyD_chnWeek2 = copyD.chnWeek2;
+    const applyD_chnWeek2 = [];
     if (copyD_chnWeek2) {
-        for (var i = 0; i < copyD_chnWeek2.length; i += 1) {
-            var s = getLenS(copyD_chnWeek2[i].index, rsd);
-            var len = copyD_chnWeek2[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_chnWeek2.length; i += 1) {
+            const s = getLenS(copyD_chnWeek2[i].index, rsd);
+            const len = copyD_chnWeek2[i].index.length * num + s;
+            let arrData;
             if (type === "1" || type === "3") {
                 arrData = getDataByType(copyD_chnWeek2[i].data, len, direction, type, "chnWeek2");
             }
@@ -1936,18 +1918,18 @@ function getApplyData(copyD, csLen, asLen) {
             else {
                 arrData = getDataByType(copyD_chnWeek2[i].data, len, direction, "0");
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_chnWeek2[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_chnWeek2[i].index);
             applyD_chnWeek2.push({ data: arrData, index: arrIndex });
         }
     }
     // 星期一~星期日
-    var copyD_chnWeek3 = copyD.chnWeek3;
-    var applyD_chnWeek3 = [];
+    const copyD_chnWeek3 = copyD.chnWeek3;
+    const applyD_chnWeek3 = [];
     if (copyD_chnWeek3) {
-        for (var i = 0; i < copyD_chnWeek3.length; i += 1) {
-            var s = getLenS(copyD_chnWeek3[i].index, rsd);
-            var len = copyD_chnWeek3[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_chnWeek3.length; i += 1) {
+            const s = getLenS(copyD_chnWeek3[i].index, rsd);
+            const len = copyD_chnWeek3[i].index.length * num + s;
+            let arrData;
             if (type === "1" || type === "3") {
                 arrData = getDataByType(copyD_chnWeek3[i].data, len, direction, type, "chnWeek3");
             }
@@ -1957,73 +1939,73 @@ function getApplyData(copyD, csLen, asLen) {
             else {
                 arrData = getDataByType(copyD_chnWeek3[i].data, len, direction, "0");
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_chnWeek3[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_chnWeek3[i].index);
             applyD_chnWeek3.push({ data: arrData, index: arrIndex });
         }
     }
     // 其它
-    var copyD_other = copyD.other;
-    var applyD_other = [];
+    const copyD_other = copyD.other;
+    const applyD_other = [];
     if (copyD_other) {
-        for (var i = 0; i < copyD_other.length; i += 1) {
-            var s = getLenS(copyD_other[i].index, rsd);
-            var len = copyD_other[i].index.length * num + s;
-            var arrData = void 0;
+        for (let i = 0; i < copyD_other.length; i += 1) {
+            const s = getLenS(copyD_other[i].index, rsd);
+            const len = copyD_other[i].index.length * num + s;
+            let arrData;
             if (type === "2" || type === "3") {
                 arrData = getDataByType(copyD_other[i].data, len, direction, type);
             }
             else {
                 arrData = getDataByType(copyD_other[i].data, len, direction, "0");
             }
-            var arrIndex = getDataIndex(csLen, asLen, copyD_other[i].index);
+            const arrIndex = getDataIndex(csLen, asLen, copyD_other[i].index);
             applyD_other.push({ data: arrData, index: arrIndex });
         }
     }
-    for (var x = 1; x <= asLen; x += 1) {
+    for (let x = 1; x <= asLen; x += 1) {
         if (applyD_number.length > 0) {
-            for (var y = 0; y < applyD_number.length; y += 1) {
+            for (let y = 0; y < applyD_number.length; y += 1) {
                 if (x in applyD_number[y].index) {
                     applyData.push(applyD_number[y].data[applyD_number[y].index[x]]);
                 }
             }
         }
         if (applyD_extendNumber.length > 0) {
-            for (var y = 0; y < applyD_extendNumber.length; y += 1) {
+            for (let y = 0; y < applyD_extendNumber.length; y += 1) {
                 if (x in applyD_extendNumber[y].index) {
                     applyData.push(applyD_extendNumber[y].data[applyD_extendNumber[y].index[x]]);
                 }
             }
         }
         if (applyD_date.length > 0) {
-            for (var y = 0; y < applyD_date.length; y += 1) {
+            for (let y = 0; y < applyD_date.length; y += 1) {
                 if (x in applyD_date[y].index) {
                     applyData.push(applyD_date[y].data[applyD_date[y].index[x]]);
                 }
             }
         }
         if (applyD_chnNumber.length > 0) {
-            for (var y = 0; y < applyD_chnNumber.length; y += 1) {
+            for (let y = 0; y < applyD_chnNumber.length; y += 1) {
                 if (x in applyD_chnNumber[y].index) {
                     applyData.push(applyD_chnNumber[y].data[applyD_chnNumber[y].index[x]]);
                 }
             }
         }
         if (applyD_chnWeek2.length > 0) {
-            for (var y = 0; y < applyD_chnWeek2.length; y += 1) {
+            for (let y = 0; y < applyD_chnWeek2.length; y += 1) {
                 if (x in applyD_chnWeek2[y].index) {
                     applyData.push(applyD_chnWeek2[y].data[applyD_chnWeek2[y].index[x]]);
                 }
             }
         }
         if (applyD_chnWeek3.length > 0) {
-            for (var y = 0; y < applyD_chnWeek3.length; y += 1) {
+            for (let y = 0; y < applyD_chnWeek3.length; y += 1) {
                 if (x in applyD_chnWeek3[y].index) {
                     applyData.push(applyD_chnWeek3[y].data[applyD_chnWeek3[y].index[x]]);
                 }
             }
         }
         if (applyD_other.length > 0) {
-            for (var y = 0; y < applyD_other.length; y += 1) {
+            for (let y = 0; y < applyD_other.length; y += 1) {
                 if (x in applyD_other[y].index) {
                     applyData.push(applyD_other[y].data[applyD_other[y].index[x]]);
                 }
@@ -2038,35 +2020,33 @@ export function updateDropCell(ctx) {
     // ) {
     //   return;
     // }
-    var _a, _b, _c, _d;
-    var _e, _f, _g;
-    var d = getFlowdata(ctx);
-    var allowEdit = isAllowEdit(ctx);
+    const d = getFlowdata(ctx);
+    const allowEdit = isAllowEdit(ctx);
     if (allowEdit === false || d == null) {
         return;
     }
-    var index = getSheetIndex(ctx, ctx.currentSheetId);
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
     if (index == null)
         return;
-    var file = ctx.luckysheetfile[index];
-    var hiddenRows = new Set(Object.keys(((_e = file.config) === null || _e === void 0 ? void 0 : _e.rowhidden) || {}));
-    var hiddenCols = new Set(Object.keys(((_f = file.config) === null || _f === void 0 ? void 0 : _f.colhidden) || {}));
-    var cfg = _.cloneDeep(ctx.config);
+    const file = ctx.luckysheetfile[index];
+    const hiddenRows = new Set(Object.keys(file.config?.rowhidden || {}));
+    const hiddenCols = new Set(Object.keys(file.config?.colhidden || {}));
+    const cfg = _.cloneDeep(ctx.config);
     if (cfg.borderInfo == null) {
         cfg.borderInfo = [];
     }
-    var borderInfoCompute = getBorderInfoCompute(ctx, ctx.currentSheetId);
-    var dataVerification = _.cloneDeep(file.dataVerification);
-    var direction = dropCellCache.direction;
+    const borderInfoCompute = getBorderInfoCompute(ctx, ctx.currentSheetId);
+    const dataVerification = _.cloneDeep(file.dataVerification);
+    const { direction } = dropCellCache;
     // const type = dropCellCache.applyType;
     // 复制范围
-    var copyRange = dropCellCache.copyRange;
-    var copy_str_r = copyRange.row[0];
-    var copy_end_r = copyRange.row[1];
-    var copy_str_c = copyRange.column[0];
-    var copy_end_c = copyRange.column[1];
-    var copyData = getCopyData(d, copy_str_r, copy_end_r, copy_str_c, copy_end_c, direction);
-    var csLen;
+    const { copyRange } = dropCellCache;
+    const copy_str_r = copyRange.row[0];
+    const copy_end_r = copyRange.row[1];
+    const copy_str_c = copyRange.column[0];
+    const copy_end_c = copyRange.column[1];
+    const copyData = getCopyData(d, copy_str_r, copy_end_r, copy_str_c, copy_end_c, direction);
+    let csLen;
     if (direction === "down" || direction === "up") {
         csLen = copy_end_r - copy_str_r + 1;
     }
@@ -2075,40 +2055,40 @@ export function updateDropCell(ctx) {
         csLen = copy_end_c - copy_str_c + 1;
     }
     // 应用范围
-    var applyRange = dropCellCache.applyRange;
-    var apply_str_r = applyRange.row[0];
-    var apply_end_r = applyRange.row[1];
-    var apply_str_c = applyRange.column[0];
-    var apply_end_c = applyRange.column[1];
+    const { applyRange } = dropCellCache;
+    const apply_str_r = applyRange.row[0];
+    const apply_end_r = applyRange.row[1];
+    const apply_str_c = applyRange.column[0];
+    const apply_end_c = applyRange.column[1];
     if (direction === "down" || direction === "up") {
-        var asLen = apply_end_r - apply_str_r + 1;
-        for (var i = apply_str_c; i <= apply_end_c; i += 1) {
-            if (hiddenCols.has("".concat(i)))
+        const asLen = apply_end_r - apply_str_r + 1;
+        for (let i = apply_str_c; i <= apply_end_c; i += 1) {
+            if (hiddenCols.has(`${i}`))
                 continue;
-            var copyD = copyData[i - apply_str_c];
-            var applyData = getApplyData(copyD, csLen, asLen);
+            const copyD = copyData[i - apply_str_c];
+            const applyData = getApplyData(copyD, csLen, asLen);
             if (direction === "down") {
-                for (var j = apply_str_r; j <= apply_end_r; j += 1) {
-                    if (hiddenRows.has("".concat(j)))
+                for (let j = apply_str_r; j <= apply_end_r; j += 1) {
+                    if (hiddenRows.has(`${j}`))
                         continue;
-                    var cell = applyData[j - apply_str_r];
-                    if ((cell === null || cell === void 0 ? void 0 : cell.f) != null) {
-                        var f = "=".concat(formula.functionCopy(ctx, cell.f, "down", j - apply_str_r + 1));
-                        var v = formula.execfunction(ctx, f, j, i);
+                    const cell = applyData[j - apply_str_r];
+                    if (cell?.f != null) {
+                        const f = `=${formula.functionCopy(ctx, cell.f, "down", j - apply_str_r + 1)}`;
+                        const v = formula.execfunction(ctx, f, j, i);
                         formula.execFunctionGroup(ctx, j, i, v[1], undefined, d);
-                        cell.v = v[1], cell.f = v[2];
+                        [, cell.v, cell.f] = v;
                         if (cell.spl != null) {
                             cell.spl = v[3].data;
                         }
                         else if (cell.v != null) {
                             if (isRealNum(cell.v) &&
-                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test("".concat(cell.v))) {
+                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(`${cell.v}`)) {
                                 if (cell.v === Infinity || cell.v === -Infinity) {
                                     cell.m = cell.v.toString();
                                 }
                                 else {
                                     if (cell.v.toString().indexOf("e") > -1) {
-                                        var len = cell.v
+                                        let len = cell.v
                                             .toString()
                                             .split(".")[1]
                                             .split("e")[0].length;
@@ -2118,11 +2098,11 @@ export function updateDropCell(ctx) {
                                         cell.m = cell.v.toExponential(len).toString();
                                     }
                                     else {
-                                        var mask = void 0;
-                                        if (((_g = cell.ct) === null || _g === void 0 ? void 0 : _g.fa) === "##0.00") {
+                                        let mask;
+                                        if (cell.ct?.fa === "##0.00") {
                                             /* 如果是数字类型 */
-                                            mask = genarate("".concat(Math.round(cell.v * 1000000000) /
-                                                1000000000, ".00"));
+                                            mask = genarate(`${Math.round(cell.v * 1000000000) /
+                                                1000000000}.00`);
                                             cell.m = mask[0].toString();
                                         }
                                         else {
@@ -2134,32 +2114,32 @@ export function updateDropCell(ctx) {
                                 cell.ct = cell.ct || { fa: "General", t: "n" };
                             }
                             else {
-                                var mask = genarate(cell.v);
+                                const mask = genarate(cell.v);
                                 cell.m = mask[0].toString();
-                                _a = mask, cell.ct = _a[1];
+                                [, cell.ct] = mask;
                             }
                         }
                     }
                     d[j][i] = cell || null;
                     // 边框
-                    var bd_r = copy_str_r + ((j - apply_str_r) % csLen);
-                    var bd_c = i;
-                    if (borderInfoCompute["".concat(bd_r, "_").concat(bd_c)]) {
-                        var bd_obj = {
+                    const bd_r = copy_str_r + ((j - apply_str_r) % csLen);
+                    const bd_c = i;
+                    if (borderInfoCompute[`${bd_r}_${bd_c}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: j,
                                 col_index: i,
-                                l: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].l,
-                                r: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].r,
-                                t: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].t,
-                                b: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].b,
+                                l: borderInfoCompute[`${bd_r}_${bd_c}`].l,
+                                r: borderInfoCompute[`${bd_r}_${bd_c}`].r,
+                                t: borderInfoCompute[`${bd_r}_${bd_c}`].t,
+                                b: borderInfoCompute[`${bd_r}_${bd_c}`].b,
                             },
                         };
                         cfg.borderInfo.push(bd_obj);
                     }
-                    else if (borderInfoCompute["".concat(j, "_").concat(i)]) {
-                        var bd_obj = {
+                    else if (borderInfoCompute[`${j}_${i}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: j,
@@ -2174,33 +2154,33 @@ export function updateDropCell(ctx) {
                     }
                     // 数据验证
                     // Bug
-                    if (dataVerification != null && dataVerification["".concat(bd_r, "_").concat(bd_c)]) {
-                        dataVerification["".concat(j, "_").concat(i)] = dataVerification["".concat(bd_r, "_").concat(bd_c)];
+                    if (dataVerification != null && dataVerification[`${bd_r}_${bd_c}`]) {
+                        dataVerification[`${j}_${i}`] = dataVerification[`${bd_r}_${bd_c}`];
                     }
                 }
             }
             if (direction === "up") {
-                for (var j = apply_end_r; j >= apply_str_r; j -= 1) {
-                    if (hiddenRows.has("".concat(j)))
+                for (let j = apply_end_r; j >= apply_str_r; j -= 1) {
+                    if (hiddenRows.has(`${j}`))
                         continue;
-                    var cell = applyData[apply_end_r - j];
-                    if ((cell === null || cell === void 0 ? void 0 : cell.f) != null) {
-                        var f = "=".concat(formula.functionCopy(ctx, cell.f, "up", apply_end_r - j + 1));
-                        var v = formula.execfunction(ctx, f, j, i);
+                    const cell = applyData[apply_end_r - j];
+                    if (cell?.f != null) {
+                        const f = `=${formula.functionCopy(ctx, cell.f, "up", apply_end_r - j + 1)}`;
+                        const v = formula.execfunction(ctx, f, j, i);
                         formula.execFunctionGroup(ctx, j, i, v[1], undefined, d);
-                        cell.v = v[1], cell.f = v[2];
+                        [, cell.v, cell.f] = v;
                         if (cell.spl != null) {
                             cell.spl = v[3].data;
                         }
                         else if (cell.v != null) {
                             if (isRealNum(cell.v) &&
-                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test("".concat(cell.v))) {
+                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(`${cell.v}`)) {
                                 if (cell.v === Infinity || cell.v === -Infinity) {
                                     cell.m = cell.v.toString();
                                 }
                                 else {
                                     if (cell.v.toString().indexOf("e") > -1) {
-                                        var len = cell.v
+                                        let len = cell.v
                                             .toString()
                                             .split(".")[1]
                                             .split("e")[0].length;
@@ -2210,39 +2190,39 @@ export function updateDropCell(ctx) {
                                         cell.m = cell.v.toExponential(len).toString();
                                     }
                                     else {
-                                        var mask = genarate(Math.round(cell.v * 1000000000) / 1000000000);
+                                        const mask = genarate(Math.round(cell.v * 1000000000) / 1000000000);
                                         cell.m = mask[0].toString();
                                     }
                                 }
                                 cell.ct = { fa: "General", t: "n" };
                             }
                             else {
-                                var mask = genarate(cell.v);
+                                const mask = genarate(cell.v);
                                 cell.m = mask[0].toString();
-                                _b = mask, cell.ct = _b[1];
+                                [, cell.ct] = mask;
                             }
                         }
                     }
                     d[j][i] = cell || null;
                     // 边框
-                    var bd_r = copy_end_r - ((apply_end_r - j) % csLen);
-                    var bd_c = i;
-                    if (borderInfoCompute["".concat(bd_r, "_").concat(bd_c)]) {
-                        var bd_obj = {
+                    const bd_r = copy_end_r - ((apply_end_r - j) % csLen);
+                    const bd_c = i;
+                    if (borderInfoCompute[`${bd_r}_${bd_c}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: j,
                                 col_index: i,
-                                l: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].l,
-                                r: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].r,
-                                t: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].t,
-                                b: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].b,
+                                l: borderInfoCompute[`${bd_r}_${bd_c}`].l,
+                                r: borderInfoCompute[`${bd_r}_${bd_c}`].r,
+                                t: borderInfoCompute[`${bd_r}_${bd_c}`].t,
+                                b: borderInfoCompute[`${bd_r}_${bd_c}`].b,
                             },
                         };
                         cfg.borderInfo.push(bd_obj);
                     }
-                    else if (borderInfoCompute["".concat(j, "_").concat(i)]) {
-                        var bd_obj = {
+                    else if (borderInfoCompute[`${j}_${i}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: j,
@@ -2256,42 +2236,42 @@ export function updateDropCell(ctx) {
                         cfg.borderInfo.push(bd_obj);
                     }
                     // 数据验证
-                    if (dataVerification != null && dataVerification["".concat(bd_r, "_").concat(bd_c)]) {
-                        dataVerification["".concat(j, "_").concat(i)] = dataVerification["".concat(bd_r, "_").concat(bd_c)];
+                    if (dataVerification != null && dataVerification[`${bd_r}_${bd_c}`]) {
+                        dataVerification[`${j}_${i}`] = dataVerification[`${bd_r}_${bd_c}`];
                     }
                 }
             }
         }
     }
     else if (direction === "right" || direction === "left") {
-        var asLen = apply_end_c - apply_str_c + 1;
-        for (var i = apply_str_r; i <= apply_end_r; i += 1) {
-            if (hiddenRows.has("".concat(i)))
+        const asLen = apply_end_c - apply_str_c + 1;
+        for (let i = apply_str_r; i <= apply_end_r; i += 1) {
+            if (hiddenRows.has(`${i}`))
                 continue;
-            var copyD = copyData[i - apply_str_r];
-            var applyData = getApplyData(copyD, csLen, asLen);
+            const copyD = copyData[i - apply_str_r];
+            const applyData = getApplyData(copyD, csLen, asLen);
             if (direction === "right") {
-                for (var j = apply_str_c; j <= apply_end_c; j += 1) {
-                    if (hiddenCols.has("".concat(j)))
+                for (let j = apply_str_c; j <= apply_end_c; j += 1) {
+                    if (hiddenCols.has(`${j}`))
                         continue;
-                    var cell = applyData[j - apply_str_c];
-                    if ((cell === null || cell === void 0 ? void 0 : cell.f) != null) {
-                        var f = "=".concat(formula.functionCopy(ctx, cell.f, "right", j - apply_str_c + 1));
-                        var v = formula.execfunction(ctx, f, i, j);
+                    const cell = applyData[j - apply_str_c];
+                    if (cell?.f != null) {
+                        const f = `=${formula.functionCopy(ctx, cell.f, "right", j - apply_str_c + 1)}`;
+                        const v = formula.execfunction(ctx, f, i, j);
                         formula.execFunctionGroup(ctx, j, i, v[1], undefined, d);
-                        cell.v = v[1], cell.f = v[2];
+                        [, cell.v, cell.f] = v;
                         if (cell.spl != null) {
                             cell.spl = v[3].data;
                         }
                         else if (cell.v != null) {
                             if (isRealNum(cell.v) &&
-                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test("".concat(cell.v))) {
+                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(`${cell.v}`)) {
                                 if (cell.v === Infinity || cell.v === -Infinity) {
                                     cell.m = cell.v.toString();
                                 }
                                 else {
                                     if (cell.v.toString().indexOf("e") > -1) {
-                                        var len = cell.v
+                                        let len = cell.v
                                             .toString()
                                             .split(".")[1]
                                             .split("e")[0].length;
@@ -2301,39 +2281,39 @@ export function updateDropCell(ctx) {
                                         cell.m = cell.v.toExponential(len).toString();
                                     }
                                     else {
-                                        var mask = genarate(Math.round(cell.v * 1000000000) / 1000000000);
+                                        const mask = genarate(Math.round(cell.v * 1000000000) / 1000000000);
                                         cell.m = mask[0].toString();
                                     }
                                 }
                                 cell.ct = { fa: "General", t: "n" };
                             }
                             else {
-                                var mask = genarate(cell.v);
+                                const mask = genarate(cell.v);
                                 cell.m = mask[0].toString();
-                                _c = mask, cell.ct = _c[1];
+                                [, cell.ct] = mask;
                             }
                         }
                     }
                     d[i][j] = cell || null;
                     // 边框
-                    var bd_r = i;
-                    var bd_c = copy_str_c + ((j - apply_str_c) % csLen);
-                    if (borderInfoCompute["".concat(bd_r, "_").concat(bd_c)]) {
-                        var bd_obj = {
+                    const bd_r = i;
+                    const bd_c = copy_str_c + ((j - apply_str_c) % csLen);
+                    if (borderInfoCompute[`${bd_r}_${bd_c}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: i,
                                 col_index: j,
-                                l: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].l,
-                                r: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].r,
-                                t: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].t,
-                                b: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].b,
+                                l: borderInfoCompute[`${bd_r}_${bd_c}`].l,
+                                r: borderInfoCompute[`${bd_r}_${bd_c}`].r,
+                                t: borderInfoCompute[`${bd_r}_${bd_c}`].t,
+                                b: borderInfoCompute[`${bd_r}_${bd_c}`].b,
                             },
                         };
                         cfg.borderInfo.push(bd_obj);
                     }
-                    else if (borderInfoCompute["".concat(i, "_").concat(j)]) {
-                        var bd_obj = {
+                    else if (borderInfoCompute[`${i}_${j}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: i,
@@ -2347,33 +2327,33 @@ export function updateDropCell(ctx) {
                         cfg.borderInfo.push(bd_obj);
                     }
                     // 数据验证
-                    if (dataVerification != null && dataVerification["".concat(bd_r, "_").concat(bd_c)]) {
-                        dataVerification["".concat(i, "_").concat(j)] = dataVerification["".concat(bd_r, "_").concat(bd_c)];
+                    if (dataVerification != null && dataVerification[`${bd_r}_${bd_c}`]) {
+                        dataVerification[`${i}_${j}`] = dataVerification[`${bd_r}_${bd_c}`];
                     }
                 }
             }
             if (direction === "left") {
-                for (var j = apply_end_c; j >= apply_str_c; j -= 1) {
-                    if (hiddenCols.has("".concat(j)))
+                for (let j = apply_end_c; j >= apply_str_c; j -= 1) {
+                    if (hiddenCols.has(`${j}`))
                         continue;
-                    var cell = applyData[apply_end_c - j];
-                    if ((cell === null || cell === void 0 ? void 0 : cell.f) != null) {
-                        var f = "=".concat(formula.functionCopy(ctx, cell.f, "left", apply_end_c - j + 1));
-                        var v = formula.execfunction(ctx, f, i, j);
+                    const cell = applyData[apply_end_c - j];
+                    if (cell?.f != null) {
+                        const f = `=${formula.functionCopy(ctx, cell.f, "left", apply_end_c - j + 1)}`;
+                        const v = formula.execfunction(ctx, f, i, j);
                         formula.execFunctionGroup(ctx, j, i, v[1], undefined, d);
-                        cell.v = v[1], cell.f = v[2];
+                        [, cell.v, cell.f] = v;
                         if (cell.spl != null) {
                             cell.spl = v[3].data;
                         }
                         else if (cell.v != null) {
                             if (isRealNum(cell.v) &&
-                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test("".concat(cell.v))) {
+                                !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(`${cell.v}`)) {
                                 if (cell.v === Infinity || cell.v === -Infinity) {
                                     cell.m = cell.v.toString();
                                 }
                                 else {
                                     if (cell.v.toString().indexOf("e") > -1) {
-                                        var len = cell.v
+                                        let len = cell.v
                                             .toString()
                                             .split(".")[1]
                                             .split("e")[0].length;
@@ -2383,39 +2363,39 @@ export function updateDropCell(ctx) {
                                         cell.m = cell.v.toExponential(len).toString();
                                     }
                                     else {
-                                        var mask = genarate(Math.round(cell.v * 1000000000) / 1000000000);
+                                        const mask = genarate(Math.round(cell.v * 1000000000) / 1000000000);
                                         cell.m = mask[0].toString();
                                     }
                                 }
                                 cell.ct = { fa: "General", t: "n" };
                             }
                             else {
-                                var mask = genarate(cell.v);
+                                const mask = genarate(cell.v);
                                 cell.m = mask[0].toString();
-                                _d = mask, cell.ct = _d[1];
+                                [, cell.ct] = mask;
                             }
                         }
                     }
                     d[i][j] = cell || null;
                     // 边框
-                    var bd_r = i;
-                    var bd_c = copy_end_c - ((apply_end_c - j) % csLen);
-                    if (borderInfoCompute["".concat(bd_r, "_").concat(bd_c)]) {
-                        var bd_obj = {
+                    const bd_r = i;
+                    const bd_c = copy_end_c - ((apply_end_c - j) % csLen);
+                    if (borderInfoCompute[`${bd_r}_${bd_c}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: i,
                                 col_index: j,
-                                l: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].l,
-                                r: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].r,
-                                t: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].t,
-                                b: borderInfoCompute["".concat(bd_r, "_").concat(bd_c)].b,
+                                l: borderInfoCompute[`${bd_r}_${bd_c}`].l,
+                                r: borderInfoCompute[`${bd_r}_${bd_c}`].r,
+                                t: borderInfoCompute[`${bd_r}_${bd_c}`].t,
+                                b: borderInfoCompute[`${bd_r}_${bd_c}`].b,
                             },
                         };
                         cfg.borderInfo.push(bd_obj);
                     }
-                    else if (borderInfoCompute["".concat(i, "_").concat(j)]) {
-                        var bd_obj = {
+                    else if (borderInfoCompute[`${i}_${j}`]) {
+                        const bd_obj = {
                             rangeType: "cell",
                             value: {
                                 row_index: i,
@@ -2429,21 +2409,21 @@ export function updateDropCell(ctx) {
                         cfg.borderInfo.push(bd_obj);
                     }
                     // 数据验证
-                    if (dataVerification != null && dataVerification["".concat(bd_r, "_").concat(bd_c)]) {
-                        dataVerification["".concat(i, "_").concat(j)] = dataVerification["".concat(bd_r, "_").concat(bd_c)];
+                    if (dataVerification != null && dataVerification[`${bd_r}_${bd_c}`]) {
+                        dataVerification[`${i}_${j}`] = dataVerification[`${bd_r}_${bd_c}`];
                     }
                 }
             }
         }
     }
     // 条件格式
-    var cdformat = file.luckysheet_conditionformat_save;
+    const cdformat = file.luckysheet_conditionformat_save;
     if (cdformat != null && cdformat.length > 0) {
-        for (var i = 0; i < cdformat.length; i += 1) {
-            var cdformat_cellrange = cdformat[i].cellrange;
-            var emptyRange = [];
-            for (var j = 0; j < cdformat_cellrange.length; j += 1) {
-                var range = CFSplitRange(cdformat_cellrange[j], { row: copyRange.row, column: copyRange.column }, { row: applyRange.row, column: applyRange.column }, "operatePart");
+        for (let i = 0; i < cdformat.length; i += 1) {
+            const cdformat_cellrange = cdformat[i].cellrange;
+            let emptyRange = [];
+            for (let j = 0; j < cdformat_cellrange.length; j += 1) {
+                const range = CFSplitRange(cdformat_cellrange[j], { row: copyRange.row, column: copyRange.column }, { row: applyRange.row, column: applyRange.column }, "operatePart");
                 if (range.length > 0) {
                     emptyRange = emptyRange.concat(range);
                 }
@@ -2463,7 +2443,6 @@ export function updateDropCell(ctx) {
     // selectHightlightShow();
 }
 export function onDropCellSelectEnd(ctx, e, container) {
-    var _a, _b, _c;
     ctx.luckysheet_cell_selected_extend = false;
     hideDropCellSelection(container);
     // if (
@@ -2474,21 +2453,21 @@ export function onDropCellSelectEnd(ctx, e, container) {
     // ) {
     //   return;
     // }
-    var scrollLeft = ctx.scrollLeft, scrollTop = ctx.scrollTop;
-    var rect = container.getBoundingClientRect();
-    var x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
-    var y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
-    var row_location = rowLocation(y, ctx.visibledatarow);
+    const { scrollLeft, scrollTop } = ctx;
+    const rect = container.getBoundingClientRect();
+    const x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
+    const y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
+    const row_location = rowLocation(y, ctx.visibledatarow);
     // const row = row_location[1];
-    var row_pre = row_location[0];
-    var row_index = row_location[2];
-    var col_location = colLocation(x, ctx.visibledatacolumn);
+    const row_pre = row_location[0];
+    const row_index = row_location[2];
+    const col_location = colLocation(x, ctx.visibledatacolumn);
     // const col = col_location[1];
-    var col_pre = col_location[0];
-    var col_index = col_location[2];
-    var row_index_original = ctx.luckysheet_cell_selected_extend_index[0];
-    var col_index_original = ctx.luckysheet_cell_selected_extend_index[1];
-    var last = (_a = ctx.luckysheet_select_save) === null || _a === void 0 ? void 0 : _a[ctx.luckysheet_select_save.length - 1];
+    const col_pre = col_location[0];
+    const col_index = col_location[2];
+    const row_index_original = ctx.luckysheet_cell_selected_extend_index[0];
+    const col_index_original = ctx.luckysheet_cell_selected_extend_index[1];
+    const last = ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
     if (last &&
         last.top != null &&
         last.left != null &&
@@ -2496,14 +2475,14 @@ export function onDropCellSelectEnd(ctx, e, container) {
         last.width != null &&
         last.row_focus != null &&
         last.column_focus != null) {
-        var row_s = last.row[0];
-        var row_e = last.row[1];
-        var col_s = last.column[0];
-        var col_e = last.column[1];
+        let row_s = last.row[0];
+        let row_e = last.row[1];
+        let col_s = last.column[0];
+        let col_e = last.column[1];
         // 复制范围
         dropCellCache.copyRange = _.cloneDeep(_.pick(last, ["row", "column"]));
         // applyType
-        var typeItemHide = getTypeItemHide(ctx);
+        const typeItemHide = getTypeItemHide(ctx);
         if (!typeItemHide[0] &&
             !typeItemHide[1] &&
             !typeItemHide[2] &&
@@ -2518,7 +2497,7 @@ export function onDropCellSelectEnd(ctx, e, container) {
         }
         if (ctx.luckysheet_select_save == null)
             return;
-        var _d = ctx.luckysheet_select_save[0], top_move = _d.top_move, left_move = _d.left_move;
+        const { top_move, left_move } = ctx.luckysheet_select_save[0];
         if (Math.abs(row_index_original - row_index) >
             Math.abs(col_index_original - col_index)) {
             if (!(row_index >= row_s && row_index <= row_e)) {
@@ -2592,20 +2571,20 @@ export function onDropCellSelectEnd(ctx, e, container) {
         }
         if (y < 0) {
             row_s = 0;
-            row_e = last.row[0];
+            [row_e] = last.row;
         }
         if (x < 0) {
             col_s = 0;
-            col_e = last.column[0];
+            [col_e] = last.column;
         }
-        var flowdata = getFlowdata(ctx);
+        const flowdata = getFlowdata(ctx);
         if (flowdata == null)
             return;
         if (ctx.config.merge != null) {
-            var HasMC = false;
-            for (var r = last.row[0]; r <= last.row[1]; r += 1) {
-                for (var c = last.column[0]; c <= last.column[1]; c += 1) {
-                    var cell = (_b = flowdata[r]) === null || _b === void 0 ? void 0 : _b[c];
+            let HasMC = false;
+            for (let r = last.row[0]; r <= last.row[1]; r += 1) {
+                for (let c = last.column[0]; c <= last.column[1]; c += 1) {
+                    const cell = flowdata[r]?.[c];
                     if (cell != null && cell.mc != null) {
                         HasMC = true;
                         break;
@@ -2620,9 +2599,9 @@ export function onDropCellSelectEnd(ctx, e, container) {
                 // }
                 return;
             }
-            for (var r = row_s; r <= row_e; r += 1) {
-                for (var c = col_s; c <= col_e; c += 1) {
-                    var cell = (_c = flowdata[r]) === null || _c === void 0 ? void 0 : _c[c];
+            for (let r = row_s; r <= row_e; r += 1) {
+                for (let c = col_s; c <= col_e; c += 1) {
+                    const cell = flowdata[r]?.[c];
                     if (cell != null && cell.mc != null) {
                         HasMC = true;
                         break;
@@ -2653,7 +2632,7 @@ export function onDropCellSelectEnd(ctx, e, container) {
             console.error(err);
         }
         // createIcon();
-        var selectedMoveEle = container.querySelector(".fortune-cell-selected-move");
+        const selectedMoveEle = container.querySelector(".fortune-cell-selected-move");
         if (selectedMoveEle) {
             selectedMoveEle.style.display = "none";
         }

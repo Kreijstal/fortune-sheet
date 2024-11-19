@@ -1,15 +1,15 @@
 // 缩放步长
 // const ZOOM_WHEEL_STEP = 0.02; // ctrl + 鼠标滚轮
-var ZOOM_STEP = 0.1; // 点击以及 Ctrl + +-
+const ZOOM_STEP = 0.1; // 点击以及 Ctrl + +-
 // 缩放最大最小比例
-export var MAX_ZOOM_RATIO = 4;
-export var MIN_ZOOM_RATIO = 0.1;
+export const MAX_ZOOM_RATIO = 4;
+export const MIN_ZOOM_RATIO = 0.1;
 export function handleKeydownForZoom(ev, currentZoom) {
     if (!ev.ctrlKey) {
         return currentZoom;
     }
-    var handled = false;
-    var zoom = currentZoom || 1;
+    let handled = false;
+    let zoom = currentZoom || 1;
     if (ev.key === "-" || ev.which === 189) {
         zoom -= ZOOM_STEP;
         handled = true;

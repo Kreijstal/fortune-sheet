@@ -6,7 +6,7 @@
 // }
 export function handleOverlayTouchStart(ctx, e, globalCache) {
     globalCache.touchMoveStatus = true;
-    var touch = e.targetTouches[0];
+    const touch = e.targetTouches[0];
     globalCache.touchMoveStartPos = {
         x: touch.pageX,
         y: touch.pageY,
@@ -17,14 +17,14 @@ export function handleOverlayTouchStart(ctx, e, globalCache) {
 export function handleOverlayTouchMove(ctx, e, globalCache, scrollbarX, scrollbarY) {
     if (e.targetTouches.length > 1)
         return;
-    var touch = e.targetTouches[0];
+    const touch = e.targetTouches[0];
     if (globalCache.touchMoveStatus) {
         if (!globalCache.touchMoveStartPos)
             return;
-        var slideX = touch.pageX - globalCache.touchMoveStartPos.x;
-        var slideY = touch.pageY - globalCache.touchMoveStartPos.y;
-        var scrollLeft = ctx.scrollLeft;
-        var scrollTop = ctx.scrollTop;
+        const slideX = touch.pageX - globalCache.touchMoveStartPos.x;
+        const slideY = touch.pageY - globalCache.touchMoveStartPos.y;
+        let { scrollLeft } = ctx;
+        let { scrollTop } = ctx;
         scrollLeft -= slideX;
         scrollTop -= slideY;
         scrollbarY.scrollTop = scrollTop;

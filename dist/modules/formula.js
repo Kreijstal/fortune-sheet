@@ -1,23 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import _ from "lodash";
 // @ts-ignore
 import { Parser, ERROR_REF } from "@fortune-sheet/formula-parser";
@@ -30,9 +10,9 @@ import { locale } from "../locale";
 import { colors } from "./color";
 import { colLocation, mousePosition, rowLocation } from "./location";
 import { cancelFunctionrangeSelected, seletedHighlistByindex } from ".";
-var functionHTMLIndex = 0;
-var rangeIndexes = [];
-var operatorPriority = {
+let functionHTMLIndex = 0;
+let rangeIndexes = [];
+const operatorPriority = {
     "^": 0,
     "%": 1,
     "*": 1,
@@ -40,71 +20,69 @@ var operatorPriority = {
     "+": 2,
     "-": 2,
 };
-var operatorArr = "==|!=|<>|<=|>=|=|+|-|>|<|/|*|%|&|^".split("|");
-var operatorjson = {};
-for (var i = 0; i < operatorArr.length; i += 1) {
+const operatorArr = "==|!=|<>|<=|>=|=|+|-|>|<|/|*|%|&|^".split("|");
+const operatorjson = {};
+for (let i = 0; i < operatorArr.length; i += 1) {
     operatorjson[operatorArr[i].toString()] = 1;
 }
-var simpleSheetName = "[A-Za-z0-9_\u00C0-\u02AF]+";
-var quotedSheetName = "'(?:(?!').|'')*'";
-var sheetNameRegexp = "(".concat(simpleSheetName, "|").concat(quotedSheetName, ")!");
-var rowColumnRegexp = "[$]?[A-Za-z]+[$]?[0-9]+";
-var rowColumnWithSheetName = "(?:".concat(sheetNameRegexp, ")?(").concat(rowColumnRegexp, ")");
-var LABEL_EXTRACT_REGEXP = new RegExp("^".concat(rowColumnWithSheetName, "(?:[:]").concat(rowColumnWithSheetName, ")?$"));
+const simpleSheetName = "[A-Za-z0-9_\u00C0-\u02AF]+";
+const quotedSheetName = "'(?:(?!').|'')*'";
+const sheetNameRegexp = `(${simpleSheetName}|${quotedSheetName})!`;
+const rowColumnRegexp = `[$]?[A-Za-z]+[$]?[0-9]+`;
+const rowColumnWithSheetName = `(?:${sheetNameRegexp})?(${rowColumnRegexp})`;
+const LABEL_EXTRACT_REGEXP = new RegExp(`^${rowColumnWithSheetName}(?:[:]${rowColumnWithSheetName})?$`);
 // FormulaCache is defined as class to avoid being frozen by immer
-var FormulaCache = /** @class */ (function () {
-    function FormulaCache() {
-        var that = this;
+export class FormulaCache {
+    constructor() {
+        const that = this;
         this.data_parm_index = 0;
         this.selectingRangeIndex = -1;
         this.functionlistMap = {};
         this.execFunctionGlobalData = {};
         this.cellTextToIndexList = {};
         this.parser = new Parser();
-        this.parser.on("callCellValue", function (cellCoord, options, done) {
-            var _a, _b;
-            var context = that.parser.context;
-            var id = cellCoord.sheetName == null
+        this.parser.on("callCellValue", (cellCoord, options, done) => {
+            const context = that.parser.context;
+            const id = cellCoord.sheetName == null
                 ? options.sheetId
                 : getSheetIdByName(context, cellCoord.sheetName);
             if (id == null)
                 throw Error(ERROR_REF);
-            var flowdata = getFlowdata(context, id);
-            var cell = ((_a = context === null || context === void 0 ? void 0 : context.formulaCache.execFunctionGlobalData) === null || _a === void 0 ? void 0 : _a["".concat(cellCoord.row.index, "_").concat(cellCoord.column.index, "_").concat(id)]) || ((_b = flowdata === null || flowdata === void 0 ? void 0 : flowdata[cellCoord.row.index]) === null || _b === void 0 ? void 0 : _b[cellCoord.column.index]);
-            var v = that.tryGetCellAsNumber(cell);
+            const flowdata = getFlowdata(context, id);
+            const cell = context?.formulaCache.execFunctionGlobalData?.[`${cellCoord.row.index}_${cellCoord.column.index}_${id}`] || flowdata?.[cellCoord.row.index]?.[cellCoord.column.index];
+            const v = that.tryGetCellAsNumber(cell);
             done(v);
         });
-        this.parser.on("callRangeValue", function (startCellCoord, endCellCoord, options, done) {
-            var _a, _b, _c, _d;
-            var context = that.parser.context;
-            var id = startCellCoord.sheetName == null
+        this.parser.on("callRangeValue", (startCellCoord, endCellCoord, options, done) => {
+            const context = that.parser.context;
+            const id = startCellCoord.sheetName == null
                 ? options.sheetId
                 : getSheetIdByName(context, startCellCoord.sheetName);
             if (id == null)
                 throw Error(ERROR_REF);
-            var flowdata = getFlowdata(context, id);
-            var fragment = [];
-            var startRow = startCellCoord.row.index;
-            var endRow = endCellCoord.row.index;
-            var startCol = startCellCoord.column.index;
-            var endCol = endCellCoord.column.index;
-            var emptyRow = startRow === -1 || endRow === -1;
-            var emptyCol = startCol === -1 || endCol === -1;
+            const flowdata = getFlowdata(context, id);
+            const fragment = [];
+            let startRow = startCellCoord.row.index;
+            let endRow = endCellCoord.row.index;
+            let startCol = startCellCoord.column.index;
+            let endCol = endCellCoord.column.index;
+            const emptyRow = startRow === -1 || endRow === -1;
+            const emptyCol = startCol === -1 || endCol === -1;
             if (emptyRow) {
                 startRow = 0;
-                endRow = (_a = flowdata === null || flowdata === void 0 ? void 0 : flowdata.length) !== null && _a !== void 0 ? _a : 0;
+                endRow = flowdata?.length ?? 0;
             }
             if (emptyCol) {
                 startCol = 0;
-                endCol = (_b = flowdata === null || flowdata === void 0 ? void 0 : flowdata[0].length) !== null && _b !== void 0 ? _b : 0;
+                endCol = flowdata?.[0].length ?? 0;
             }
             if (emptyRow && emptyCol)
                 throw Error(ERROR_REF);
-            for (var row = startRow; row <= endRow; row += 1) {
-                var colFragment = [];
-                for (var col = startCol; col <= endCol; col += 1) {
-                    var cell = ((_c = context === null || context === void 0 ? void 0 : context.formulaCache.execFunctionGlobalData) === null || _c === void 0 ? void 0 : _c["".concat(row, "_").concat(col, "_").concat(id)]) || ((_d = flowdata === null || flowdata === void 0 ? void 0 : flowdata[row]) === null || _d === void 0 ? void 0 : _d[col]);
-                    var v = that.tryGetCellAsNumber(cell);
+            for (let row = startRow; row <= endRow; row += 1) {
+                const colFragment = [];
+                for (let col = startCol; col <= endCol; col += 1) {
+                    const cell = context?.formulaCache.execFunctionGlobalData?.[`${row}_${col}_${id}`] || flowdata?.[row]?.[col];
+                    const v = that.tryGetCellAsNumber(cell);
                     colFragment.push(v);
                 }
                 fragment.push(colFragment);
@@ -114,54 +92,51 @@ var FormulaCache = /** @class */ (function () {
             }
         });
     }
-    FormulaCache.prototype.tryGetCellAsNumber = function (cell) {
-        var _a;
-        if (((_a = cell === null || cell === void 0 ? void 0 : cell.ct) === null || _a === void 0 ? void 0 : _a.t) === "n") {
-            var n = Number(cell === null || cell === void 0 ? void 0 : cell.v);
+    tryGetCellAsNumber(cell) {
+        if (cell?.ct?.t === "n") {
+            const n = Number(cell?.v);
             return Number.isNaN(n) ? cell.v : n;
         }
-        return cell === null || cell === void 0 ? void 0 : cell.v;
-    };
-    return FormulaCache;
-}());
-export { FormulaCache };
+        return cell?.v;
+    }
+}
 function parseElement(eleString) {
     return new DOMParser().parseFromString(eleString, "text/html").body
         .childNodes[0];
 }
 export function iscelldata(txt) {
     // 判断是否为单元格格式
-    var val = txt.split("!");
-    var rangetxt;
+    const val = txt.split("!");
+    let rangetxt;
     if (val.length > 1) {
-        rangetxt = val[1];
+        [, rangetxt] = val;
     }
     else {
-        rangetxt = val[0];
+        [rangetxt] = val;
     }
-    var reg_cell = /^(([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+))$/g; // 增加正则判断单元格为字母+数字的格式：如 A1:B3
-    var reg_cellRange = /^(((([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+)))|((([a-zA-Z]+)|([$][a-zA-Z]+))))$/g; // 增加正则判断单元格为字母+数字或字母的格式：如 A1:B3，A:A
+    const reg_cell = /^(([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+))$/g; // 增加正则判断单元格为字母+数字的格式：如 A1:B3
+    let reg_cellRange = /^(((([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+)))|((([a-zA-Z]+)|([$][a-zA-Z]+))))$/g; // 增加正则判断单元格为字母+数字或字母的格式：如 A1:B3，A:A
     if (rangetxt.indexOf(":") === -1) {
-        var row_1 = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10) - 1;
-        var col_1 = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
-        if (!Number.isNaN(row_1) &&
-            !Number.isNaN(col_1) &&
+        const row = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10) - 1;
+        const col = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
+        if (!Number.isNaN(row) &&
+            !Number.isNaN(col) &&
             rangetxt.toString().match(reg_cell)) {
             return true;
         }
-        if (!Number.isNaN(row_1)) {
+        if (!Number.isNaN(row)) {
             return false;
         }
-        if (!Number.isNaN(col_1)) {
+        if (!Number.isNaN(col)) {
             return false;
         }
         return false;
     }
     reg_cellRange =
         /^(((([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+)))|((([a-zA-Z]+)|([$][a-zA-Z]+)))|((([0-9]+)|([$][0-9]+s))))$/g;
-    var rangetxtArr = rangetxt.split(":");
-    var row = [];
-    var col = [];
+    const rangetxtArr = rangetxt.split(":");
+    const row = [];
+    const col = [];
     row[0] = parseInt(rangetxtArr[0].replace(/[^0-9]/g, ""), 10) - 1;
     row[1] = parseInt(rangetxtArr[1].replace(/[^0-9]/g, ""), 10) - 1;
     if (row[0] > row[1]) {
@@ -190,37 +165,37 @@ function addToCellIndexList(ctx, txt, infoObj) {
         ctx.formulaCache.cellTextToIndexList[txt] = infoObj;
     }
     else {
-        ctx.formulaCache.cellTextToIndexList["".concat(txt, "_").concat(infoObj.sheetId)] = infoObj;
+        ctx.formulaCache.cellTextToIndexList[`${txt}_${infoObj.sheetId}`] = infoObj;
     }
 }
 export function getcellrange(ctx, txt, formulaId) {
     if (_.isNil(txt) || txt.length === 0) {
         return null;
     }
-    var flowdata = getFlowdata(ctx, formulaId);
-    var sheettxt = "";
-    var rangetxt = "";
-    var sheetId = null;
-    var sheetdata = null;
-    var luckysheetfile = ctx.luckysheetfile;
+    const flowdata = getFlowdata(ctx, formulaId);
+    let sheettxt = "";
+    let rangetxt = "";
+    let sheetId = null;
+    let sheetdata = null;
+    const { luckysheetfile } = ctx;
     if (txt.indexOf("!") > -1) {
         if (txt in ctx.formulaCache.cellTextToIndexList) {
             return ctx.formulaCache.cellTextToIndexList[txt];
         }
-        var matchRes = txt.match(LABEL_EXTRACT_REGEXP);
+        const matchRes = txt.match(LABEL_EXTRACT_REGEXP);
         if (matchRes == null) {
             return null;
         }
-        var sheettxt1 = matchRes[1], starttxt1 = matchRes[2], sheettxt2 = matchRes[3], starttxt2 = matchRes[4];
+        const [, sheettxt1, starttxt1, sheettxt2, starttxt2] = matchRes;
         if (sheettxt2 != null && sheettxt1 !== sheettxt2) {
             return null;
         }
-        rangetxt = starttxt2 ? "".concat(starttxt1, ":").concat(starttxt2) : starttxt1;
+        rangetxt = starttxt2 ? `${starttxt1}:${starttxt2}` : starttxt1;
         sheettxt = sheettxt1
             .replace(/^'|'$/g, "")
             .replace(/\\'/g, "'")
             .replace(/''/g, "'");
-        _.forEach(luckysheetfile, function (f) {
+        _.forEach(luckysheetfile, (f) => {
             if (sheettxt === f.name) {
                 sheetId = f.id;
                 sheetdata = f.data;
@@ -230,14 +205,14 @@ export function getcellrange(ctx, txt, formulaId) {
         });
     }
     else {
-        var i = formulaId;
+        let i = formulaId;
         if (_.isNil(i)) {
             i = ctx.currentSheetId;
         }
-        if ("".concat(txt, "_").concat(i) in ctx.formulaCache.cellTextToIndexList) {
-            return ctx.formulaCache.cellTextToIndexList["".concat(txt, "_").concat(i)];
+        if (`${txt}_${i}` in ctx.formulaCache.cellTextToIndexList) {
+            return ctx.formulaCache.cellTextToIndexList[`${txt}_${i}`];
         }
-        var index = getSheetIndex(ctx, i);
+        const index = getSheetIndex(ctx, i);
         if (_.isNil(index)) {
             return null;
         }
@@ -250,22 +225,22 @@ export function getcellrange(ctx, txt, formulaId) {
         return null;
     }
     if (rangetxt.indexOf(":") === -1) {
-        var row_2 = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10) - 1;
-        var col_2 = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
-        if (!Number.isNaN(row_2) && !Number.isNaN(col_2)) {
-            var item_1 = {
-                row: [row_2, row_2],
-                column: [col_2, col_2],
-                sheetId: sheetId,
+        const row = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10) - 1;
+        const col = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
+        if (!Number.isNaN(row) && !Number.isNaN(col)) {
+            const item = {
+                row: [row, row],
+                column: [col, col],
+                sheetId,
             };
-            addToCellIndexList(ctx, txt, item_1);
-            return item_1;
+            addToCellIndexList(ctx, txt, item);
+            return item;
         }
         return null;
     }
-    var rangetxtArr = rangetxt.split(":");
-    var row = [];
-    var col = [];
+    const rangetxtArr = rangetxt.split(":");
+    const row = [];
+    const col = [];
     row[0] = parseInt(rangetxtArr[0].replace(/[^0-9]/g, ""), 10) - 1;
     row[1] = parseInt(rangetxtArr[1].replace(/[^0-9]/g, ""), 10) - 1;
     if (Number.isNaN(row[0])) {
@@ -288,10 +263,10 @@ export function getcellrange(ctx, txt, formulaId) {
     if (col[0] > col[1]) {
         return null;
     }
-    var item = {
-        row: row,
+    const item = {
+        row,
         column: col,
-        sheetId: sheetId,
+        sheetId,
     };
     addToCellIndexList(ctx, txt, item);
     return item;
@@ -300,13 +275,13 @@ function calPostfixExpression(cal) {
     if (cal.length === 0) {
         return "";
     }
-    var stack = [];
-    for (var i = cal.length - 1; i >= 0; i -= 1) {
-        var c = cal[i];
+    const stack = [];
+    for (let i = cal.length - 1; i >= 0; i -= 1) {
+        const c = cal[i];
         if (c in operatorjson) {
-            var s2 = stack.pop();
-            var s1 = stack.pop();
-            var str = "luckysheet_compareWith(".concat(s1, ",'").concat(c, "', ").concat(s2, ")");
+            const s2 = stack.pop();
+            const s1 = stack.pop();
+            const str = `luckysheet_compareWith(${s1},'${c}', ${s2})`;
             stack.push(str);
         }
         else {
@@ -322,7 +297,7 @@ function checkSpecialFunctionRange(ctx, function_str, r, c, id, dynamicArray_com
     if (function_str.substring(0, 30) === "luckysheet_getSpecialReference" ||
         function_str.substring(0, 20) === "luckysheet_function.") {
         if (function_str.substring(0, 20) === "luckysheet_function.") {
-            var funcName = function_str.split(".")[1];
+            let funcName = function_str.split(".")[1];
             if (!_.isNil(funcName)) {
                 funcName = funcName.toUpperCase();
                 if (funcName !== "INDIRECT" &&
@@ -334,10 +309,10 @@ function checkSpecialFunctionRange(ctx, function_str, r, c, id, dynamicArray_com
         }
         try {
             ctx.calculateSheetId = id;
-            var str = function_str
+            const str = function_str
                 .split(",")[function_str.split(",").length - 1].split("'")[1]
                 .split("'")[0];
-            var str_nb = _.trim(str);
+            const str_nb = _.trim(str);
             // console.log(function_str, tempFunc,str, this.iscelldata(str_nb),this.isFunctionRangeSave,r,c);
             if (iscelldata(str_nb)) {
                 if (typeof cellRangeFunction === "function") {
@@ -347,19 +322,18 @@ function checkSpecialFunctionRange(ctx, function_str, r, c, id, dynamicArray_com
                 // console.log(function_str, str, this.isFunctionRangeSave,r,c);
             }
         }
-        catch (_a) { }
+        catch { }
     }
 }
 function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunction) {
-    var _a;
     if (txt.substring(0, 1) === "=") {
         txt = txt.substring(1);
     }
-    var funcstack = txt.split("");
-    var i = 0;
-    var str = "";
-    var function_str = "";
-    var matchConfig = {
+    const funcstack = txt.split("");
+    let i = 0;
+    let str = "";
+    let function_str = "";
+    const matchConfig = {
         bracket: 0,
         comma: 0,
         squote: 0,
@@ -370,12 +344,12 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
     // let luckysheetfile = getluckysheetfile();
     // let dynamicArray_compute = luckysheetfile[getSheetIndex(Store.currentSheetId)_.isNil(]["dynamicArray_compute"]) ? {} : luckysheetfile[getSheetIndex(Store.currentSheetId)]["dynamicArray_compute"];
     // bracket 0为运算符括号、1为函数括号
-    var cal1 = [];
-    var cal2 = [];
-    var bracket = [];
-    var firstSQ = -1;
+    const cal1 = [];
+    const cal2 = [];
+    const bracket = [];
+    let firstSQ = -1;
     while (i < funcstack.length) {
-        var s = funcstack[i];
+        const s = funcstack[i];
         if (s === "(" &&
             matchConfig.squote === 0 &&
             matchConfig.dquote === 0 &&
@@ -383,11 +357,11 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
             if (str.length > 0 && bracket.length === 0) {
                 str = str.toUpperCase();
                 if (str.indexOf(":") > -1) {
-                    var funcArray = str.split(":");
-                    function_str += "luckysheet_getSpecialReference(true,'".concat(_.trim(funcArray[0]).replace(/'/g, "\\'"), "', luckysheet_function.").concat(funcArray[1], ".f(#lucky#");
+                    const funcArray = str.split(":");
+                    function_str += `luckysheet_getSpecialReference(true,'${_.trim(funcArray[0]).replace(/'/g, "\\'")}', luckysheet_function.${funcArray[1]}.f(#lucky#`;
                 }
                 else {
-                    function_str += "luckysheet_function.".concat(str, ".f(");
+                    function_str += `luckysheet_function.${str}.f(`;
                 }
                 bracket.push(1);
                 str = "";
@@ -410,11 +384,11 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
             if (bracket.length === 0) {
                 // function_str += _this.isFunctionRange(str,r,c, index,dynamicArray_compute,cellRangeFunction) + ")";
                 // str = "";
-                var functionS = isFunctionRange(ctx, str, r, c, id, dynamicArray_compute, cellRangeFunction);
+                let functionS = isFunctionRange(ctx, str, r, c, id, dynamicArray_compute, cellRangeFunction);
                 if (functionS.indexOf("#lucky#") > -1) {
-                    functionS = "".concat(functionS.replace(/#lucky#/g, ""), ")");
+                    functionS = `${functionS.replace(/#lucky#/g, "")})`;
                 }
-                function_str += "".concat(functionS, ")");
+                function_str += `${functionS})`;
                 str = "";
             }
             else {
@@ -484,11 +458,11 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
             if (bracket.length <= 1) {
                 // function_str += _this.isFunctionRange(str, r, c, index,dynamicArray_compute,cellRangeFunction) + ",";
                 // str = "";
-                var functionS = isFunctionRange(ctx, str, r, c, id, dynamicArray_compute, cellRangeFunction);
+                let functionS = isFunctionRange(ctx, str, r, c, id, dynamicArray_compute, cellRangeFunction);
                 if (functionS.indexOf("#lucky#") > -1) {
-                    functionS = "".concat(functionS.replace(/#lucky#/g, ""), ")");
+                    functionS = `${functionS.replace(/#lucky#/g, "")})`;
                 }
-                function_str += "".concat(functionS, ",");
+                function_str += `${functionS},`;
                 str = "";
             }
             else {
@@ -499,8 +473,8 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
             matchConfig.squote === 0 &&
             matchConfig.dquote === 0 &&
             matchConfig.braces === 0) {
-            var s_next = "";
-            var op = operatorPriority;
+            let s_next = "";
+            const op = operatorPriority;
             if (i + 1 < funcstack.length) {
                 s_next = funcstack[i + 1];
             }
@@ -513,7 +487,7 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
                         cal2.unshift(_.trim(function_str));
                     }
                     if (cal1[0] in operatorjson) {
-                        var stackCeilPri = op[cal1[0]];
+                        let stackCeilPri = op[cal1[0]];
                         while (cal1.length > 0 && !_.isNil(stackCeilPri)) {
                             cal2.unshift(cal1.shift());
                             stackCeilPri = op[cal1[0]];
@@ -537,9 +511,9 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
                         cal2.unshift(_.trim(function_str));
                     }
                     if (cal1[0] in operatorjson) {
-                        var stackCeilPri = op[cal1[0]];
+                        let stackCeilPri = op[cal1[0]];
                         stackCeilPri = _.isNil(stackCeilPri) ? 1000 : stackCeilPri;
-                        var sPri = op[s];
+                        let sPri = op[s];
                         sPri = _.isNil(sPri) ? 1000 : sPri;
                         while (cal1.length > 0 && sPri >= stackCeilPri) {
                             cal2.unshift(cal1.shift());
@@ -565,30 +539,30 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
             }
         }
         if (i === funcstack.length - 1) {
-            var endstr = "";
-            var str_nb = _.trim(str).replace(/'/g, "\\'");
+            let endstr = "";
+            let str_nb = _.trim(str).replace(/'/g, "\\'");
             if (iscelldata(str_nb) && str_nb.substring(0, 1) !== ":") {
                 // endstr = "luckysheet_getcelldata('" + _.trim(str) + "')";
-                endstr = "luckysheet_getcelldata('".concat(str_nb, "')");
+                endstr = `luckysheet_getcelldata('${str_nb}')`;
             }
             else if (str_nb.substring(0, 1) === ":") {
                 str_nb = str_nb.substring(1);
                 if (iscelldata(str_nb)) {
-                    endstr = "luckysheet_getSpecialReference(false,".concat(function_str, ",'").concat(str_nb, "')");
+                    endstr = `luckysheet_getSpecialReference(false,${function_str},'${str_nb}')`;
                 }
             }
             else {
                 str = _.trim(str);
-                var regx = /{.*?}/;
+                const regx = /{.*?}/;
                 if (regx.test(str) &&
                     str.substring(0, 1) !== '"' &&
                     str.substring(str.length - 1, 1) !== '"') {
-                    var arraytxt = (_a = regx.exec(str)) === null || _a === void 0 ? void 0 : _a[0];
-                    var arraystart = str.search(regx);
+                    const arraytxt = regx.exec(str)?.[0];
+                    const arraystart = str.search(regx);
                     if (arraystart > 0) {
                         endstr += str.substring(0, arraystart);
                     }
-                    endstr += "luckysheet_getarraydata('".concat(arraytxt, "')");
+                    endstr += `luckysheet_getarraydata('${arraytxt}')`;
                     if (arraystart + arraytxt.length < str.length) {
                         endstr += str.substring(arraystart + arraytxt.length, str.length);
                     }
@@ -622,11 +596,11 @@ function isFunctionRange(ctx, txt, r, c, id, dynamicArray_compute, cellRangeFunc
     return function_str;
 }
 export function getAllFunctionGroup(ctx) {
-    var luckysheetfile = ctx.luckysheetfile;
-    var ret = [];
-    for (var i = 0; i < luckysheetfile.length; i += 1) {
-        var file = luckysheetfile[i];
-        var calcChain = file.calcChain;
+    const { luckysheetfile } = ctx;
+    let ret = [];
+    for (let i = 0; i < luckysheetfile.length; i += 1) {
+        const file = luckysheetfile[i];
+        let { calcChain } = file;
         /* 备注：再次加载表格获取的数据可能是JSON字符串格式(需要进行发序列化处理) */
         // if (calcChain) {
         //   const tempCalcChain: any[] = [];
@@ -640,7 +614,7 @@ export function getAllFunctionGroup(ctx) {
         //   calcChain = tempCalcChain;
         //   file.calcChain = tempCalcChain;
         // }
-        var dynamicArray_compute = file.dynamicArray_compute;
+        let { dynamicArray_compute } = file;
         if (_.isNil(calcChain)) {
             calcChain = [];
         }
@@ -648,8 +622,8 @@ export function getAllFunctionGroup(ctx) {
             dynamicArray_compute = [];
         }
         ret = ret.concat(calcChain);
-        for (var j = 0; j < dynamicArray_compute.length; j += 1) {
-            var d = dynamicArray_compute[0];
+        for (let j = 0; j < dynamicArray_compute.length; j += 1) {
+            const d = dynamicArray_compute[0];
             ret.push({
                 r: d.r,
                 c: d.c,
@@ -663,13 +637,13 @@ export function delFunctionGroup(ctx, r, c, id) {
     if (_.isNil(id)) {
         id = ctx.currentSheetId;
     }
-    var file = ctx.luckysheetfile[getSheetIndex(ctx, id)];
-    var calcChain = file.calcChain;
+    const file = ctx.luckysheetfile[getSheetIndex(ctx, id)];
+    const { calcChain } = file;
     if (!_.isNil(calcChain)) {
-        var modified = false;
-        var calcChainClone = _.cloneDeep(calcChain);
-        for (var i = 0; i < calcChainClone.length; i += 1) {
-            var calc = calcChainClone[i];
+        let modified = false;
+        const calcChainClone = _.cloneDeep(calcChain);
+        for (let i = 0; i < calcChainClone.length; i += 1) {
+            const calc = calcChainClone[i];
             if (calc.r === r && calc.c === c && calc.id === id) {
                 calcChainClone.splice(i, 1);
                 modified = true;
@@ -684,12 +658,12 @@ export function delFunctionGroup(ctx, r, c, id) {
             file.calcChain = calcChainClone;
         }
     }
-    var dynamicArray = file.dynamicArray;
+    const { dynamicArray } = file;
     if (!_.isNil(dynamicArray)) {
-        var modified = false;
-        var dynamicArrayClone = _.cloneDeep(dynamicArray);
-        for (var i = 0; i < dynamicArrayClone.length; i += 1) {
-            var calc = dynamicArrayClone[i];
+        let modified = false;
+        const dynamicArrayClone = _.cloneDeep(dynamicArray);
+        for (let i = 0; i < dynamicArrayClone.length; i += 1) {
+            const calc = dynamicArrayClone[i];
             if (calc.r === r &&
                 calc.c === c &&
                 (_.isNil(calc.id) || calc.id === id)) {
@@ -708,31 +682,31 @@ export function delFunctionGroup(ctx, r, c, id) {
     }
 }
 function checkBracketNum(fp) {
-    var bra_l = fp.match(/\(/g);
-    var bra_r = fp.match(/\)/g);
-    var bra_tl_txt = fp.match(/(['"])(?:(?!\1).)*?\1/g);
-    var bra_tr_txt = fp.match(/(['"])(?:(?!\1).)*?\1/g);
-    var bra_l_len = 0;
-    var bra_r_len = 0;
+    const bra_l = fp.match(/\(/g);
+    const bra_r = fp.match(/\)/g);
+    const bra_tl_txt = fp.match(/(['"])(?:(?!\1).)*?\1/g);
+    const bra_tr_txt = fp.match(/(['"])(?:(?!\1).)*?\1/g);
+    let bra_l_len = 0;
+    let bra_r_len = 0;
     if (!_.isNil(bra_l)) {
         bra_l_len += bra_l.length;
     }
     if (!_.isNil(bra_r)) {
         bra_r_len += bra_r.length;
     }
-    var bra_tl_len = 0;
-    var bra_tr_len = 0;
+    let bra_tl_len = 0;
+    let bra_tr_len = 0;
     if (!_.isNil(bra_tl_txt)) {
-        for (var i = 0; i < bra_tl_txt.length; i += 1) {
-            var bra_tl = bra_tl_txt[i].match(/\(/g);
+        for (let i = 0; i < bra_tl_txt.length; i += 1) {
+            const bra_tl = bra_tl_txt[i].match(/\(/g);
             if (!_.isNil(bra_tl)) {
                 bra_tl_len += bra_tl.length;
             }
         }
     }
     if (!_.isNil(bra_tr_txt)) {
-        for (var i = 0; i < bra_tr_txt.length; i += 1) {
-            var bra_tr = bra_tr_txt[i].match(/\)/g);
+        for (let i = 0; i < bra_tr_txt.length; i += 1) {
+            const bra_tr = bra_tr_txt[i].match(/\)/g);
             if (!_.isNil(bra_tr)) {
                 bra_tr_len += bra_tr.length;
             }
@@ -754,23 +728,23 @@ export function insertUpdateFunctionGroup(ctx, r, c, id, calcChainSet) {
     //     this.delFunctionGroup(r, c, index);
     //     return;
     // }
-    var luckysheetfile = ctx.luckysheetfile;
-    var idx = getSheetIndex(ctx, id);
+    const { luckysheetfile } = ctx;
+    const idx = getSheetIndex(ctx, id);
     if (_.isNil(idx)) {
         return;
     }
-    var file = luckysheetfile[idx];
-    var calcChain = file.calcChain;
+    const file = luckysheetfile[idx];
+    let { calcChain } = file;
     if (_.isNil(calcChain)) {
         calcChain = [];
     }
     if (calcChainSet) {
-        if (calcChainSet.has("".concat(r, "_").concat(c, "_").concat(id)))
+        if (calcChainSet.has(`${r}_${c}_${id}`))
             return;
     }
     else {
-        for (var i = 0; i < calcChain.length; i += 1) {
-            var calc = calcChain[i];
+        for (let i = 0; i < calcChain.length; i += 1) {
+            const calc = calcChain[i];
             if (calc.r === r && calc.c === c && calc.id === id) {
                 // server.saveParam("fc", index, calc, {
                 //   op: "update",
@@ -780,10 +754,10 @@ export function insertUpdateFunctionGroup(ctx, r, c, id, calcChainSet) {
             }
         }
     }
-    var cc = {
-        r: r,
-        c: c,
-        id: id,
+    const cc = {
+        r,
+        c,
+        id,
     };
     calcChain.push(cc);
     file.calcChain = calcChain;
@@ -927,11 +901,11 @@ export function execfunction(ctx, txt, r, c, id, calcChainSet, isrefresh, notIns
     window.luckysheetCurrentFunction = null;
     */
     ctx.formulaCache.parser.context = ctx;
-    var parsedResponse = ctx.formulaCache.parser.parse(txt.substring(1), {
+    const parsedResponse = ctx.formulaCache.parser.parse(txt.substring(1), {
         sheetId: id || ctx.currentSheetId,
     });
-    var formulaError = parsedResponse.error;
-    var result = parsedResponse.result;
+    const { error: formulaError } = parsedResponse;
+    let { result } = parsedResponse;
     // https://stackoverflow.com/a/643827/8200626
     // https://github.com/ruilisi/fortune-sheet/issues/551
     if (Object.prototype.toString.call(result) === "[object Date]" &&
@@ -965,22 +939,22 @@ export function execfunction(ctx, txt, r, c, id, calcChainSet, isrefresh, notIns
     return [true, _.isNil(formulaError) ? result : formulaError, txt];
 }
 function insertUpdateDynamicArray(ctx, dynamicArrayItem) {
-    var r = dynamicArrayItem.r, c = dynamicArrayItem.c;
-    var id = dynamicArrayItem.id;
+    const { r, c } = dynamicArrayItem;
+    let { id } = dynamicArrayItem;
     if (_.isNil(id)) {
         id = ctx.currentSheetId;
     }
-    var luckysheetfile = ctx.luckysheetfile;
-    var idx = getSheetIndex(ctx, id);
+    const { luckysheetfile } = ctx;
+    const idx = getSheetIndex(ctx, id);
     if (idx == null)
         return [];
-    var file = luckysheetfile[idx];
-    var dynamicArray = file.dynamicArray;
+    const file = luckysheetfile[idx];
+    let { dynamicArray } = file;
     if (_.isNil(dynamicArray)) {
         dynamicArray = [];
     }
-    for (var i = 0; i < dynamicArray.length; i += 1) {
-        var calc = dynamicArray[i];
+    for (let i = 0; i < dynamicArray.length; i += 1) {
+        const calc = dynamicArray[i];
         if (calc.r === r && calc.c === c && calc.id === id) {
             calc.data = dynamicArrayItem.data;
             calc.f = dynamicArrayItem.f;
@@ -991,22 +965,22 @@ function insertUpdateDynamicArray(ctx, dynamicArrayItem) {
     return dynamicArray;
 }
 export function groupValuesRefresh(ctx) {
-    var luckysheetfile = ctx.luckysheetfile;
+    const { luckysheetfile } = ctx;
     if (ctx.groupValuesRefreshData.length > 0) {
-        for (var i = 0; i < ctx.groupValuesRefreshData.length; i += 1) {
-            var item = ctx.groupValuesRefreshData[i];
+        for (let i = 0; i < ctx.groupValuesRefreshData.length; i += 1) {
+            const item = ctx.groupValuesRefreshData[i];
             // if(item.i !== ctx.currentSheetId){
             //     continue;
             // }
-            var idx = getSheetIndex(ctx, item.id);
+            const idx = getSheetIndex(ctx, item.id);
             if (idx == null)
                 continue;
-            var file = luckysheetfile[idx];
-            var data = file.data;
+            const file = luckysheetfile[idx];
+            const { data } = file;
             if (_.isNil(data)) {
                 continue;
             }
-            var updateValue = {};
+            const updateValue = {};
             if (!_.isNil(item.spe)) {
                 if (item.spe.type === "sparklines") {
                     updateValue.spl = item.spe.data;
@@ -1027,8 +1001,7 @@ export function groupValuesRefresh(ctx) {
         ctx.groupValuesRefreshData = [];
     }
 }
-export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isForce) {
-    if (isForce === void 0) { isForce = false; }
+export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isForce = false) {
     if (_.isNil(data)) {
         data = getFlowdata(ctx);
     }
@@ -1055,57 +1028,61 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
     if (!_.isNil(value)) {
         // 此处setcellvalue 中this.execFunctionGroupData会保存想要更新的值，本函数结尾不要设为null,以备后续函数使用
         // setcellvalue(origin_r, origin_c, _this.execFunctionGroupData, value);
-        var cellCache = [[{ v: undefined }]];
+        const cellCache = [[{ v: undefined }]];
         setCellValue(ctx, 0, 0, cellCache, value);
-        ctx.formulaCache.execFunctionGlobalData["".concat(origin_r, "_").concat(origin_c, "_").concat(id)] = cellCache[0][0];
+        [
+            [
+                ctx.formulaCache.execFunctionGlobalData[`${origin_r}_${origin_c}_${id}`],
+            ],
+        ] = cellCache;
     }
     // { "r": r, "c": c, "id": id, "func": func}
-    var calcChains = getAllFunctionGroup(ctx);
-    var formulaObjects = {};
-    var sheets = ctx.luckysheetfile;
-    var sheetData = {};
-    for (var i = 0; i < sheets.length; i += 1) {
-        var sheet = sheets[i];
+    const calcChains = getAllFunctionGroup(ctx);
+    const formulaObjects = {};
+    const sheets = ctx.luckysheetfile;
+    const sheetData = {};
+    for (let i = 0; i < sheets.length; i += 1) {
+        const sheet = sheets[i];
         sheetData[sheet.id] = sheet.data;
     }
     // 把修改涉及的单元格存储为对象
-    var updateValueOjects = {};
-    var updateValueArray = [];
+    const updateValueOjects = {};
+    const updateValueArray = [];
     if (_.isNil(ctx.formulaCache.execFunctionExist)) {
-        var key = "r".concat(origin_r, "c").concat(origin_c, "i").concat(id);
+        const key = `r${origin_r}c${origin_c}i${id}`;
         updateValueOjects[key] = 1;
     }
     else {
-        for (var x = 0; x < ctx.formulaCache.execFunctionExist.length; x += 1) {
-            var cell = ctx.formulaCache.execFunctionExist[x];
-            var key = "r".concat(cell.r, "c").concat(cell.c, "i").concat(cell.i);
+        for (let x = 0; x < ctx.formulaCache.execFunctionExist.length; x += 1) {
+            const cell = ctx.formulaCache.execFunctionExist[x];
+            const key = `r${cell.r}c${cell.c}i${cell.i}`;
             updateValueOjects[key] = 1;
         }
     }
-    var arrayMatchCache = {};
-    var arrayMatch = function (formulaArray, _formulaObjects, _updateValueOjects, func) {
-        for (var a = 0; a < formulaArray.length; a += 1) {
-            var range = formulaArray[a];
-            var cacheKey = "r".concat(range.row[0]).concat(range.row[1], "c").concat(range.column[0]).concat(range.column[1], "id").concat(range.sheetId);
+    const arrayMatchCache = {};
+    const arrayMatch = (formulaArray, _formulaObjects, _updateValueOjects, func) => {
+        for (let a = 0; a < formulaArray.length; a += 1) {
+            const range = formulaArray[a];
+            const cacheKey = `r${range.row[0]}${range.row[1]}c${range.column[0]}${range.column[1]}id${range.sheetId}`;
             if (cacheKey in arrayMatchCache) {
-                var amc = arrayMatchCache[cacheKey];
+                const amc = arrayMatchCache[cacheKey];
                 // console.log(amc);
-                amc.forEach(function (item) {
+                amc.forEach((item) => {
                     func(item.key, item.r, item.c, item.sheetId);
                 });
             }
             else {
-                var functionArr = [];
-                for (var r = range.row[0]; r <= range.row[1]; r += 1) {
-                    for (var c = range.column[0]; c <= range.column[1]; c += 1) {
-                        var key = "r".concat(r, "c").concat(c, "i").concat(range.sheetId);
+                const functionArr = [];
+                for (let r = range.row[0]; r <= range.row[1]; r += 1) {
+                    for (let c = range.column[0]; c <= range.column[1]; c += 1) {
+                        const key = `r${r}c${c}i${range.sheetId}`;
                         func(key, r, c, range.sheetId);
                         if ((_formulaObjects && key in _formulaObjects) ||
                             (_updateValueOjects && key in _updateValueOjects)) {
                             functionArr.push({
-                                key: key,
-                                r: r,
-                                c: c,
+                                key,
+                                r,
+                                c,
                                 sheetId: range.sheetId,
                             });
                         }
@@ -1117,21 +1094,23 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
             }
         }
     };
-    var _loop_1 = function (i) {
-        var formulaCell = calcChains[i];
-        var key = "r".concat(formulaCell.r, "c").concat(formulaCell.c, "i").concat(formulaCell.id);
-        var calc_funcStr = getcellFormula(ctx, formulaCell.r, formulaCell.c, formulaCell.id);
+    // 创建公式缓存及其范围的缓存
+    // console.time("1");
+    for (let i = 0; i < calcChains.length; i += 1) {
+        const formulaCell = calcChains[i];
+        const key = `r${formulaCell.r}c${formulaCell.c}i${formulaCell.id}`;
+        const calc_funcStr = getcellFormula(ctx, formulaCell.r, formulaCell.c, formulaCell.id);
         if (_.isNil(calc_funcStr)) {
-            return "continue";
+            continue;
         }
-        var txt1 = calc_funcStr.toUpperCase();
-        var isOffsetFunc = txt1.indexOf("INDIRECT(") > -1 ||
+        const txt1 = calc_funcStr.toUpperCase();
+        const isOffsetFunc = txt1.indexOf("INDIRECT(") > -1 ||
             txt1.indexOf("OFFSET(") > -1 ||
             txt1.indexOf("INDEX(") > -1;
-        var formulaArray = [];
+        const formulaArray = [];
         if (isOffsetFunc) {
-            isFunctionRange(ctx, calc_funcStr, null, null, formulaCell.id, null, function (str_nb) {
-                var range = getcellrange(ctx, _.trim(str_nb), formulaCell.id);
+            isFunctionRange(ctx, calc_funcStr, null, null, formulaCell.id, null, (str_nb) => {
+                const range = getcellrange(ctx, _.trim(str_nb), formulaCell.id);
                 if (!_.isNil(range)) {
                     formulaArray.push(range);
                 }
@@ -1141,19 +1120,19 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
             calc_funcStr.substring(calc_funcStr.length - 1, 1) === '"')) {
             // let formulaTextArray = calc_funcStr.split(/==|!=|<>|<=|>=|[,()=+-\/*%&^><]/g);//无法正确分割单引号或双引号之间有==、!=、-等运算符的情况。导致如='1-2'!A1公式中表名1-2的A1单元格内容更新后，公式的值不更新的bug
             // 解决='1-2'!A1+5会被calc_funcStr.split(/==|!=|<>|<=|>=|[,()=+-\/*%&^><]/g)分割成["","'1","2'!A1",5]的错误情况
-            var point = 0; // 指针
-            var squote = -1; // 双引号
-            var dquote = -1; // 单引号
-            var formulaTextArray = [];
-            var sq_end_array = []; // 保存了配对的单引号在formulaTextArray的index索引。
-            var calc_funcStr_length = calc_funcStr.length;
-            for (var j = 0; j < calc_funcStr_length; j += 1) {
-                var char = calc_funcStr.charAt(j);
+            let point = 0; // 指针
+            let squote = -1; // 双引号
+            let dquote = -1; // 单引号
+            const formulaTextArray = [];
+            const sq_end_array = []; // 保存了配对的单引号在formulaTextArray的index索引。
+            const calc_funcStr_length = calc_funcStr.length;
+            for (let j = 0; j < calc_funcStr_length; j += 1) {
+                const char = calc_funcStr.charAt(j);
                 if (char === "'" && dquote === -1) {
                     // 如果是单引号开始
                     if (squote === -1) {
                         if (point !== j) {
-                            formulaTextArray.push.apply(formulaTextArray, calc_funcStr
+                            formulaTextArray.push(...calc_funcStr
                                 .substring(point, j)
                                 .split(/==|!=|<>|<=|>=|[,()=+-/*%&^><]/));
                         }
@@ -1191,7 +1170,7 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
                     // 如果是双引号开始
                     if (dquote === -1) {
                         if (point !== j) {
-                            formulaTextArray.push.apply(formulaTextArray, calc_funcStr
+                            formulaTextArray.push(...calc_funcStr
                                 .substring(point, j)
                                 .split(/==|!=|<>|<=|>=|[,()=+-/*%&^><]/));
                         }
@@ -1214,12 +1193,12 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
                 }
             }
             if (point !== calc_funcStr_length) {
-                formulaTextArray.push.apply(formulaTextArray, calc_funcStr
+                formulaTextArray.push(...calc_funcStr
                     .substring(point, calc_funcStr_length)
                     .split(/==|!=|<>|<=|>=|[,()=+-/*%&^><]/));
             }
             // 拼接所有配对单引号及之后一个单元格内容，例如["'1-2'","!A1"]拼接为["'1-2'!A1"]
-            for (var j = sq_end_array.length - 1; j >= 0; j -= 1) {
+            for (let j = sq_end_array.length - 1; j >= 0; j -= 1) {
                 if (sq_end_array[j] !== formulaTextArray.length - 1) {
                     formulaTextArray[sq_end_array[j]] +=
                         formulaTextArray[sq_end_array[j] + 1];
@@ -1227,8 +1206,8 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
                 }
             }
             // 至此=SUM('1-2'!A1:A2&"'1-2'!A2")由原来的["","SUM","'1","2'!A1:A2","",""'1","2'!A2""]更正为["","SUM","","'1-2'!A1:A2","","",""'1-2'!A2""]
-            for (var j = 0; j < formulaTextArray.length; j += 1) {
-                var t = formulaTextArray[j];
+            for (let j = 0; j < formulaTextArray.length; j += 1) {
+                const t = formulaTextArray[j];
                 if (t.length <= 1) {
                     continue;
                 }
@@ -1236,17 +1215,17 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
                     !iscelldata(t)) {
                     continue;
                 }
-                var range = getcellrange(ctx, _.trim(t), formulaCell.id);
+                const range = getcellrange(ctx, _.trim(t), formulaCell.id);
                 if (_.isNil(range)) {
                     continue;
                 }
                 formulaArray.push(range);
             }
         }
-        var item = {
-            formulaArray: formulaArray,
-            calc_funcStr: calc_funcStr,
-            key: key,
+        const item = {
+            formulaArray,
+            calc_funcStr,
+            key,
             r: formulaCell.r,
             c: formulaCell.c,
             id: formulaCell.id,
@@ -1255,20 +1234,25 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
             color: "w",
         };
         formulaObjects[key] = item;
-    };
-    // 创建公式缓存及其范围的缓存
-    // console.time("1");
-    for (var i = 0; i < calcChains.length; i += 1) {
-        _loop_1(i);
+        // if(isForce){
+        //     updateValueArray.push(item);
+        // }
+        // else{
+        //     arrayMatch(formulaArray, null, function(key){
+        //         if(key in updateValueOjects){
+        //             updateValueArray.push(item);
+        //         }
+        //     });
+        // }
     }
     // console.timeEnd("1");
     // console.time("2");
     // 形成一个公式之间引用的图结构
-    Object.keys(formulaObjects).forEach(function (key) {
-        var formulaObject = formulaObjects[key];
-        arrayMatch(formulaObject.formulaArray, formulaObjects, updateValueOjects, function (childKey) {
+    Object.keys(formulaObjects).forEach((key) => {
+        const formulaObject = formulaObjects[key];
+        arrayMatch(formulaObject.formulaArray, formulaObjects, updateValueOjects, (childKey) => {
             if (childKey in formulaObjects) {
-                var childFormulaObject = formulaObjects[childKey];
+                const childFormulaObject = formulaObjects[childKey];
                 formulaObject.chidren[childKey] = 1;
                 childFormulaObject.parents[key] = 1;
             }
@@ -1284,26 +1268,26 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
     // console.log(formulaObjects)
     // console.timeEnd("2");
     // console.time("3");
-    var formulaRunList = [];
+    const formulaRunList = [];
     // 计算，采用深度优先遍历公式形成的图结构
     // updateValueArray.forEach((key)=>{
     //     let formulaObject = formulaObjects[key];
     // });
-    var stack = updateValueArray;
-    var existsFormulaRunList = {};
-    var _loop_2 = function () {
-        var formulaObject = stack.pop();
+    let stack = updateValueArray;
+    const existsFormulaRunList = {};
+    while (stack.length > 0) {
+        const formulaObject = stack.pop();
         if (_.isNil(formulaObject) || formulaObject.key in existsFormulaRunList) {
-            return "continue";
+            continue;
         }
         if (formulaObject.color === "b") {
             formulaRunList.push(formulaObject);
             existsFormulaRunList[formulaObject.key] = 1;
-            return "continue";
+            continue;
         }
-        var cacheStack = [];
-        Object.keys(formulaObject.parents).forEach(function (parentKey) {
-            var parentFormulaObject = formulaObjects[parentKey];
+        const cacheStack = [];
+        Object.keys(formulaObject.parents).forEach((parentKey) => {
+            const parentFormulaObject = formulaObjects[parentKey];
             if (!_.isNil(parentFormulaObject)) {
                 cacheStack.push(parentFormulaObject);
             }
@@ -1317,25 +1301,22 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
             stack.push(formulaObject);
             stack = stack.concat(cacheStack);
         }
-    };
-    while (stack.length > 0) {
-        _loop_2();
     }
     formulaRunList.reverse();
-    var calcChainSet = new Set();
-    calcChains.forEach(function (item) {
-        calcChainSet.add("".concat(item.r, "_").concat(item.c, "_").concat(item.id));
+    const calcChainSet = new Set();
+    calcChains.forEach((item) => {
+        calcChainSet.add(`${item.r}_${item.c}_${item.id}`);
     });
     // console.log(formulaObjects, ii)
     // console.timeEnd("3");
     // console.time("4");
-    for (var i = 0; i < formulaRunList.length; i += 1) {
-        var formulaCell = formulaRunList[i];
+    for (let i = 0; i < formulaRunList.length; i += 1) {
+        const formulaCell = formulaRunList[i];
         if (formulaCell.level === Math.max) {
             continue;
         }
-        var calc_funcStr = formulaCell.calc_funcStr;
-        var v = execfunction(ctx, calc_funcStr, formulaCell.r, formulaCell.c, formulaCell.id, calcChainSet);
+        const { calc_funcStr } = formulaCell;
+        const v = execfunction(ctx, calc_funcStr, formulaCell.r, formulaCell.c, formulaCell.id, calcChainSet);
         ctx.groupValuesRefreshData.push({
             r: formulaCell.r,
             c: formulaCell.c,
@@ -1345,7 +1326,7 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
             id: formulaCell.id,
         });
         // _this.execFunctionGroupData[u.r][u.c] = value;
-        ctx.formulaCache.execFunctionGlobalData["".concat(formulaCell.r, "_").concat(formulaCell.c, "_").concat(formulaCell.id)] = {
+        ctx.formulaCache.execFunctionGlobalData[`${formulaCell.r}_${formulaCell.c}_${formulaCell.id}`] = {
             v: v[1],
             f: v[2],
         };
@@ -1355,22 +1336,22 @@ export function execFunctionGroup(ctx, origin_r, origin_c, value, id, data, isFo
     ctx.formulaCache.execFunctionExist = undefined;
 }
 function findrangeindex(ctx, v, vp) {
-    var re = /<span.*?>/g;
-    var v_a = v.replace(re, "").split("</span>");
-    var vp_a = vp.replace(re, "").split("</span>");
+    const re = /<span.*?>/g;
+    const v_a = v.replace(re, "").split("</span>");
+    const vp_a = vp.replace(re, "").split("</span>");
     v_a.pop();
     if (vp_a[vp_a.length - 1] === "")
         vp_a.pop();
-    var pfri = ctx.formulaCache.functionRangeIndex;
+    let pfri = ctx.formulaCache.functionRangeIndex;
     if (pfri == null)
         return [];
-    var vplen = vp_a.length;
-    var vlen = v_a.length;
+    const vplen = vp_a.length;
+    const vlen = v_a.length;
     // 不增加元素输入
     if (vplen === vlen) {
-        var i = pfri[0];
-        var p = vp_a[i];
-        var n = v_a[i];
+        const i = pfri[0];
+        const p = vp_a[i];
+        const n = v_a[i];
         if (_.isNil(p)) {
             if (vp_a.length <= i) {
                 pfri = [vp_a.length - 1, vp_a.length - 1];
@@ -1408,13 +1389,13 @@ function findrangeindex(ctx, v, vp) {
     }
     // 减少元素输入
     else if (vplen > vlen) {
-        var i = pfri[0];
-        var p = vp_a[i];
-        var n = v_a[i];
+        const i = pfri[0];
+        const p = vp_a[i];
+        const n = v_a[i];
         if (_.isNil(n)) {
             if (v_a[i - 1].indexOf("{") > -1) {
                 pfri[0] -= 1;
-                var start = v_a[i - 1].search("{");
+                const start = v_a[i - 1].search("{");
                 pfri[1] += start;
             }
             else {
@@ -1467,9 +1448,9 @@ function findrangeindex(ctx, v, vp) {
     }
     // 增加元素输入
     else if (vplen < vlen) {
-        var i = pfri[0];
-        var p = vp_a[i];
-        var n = v_a[i];
+        const i = pfri[0];
+        const p = vp_a[i];
+        const n = v_a[i];
         if (_.isNil(p)) {
             pfri[0] = v_a.length - 1;
             if (!_.isNil(n)) {
@@ -1555,26 +1536,29 @@ function findrangeindex(ctx, v, vp) {
 export function createFormulaRangeSelect(ctx, select) {
     ctx.formulaRangeSelect = select;
 }
-export function createRangeHightlight(ctx, inputInnerHtmlStr, ignoreRangeIndex) {
-    if (ignoreRangeIndex === void 0) { ignoreRangeIndex = -1; }
-    var $span = parseElement("<div>".concat(inputInnerHtmlStr, "</div>"));
-    var formulaRanges = [];
+export function createRangeHightlight(ctx, inputInnerHtmlStr, ignoreRangeIndex = -1) {
+    const $span = parseElement(`<div>${inputInnerHtmlStr}</div>`);
+    const formulaRanges = [];
     $span
         .querySelectorAll("span.fortune-formula-functionrange-cell")
-        .forEach(function (ele) {
-        var rangeIndex = parseInt(ele.getAttribute("rangeindex") || "0", 10);
+        .forEach((ele) => {
+        const rangeIndex = parseInt(ele.getAttribute("rangeindex") || "0", 10);
         if (rangeIndex === ignoreRangeIndex)
             return;
-        var cellrange = getcellrange(ctx, ele.textContent || "");
+        const cellrange = getcellrange(ctx, ele.textContent || "");
         if (rangeIndex === ctx.formulaCache.selectingRangeIndex ||
             cellrange == null)
             return;
         if (cellrange.sheetId === ctx.currentSheetId ||
             (cellrange.sheetId === -1 &&
                 ctx.formulaCache.rangetosheet === ctx.currentSheetId)) {
-            var rect = seletedHighlistByindex(ctx, cellrange.row[0], cellrange.row[1], cellrange.column[0], cellrange.column[1]);
+            const rect = seletedHighlistByindex(ctx, cellrange.row[0], cellrange.row[1], cellrange.column[0], cellrange.column[1]);
             if (rect) {
-                formulaRanges.push(__assign(__assign({ rangeIndex: rangeIndex }, rect), { backgroundColor: colors[rangeIndex] }));
+                formulaRanges.push({
+                    rangeIndex,
+                    ...rect,
+                    backgroundColor: colors[rangeIndex],
+                });
             }
         }
     });
@@ -1582,13 +1566,13 @@ export function createRangeHightlight(ctx, inputInnerHtmlStr, ignoreRangeIndex) 
 }
 export function setCaretPosition(ctx, textDom, children, pos) {
     try {
-        var el = textDom;
-        var range = document.createRange();
-        var sel = window.getSelection();
+        const el = textDom;
+        const range = document.createRange();
+        const sel = window.getSelection();
         range.setStart(el.childNodes[children], pos);
         range.collapse(true);
-        sel === null || sel === void 0 ? void 0 : sel.removeAllRanges();
-        sel === null || sel === void 0 ? void 0 : sel.addRange(range);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
         el.focus();
     }
     catch (err) {
@@ -1599,10 +1583,10 @@ export function setCaretPosition(ctx, textDom, children, pos) {
 function functionRange(ctx, obj, v, vp) {
     if (window.getSelection) {
         // ie11 10 9 ff safari
-        var currSelection = window.getSelection();
+        const currSelection = window.getSelection();
         if (!currSelection)
             return;
-        var fri = findrangeindex(ctx, v, vp);
+        const fri = findrangeindex(ctx, v, vp);
         if (_.isNil(fri)) {
             currSelection.selectAllChildren(obj);
             currSelection.collapseToEnd();
@@ -1623,7 +1607,7 @@ function functionRange(ctx, obj, v, vp) {
     }
 }
 function searchFunction(ctx, searchtxt) {
-    var functionlist = locale(ctx).functionlist;
+    const { functionlist } = locale(ctx);
     // // 这里的逻辑在原项目上做了修改
     // if (_.isNil($editer)) {
     //   return;
@@ -1636,13 +1620,13 @@ function searchFunction(ctx, searchtxt) {
     //   return;
     // }
     // const searchtxt = match[1];
-    var f = [];
-    var s = [];
-    var t = [];
-    var result_i = 0;
-    for (var i = 0; i < functionlist.length; i += 1) {
-        var item = functionlist[i];
-        var n = item.n;
+    const f = [];
+    const s = [];
+    const t = [];
+    let result_i = 0;
+    for (let i = 0; i < functionlist.length; i += 1) {
+        const item = functionlist[i];
+        const { n } = item;
         if (n === searchtxt) {
             f.unshift(item);
             result_i += 1;
@@ -1659,7 +1643,7 @@ function searchFunction(ctx, searchtxt) {
             break;
         }
     }
-    var list = __spreadArray(__spreadArray(__spreadArray([], f, true), s, true), t, true);
+    const list = [...f, ...s, ...t];
     if (list.length <= 0) {
         return;
     }
@@ -1677,47 +1661,45 @@ function searchFunction(ctx, searchtxt) {
     // );
 }
 export function getrangeseleciton() {
-    var _a, _b, _c, _d, _e;
-    var currSelection = window.getSelection();
+    const currSelection = window.getSelection();
     if (!currSelection)
         return null;
-    var anchorNode = currSelection.anchorNode, anchorOffset = currSelection.anchorOffset;
+    const { anchorNode, anchorOffset } = currSelection;
     if (!anchorNode)
         return null;
-    if (((_b = (_a = anchorNode.parentNode) === null || _a === void 0 ? void 0 : _a.nodeName) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === "span" &&
+    if (anchorNode.parentNode?.nodeName?.toLowerCase() === "span" &&
         anchorOffset !== 0) {
-        var txt = _.trim(anchorNode.textContent || "");
+        let txt = _.trim(anchorNode.textContent || "");
         if (txt.length === 0 && anchorNode.parentNode.previousSibling) {
-            var ahr = anchorNode.parentNode.previousSibling;
+            const ahr = anchorNode.parentNode.previousSibling;
             txt = _.trim(ahr.textContent || "");
             return ahr;
         }
         return anchorNode.parentNode;
     }
-    var anchorElement = anchorNode;
+    const anchorElement = anchorNode;
     if (anchorElement.id === "luckysheet-rich-text-editor" ||
         anchorElement.id === "luckysheet-functionbox-cell") {
-        var txt = _.trim((_c = _.last(anchorElement.querySelectorAll("span"))) === null || _c === void 0 ? void 0 : _c.innerText);
+        let txt = _.trim(_.last(anchorElement.querySelectorAll("span"))?.innerText);
         if (txt.length === 0 && anchorElement.querySelectorAll("span").length > 1) {
-            var ahr = anchorElement.querySelectorAll("span");
+            const ahr = anchorElement.querySelectorAll("span");
             txt = _.trim(ahr[ahr.length - 2].innerText);
-            return ahr === null || ahr === void 0 ? void 0 : ahr[0];
+            return ahr?.[0];
         }
         return _.last(anchorElement.querySelectorAll("span"));
     }
-    if (((_d = anchorNode === null || anchorNode === void 0 ? void 0 : anchorNode.parentElement) === null || _d === void 0 ? void 0 : _d.id) === "luckysheet-rich-text-editor" ||
-        ((_e = anchorNode === null || anchorNode === void 0 ? void 0 : anchorNode.parentElement) === null || _e === void 0 ? void 0 : _e.id) === "luckysheet-functionbox-cell" ||
+    if (anchorNode?.parentElement?.id === "luckysheet-rich-text-editor" ||
+        anchorNode?.parentElement?.id === "luckysheet-functionbox-cell" ||
         anchorOffset === 0) {
-        var newAnchorNode = anchorOffset === 0 ? anchorNode === null || anchorNode === void 0 ? void 0 : anchorNode.parentNode : anchorNode;
-        if (newAnchorNode === null || newAnchorNode === void 0 ? void 0 : newAnchorNode.previousSibling) {
-            return newAnchorNode === null || newAnchorNode === void 0 ? void 0 : newAnchorNode.previousSibling;
+        const newAnchorNode = anchorOffset === 0 ? anchorNode?.parentNode : anchorNode;
+        if (newAnchorNode?.previousSibling) {
+            return newAnchorNode?.previousSibling;
         }
     }
     return null;
 }
 function helpFunctionExe($editer, currSelection, ctx) {
-    var _a;
-    var functionlist = locale(ctx).functionlist;
+    const { functionlist } = locale(ctx);
     // let _locale = locale();
     // let locale_formulaMore = _locale.formulaMore;
     // if ($("#luckysheet-formula-help-c").length === 0) {
@@ -1762,28 +1744,28 @@ function helpFunctionExe($editer, currSelection, ctx) {
     //   }
     // }
     if (_.isEmpty(ctx.formulaCache.functionlistMap)) {
-        for (var i_1 = 0; i_1 < functionlist.length; i_1 += 1) {
-            ctx.formulaCache.functionlistMap[functionlist[i_1].n] = functionlist[i_1];
+        for (let i = 0; i < functionlist.length; i += 1) {
+            ctx.formulaCache.functionlistMap[functionlist[i].n] = functionlist[i];
         }
     }
     if (!currSelection) {
         return null;
     }
-    var $prev = currSelection;
-    var $span = $editer.querySelectorAll("span");
-    var currentIndex = _.indexOf((_a = currSelection.parentNode) === null || _a === void 0 ? void 0 : _a.childNodes, currSelection);
-    var i = currentIndex;
+    const $prev = currSelection;
+    const $span = $editer.querySelectorAll("span");
+    const currentIndex = _.indexOf(currSelection.parentNode?.childNodes, currSelection);
+    let i = currentIndex;
     if ($prev == null) {
         return null;
     }
-    var funcName = null;
-    var paramindex = null;
+    let funcName = null;
+    let paramindex = null;
     if ($span[i].classList.contains("luckysheet-formula-text-func")) {
         funcName = $span[i].textContent;
     }
     else {
-        var $cur = null;
-        var exceptIndex = [-1, -1];
+        let $cur = null;
+        let exceptIndex = [-1, -1];
         // eslint-disable-next-line no-plusplus
         while (--i > 0) {
             $cur = $span[i];
@@ -1792,8 +1774,8 @@ function helpFunctionExe($editer, currSelection, ctx) {
                     ctx.formulaCache.functionlistMap) {
                 funcName = $cur.textContent;
                 paramindex = null;
-                var endstate = true;
-                for (var a = i; a <= currentIndex; a += 1) {
+                let endstate = true;
+                for (let a = i; a <= currentIndex; a += 1) {
                     if (!paramindex) {
                         paramindex = 0;
                     }
@@ -1820,7 +1802,7 @@ function helpFunctionExe($editer, currSelection, ctx) {
     return funcName;
 }
 export function rangeHightlightselected(ctx, $editor) {
-    var currSelection = getrangeseleciton();
+    const currSelection = getrangeseleciton();
     // $("#luckysheet-formula-search-c, #luckysheet-formula-help-c").hide();
     // $(
     //   "#fortune-formula-functionrange .fortune-formula-functionrange-highlight .fortune-selection-copy-hc"
@@ -1832,14 +1814,14 @@ export function rangeHightlightselected(ctx, $editor) {
     // ) {
     if (!currSelection)
         return;
-    var currText = _.trim(currSelection.textContent || "");
-    if (currText === null || currText === void 0 ? void 0 : currText.match(/^[a-zA-Z_]+$/)) {
+    const currText = _.trim(currSelection.textContent || "");
+    if (currText?.match(/^[a-zA-Z_]+$/)) {
         searchFunction(ctx, currText.toUpperCase());
         ctx.functionHint = null;
     }
     else {
-        var funcName = helpFunctionExe($editor, currSelection, ctx);
-        ctx.functionHint = funcName === null || funcName === void 0 ? void 0 : funcName.toUpperCase();
+        const funcName = helpFunctionExe($editor, currSelection, ctx);
+        ctx.functionHint = funcName?.toUpperCase();
         ctx.functionCandidates = [];
     }
     // return;
@@ -1857,11 +1839,11 @@ function functionHTML(txt) {
     if (txt.substr(0, 1) === "=") {
         txt = txt.substr(1);
     }
-    var funcstack = txt.split("");
-    var i = 0;
-    var str = "";
-    var function_str = "";
-    var matchConfig = {
+    const funcstack = txt.split("");
+    let i = 0;
+    let str = "";
+    let function_str = "";
+    const matchConfig = {
         bracket: 0,
         comma: 0,
         squote: 0,
@@ -1869,14 +1851,14 @@ function functionHTML(txt) {
         braces: 0,
     };
     while (i < funcstack.length) {
-        var s = funcstack[i];
+        const s = funcstack[i];
         if (s === "(" &&
             matchConfig.squote === 0 &&
             matchConfig.dquote === 0 &&
             matchConfig.braces === 0) {
             matchConfig.bracket += 1;
             if (str.length > 0) {
-                function_str += "<span dir=\"auto\" class=\"luckysheet-formula-text-func\">".concat(str, "</span><span dir=\"auto\" class=\"luckysheet-formula-text-lpar\">(</span>");
+                function_str += `<span dir="auto" class="luckysheet-formula-text-func">${str}</span><span dir="auto" class="luckysheet-formula-text-lpar">(</span>`;
             }
             else {
                 function_str +=
@@ -1889,7 +1871,7 @@ function functionHTML(txt) {
             matchConfig.dquote === 0 &&
             matchConfig.braces === 0) {
             matchConfig.bracket -= 1;
-            function_str += "".concat(functionHTML(str), "<span dir=\"auto\" class=\"luckysheet-formula-text-rpar\">)</span>");
+            function_str += `${functionHTML(str)}<span dir="auto" class="luckysheet-formula-text-rpar">)</span>`;
             str = "";
         }
         else if (s === "{" &&
@@ -1907,7 +1889,7 @@ function functionHTML(txt) {
         else if (s === '"' && matchConfig.squote === 0) {
             if (matchConfig.dquote > 0) {
                 if (str.length > 0) {
-                    function_str += "".concat(str, "\"</span>");
+                    function_str += `${str}"</span>`;
                 }
                 else {
                     function_str += '"</span>';
@@ -1918,7 +1900,7 @@ function functionHTML(txt) {
             else {
                 matchConfig.dquote += 1;
                 if (str.length > 0) {
-                    function_str += "".concat(functionHTML(str), "<span dir=\"auto\" class=\"luckysheet-formula-text-string\">\"");
+                    function_str += `${functionHTML(str)}<span dir="auto" class="luckysheet-formula-text-string">"`;
                 }
                 else {
                     function_str +=
@@ -1937,7 +1919,7 @@ function functionHTML(txt) {
             matchConfig.dquote === 0 &&
             matchConfig.braces === 0) {
             // matchConfig.comma += 1;
-            function_str += "".concat(functionHTML(str), "<span dir=\"auto\" class=\"luckysheet-formula-text-comma\">,</span>");
+            function_str += `${functionHTML(str)}<span dir="auto" class="luckysheet-formula-text-comma">,</span>`;
             str = "";
         }
         else if (s === "&" &&
@@ -1946,9 +1928,9 @@ function functionHTML(txt) {
             matchConfig.braces === 0) {
             if (str.length > 0) {
                 function_str +=
-                    "".concat(functionHTML(str), "<span dir=\"auto\" class=\"luckysheet-formula-text-calc\">") +
-                        "&" +
-                        "</span>";
+                    `${functionHTML(str)}<span dir="auto" class="luckysheet-formula-text-calc">` +
+                        `&` +
+                        `</span>`;
                 str = "";
             }
             else {
@@ -1962,12 +1944,12 @@ function functionHTML(txt) {
             matchConfig.squote === 0 &&
             matchConfig.dquote === 0 &&
             matchConfig.braces === 0) {
-            var s_next = "";
+            let s_next = "";
             if (i + 1 < funcstack.length) {
                 s_next = funcstack[i + 1];
             }
-            var p = i - 1;
-            var s_pre = null;
+            let p = i - 1;
+            let s_pre = null;
             if (p >= 0) {
                 do {
                     s_pre = funcstack[p];
@@ -1976,11 +1958,11 @@ function functionHTML(txt) {
             }
             if (s + s_next in operatorjson) {
                 if (str.length > 0) {
-                    function_str += "".concat(functionHTML(str), "<span dir=\"auto\" class=\"luckysheet-formula-text-calc\">").concat(s).concat(s_next, "</span>");
+                    function_str += `${functionHTML(str)}<span dir="auto" class="luckysheet-formula-text-calc">${s}${s_next}</span>`;
                     str = "";
                 }
                 else {
-                    function_str += "<span dir=\"auto\" class=\"luckysheet-formula-text-calc\">".concat(s).concat(s_next, "</span>");
+                    function_str += `<span dir="auto" class="luckysheet-formula-text-calc">${s}${s_next}</span>`;
                 }
                 i += 1;
             }
@@ -1995,11 +1977,11 @@ function functionHTML(txt) {
             }
             else {
                 if (str.length > 0) {
-                    function_str += "".concat(functionHTML(str), "<span dir=\"auto\" class=\"luckysheet-formula-text-calc\">").concat(s, "</span>");
+                    function_str += `${functionHTML(str)}<span dir="auto" class="luckysheet-formula-text-calc">${s}</span>`;
                     str = "";
                 }
                 else {
-                    function_str += "<span dir=\"auto\" class=\"luckysheet-formula-text-calc\">".concat(s, "</span>");
+                    function_str += `<span dir="auto" class="luckysheet-formula-text-calc">${s}</span>`;
                 }
             }
         }
@@ -2009,32 +1991,32 @@ function functionHTML(txt) {
         if (i === funcstack.length - 1) {
             // function_str += str;
             if (iscelldata(_.trim(str))) {
-                var rangeIndex = rangeIndexes.length > functionHTMLIndex
+                const rangeIndex = rangeIndexes.length > functionHTMLIndex
                     ? rangeIndexes[functionHTMLIndex]
                     : functionHTMLIndex;
-                function_str += "<span class=\"fortune-formula-functionrange-cell\" rangeindex=\"".concat(rangeIndex, "\" dir=\"auto\" style=\"color:").concat(colors[rangeIndex], ";\">").concat(str, "</span>");
+                function_str += `<span class="fortune-formula-functionrange-cell" rangeindex="${rangeIndex}" dir="auto" style="color:${colors[rangeIndex]};">${str}</span>`;
                 functionHTMLIndex += 1;
             }
             else if (matchConfig.dquote > 0) {
-                function_str += "".concat(str, "</span>");
+                function_str += `${str}</span>`;
             }
             else if (str.indexOf("</span>") === -1 && str.length > 0) {
-                var regx = /{.*?}/;
+                const regx = /{.*?}/;
                 if (regx.test(_.trim(str))) {
-                    var arraytxt = regx.exec(str)[0];
-                    var arraystart = str.search(regx);
-                    var alltxt = "";
+                    const arraytxt = regx.exec(str)[0];
+                    const arraystart = str.search(regx);
+                    let alltxt = "";
                     if (arraystart > 0) {
-                        alltxt += "<span dir=\"auto\" class=\"luckysheet-formula-text-color\">".concat(str.substr(0, arraystart), "</span>");
+                        alltxt += `<span dir="auto" class="luckysheet-formula-text-color">${str.substr(0, arraystart)}</span>`;
                     }
-                    alltxt += "<span dir=\"auto\" style=\"color:#959a05\" class=\"luckysheet-formula-text-array\">".concat(arraytxt, "</span>");
+                    alltxt += `<span dir="auto" style="color:#959a05" class="luckysheet-formula-text-array">${arraytxt}</span>`;
                     if (arraystart + arraytxt.length < str.length) {
-                        alltxt += "<span dir=\"auto\" class=\"luckysheet-formula-text-color\">".concat(str.substr(arraystart + arraytxt.length, str.length), "</span>");
+                        alltxt += `<span dir="auto" class="luckysheet-formula-text-color">${str.substr(arraystart + arraytxt.length, str.length)}</span>`;
                     }
                     function_str += alltxt;
                 }
                 else {
-                    function_str += "<span dir=\"auto\" class=\"luckysheet-formula-text-color\">".concat(str, "</span>");
+                    function_str += `<span dir="auto" class="luckysheet-formula-text-color">${str}</span>`;
                 }
             }
         }
@@ -2047,31 +2029,29 @@ export function functionHTMLGenerate(txt) {
         return txt;
     }
     functionHTMLIndex = 0;
-    return "<span dir=\"auto\" class=\"luckysheet-formula-text-color\">=</span>".concat(functionHTML(txt));
+    return `<span dir="auto" class="luckysheet-formula-text-color">=</span>${functionHTML(txt)}`;
 }
 function getRangeIndexes($editor) {
-    var res = [];
+    const res = [];
     $editor
         .querySelectorAll("span.fortune-formula-functionrange-cell")
-        .forEach(function (ele) {
-        var indexStr = ele.getAttribute("rangeindex");
+        .forEach((ele) => {
+        const indexStr = ele.getAttribute("rangeindex");
         if (indexStr) {
-            var rangeIndex = parseInt(indexStr, 10);
+            const rangeIndex = parseInt(indexStr, 10);
             res.push(rangeIndex);
         }
     });
     return res;
 }
-export function handleFormulaInput(ctx, $copyTo, $editor, kcode, preText, refreshRangeSelect) {
-    var _a, _b, _c, _d, _e, _f;
-    if (refreshRangeSelect === void 0) { refreshRangeSelect = true; }
+export function handleFormulaInput(ctx, $copyTo, $editor, kcode, preText, refreshRangeSelect = true) {
     // if (isEditMode()) {
     //   // 此模式下禁用公式栏
     //   return;
     // }
-    var value1;
-    var value1txt = preText !== null && preText !== void 0 ? preText : $editor.innerText;
-    var value = $editor.innerText;
+    let value1;
+    const value1txt = preText ?? $editor.innerText;
+    let value = $editor.innerText;
     value = escapeScriptTag(value);
     if (value.length > 0 &&
         value.substring(0, 1) === "=" &&
@@ -2085,22 +2065,23 @@ export function handleFormulaInput(ctx, $copyTo, $editor, kcode, preText, refres
         rangeIndexes = [];
         if (window.getSelection) {
             // all browsers, except IE before version 9
-            var currSelection = window.getSelection();
+            const currSelection = window.getSelection();
             if (!currSelection)
                 return;
-            if (((_a = currSelection.anchorNode) === null || _a === void 0 ? void 0 : _a.nodeName.toLowerCase()) === "div") {
-                var editorlen = $editor.querySelectorAll("span").length;
+            if (currSelection.anchorNode?.nodeName.toLowerCase() === "div") {
+                const editorlen = $editor.querySelectorAll("span").length;
                 if (editorlen > 0)
                     ctx.formulaCache.functionRangeIndex = [
                         editorlen - 1,
-                        (_b = $editor.querySelectorAll("span").item(editorlen - 1).textContent) === null || _b === void 0 ? void 0 : _b.length,
+                        $editor.querySelectorAll("span").item(editorlen - 1).textContent
+                            ?.length,
                     ];
             }
             else {
                 ctx.formulaCache.functionRangeIndex = [
-                    _.indexOf((_e = (_d = (_c = currSelection.anchorNode) === null || _c === void 0 ? void 0 : _c.parentNode) === null || _d === void 0 ? void 0 : _d.parentNode) === null || _e === void 0 ? void 0 : _e.childNodes, 
+                    _.indexOf(currSelection.anchorNode?.parentNode?.parentNode?.childNodes, 
                     // @ts-ignore
-                    (_f = currSelection.anchorNode) === null || _f === void 0 ? void 0 : _f.parentNode),
+                    currSelection.anchorNode?.parentNode),
                     currSelection.anchorOffset,
                 ];
             }
@@ -2108,7 +2089,7 @@ export function handleFormulaInput(ctx, $copyTo, $editor, kcode, preText, refres
         else {
             // Internet Explorer before version 9
             // @ts-ignore
-            var textRange = document.selection.createRange();
+            const textRange = document.selection.createRange();
             ctx.formulaCache.functionRangeIndex = textRange;
         }
         $editor.innerHTML = value;
@@ -2148,11 +2129,11 @@ export function handleFormulaInput(ctx, $copyTo, $editor, kcode, preText, refres
     }
 }
 function isfreezonFuc(txt) {
-    var row = txt.replace(/[^0-9]/g, "");
-    var col = txt.replace(/[^A-Za-z]/g, "");
-    var row$ = txt.substr(txt.indexOf(row) - 1, 1);
-    var col$ = txt.substr(txt.indexOf(col) - 1, 1);
-    var ret = [false, false];
+    const row = txt.replace(/[^0-9]/g, "");
+    const col = txt.replace(/[^A-Za-z]/g, "");
+    const row$ = txt.substr(txt.indexOf(row) - 1, 1);
+    const col$ = txt.substr(txt.indexOf(col) - 1, 1);
+    const ret = [false, false];
     if (row$ === "$") {
         ret[0] = true;
     }
@@ -2162,30 +2143,30 @@ function isfreezonFuc(txt) {
     return ret;
 }
 function functionStrChange_range(txt, type, rc, orient, stindex, step) {
-    var val = txt.split("!");
-    var rangetxt;
-    var prefix = "";
+    const val = txt.split("!");
+    let rangetxt;
+    let prefix = "";
     if (val.length > 1) {
-        rangetxt = val[1];
-        prefix = "".concat(val[0], "!");
+        [, rangetxt] = val;
+        prefix = `${val[0]}!`;
     }
     else {
-        rangetxt = val[0];
+        [rangetxt] = val;
     }
-    var r1;
-    var r2;
-    var c1;
-    var c2;
-    var $row0;
-    var $row1;
-    var $col0;
-    var $col1;
+    let r1;
+    let r2;
+    let c1;
+    let c2;
+    let $row0;
+    let $row1;
+    let $col0;
+    let $col1;
     if (rangetxt.indexOf(":") === -1) {
         r1 = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10) - 1;
         r2 = r1;
         c1 = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
         c2 = c1;
-        var freezonFuc = isfreezonFuc(rangetxt);
+        const freezonFuc = isfreezonFuc(rangetxt);
         $row0 = freezonFuc[0] ? "$" : "";
         $row1 = $row0;
         $col0 = freezonFuc[1] ? "$" : "";
@@ -2203,10 +2184,10 @@ function functionStrChange_range(txt, type, rc, orient, stindex, step) {
         if (c1 > c2) {
             return txt;
         }
-        var freezonFuc0 = isfreezonFuc(rangetxt[0]);
+        const freezonFuc0 = isfreezonFuc(rangetxt[0]);
         $row0 = freezonFuc0[0] ? "$" : "";
         $col0 = freezonFuc0[1] ? "$" : "";
-        var freezonFuc1 = isfreezonFuc(rangetxt[1]);
+        const freezonFuc1 = isfreezonFuc(rangetxt[1]);
         $row1 = freezonFuc1[0] ? "$" : "";
         $col1 = freezonFuc1[1] ? "$" : "";
     }
@@ -2270,12 +2251,12 @@ function functionStrChange_range(txt, type, rc, orient, stindex, step) {
             return txt;
         }
         if (Number.isNaN(c1) && Number.isNaN(c2)) {
-            return "".concat(prefix + $row0 + (r1 + 1), ":").concat($row1).concat(r2 + 1);
+            return `${prefix + $row0 + (r1 + 1)}:${$row1}${r2 + 1}`;
         }
         if (Number.isNaN(r1) && Number.isNaN(r2)) {
-            return "".concat(prefix + $col0 + indexToColumnChar(c1), ":").concat($col1).concat(indexToColumnChar(c2));
+            return `${prefix + $col0 + indexToColumnChar(c1)}:${$col1}${indexToColumnChar(c2)}`;
         }
-        return "".concat(prefix + $col0 + indexToColumnChar(c1) + $row0 + (r1 + 1), ":").concat($col1).concat(indexToColumnChar(c2)).concat($row1).concat(r2 + 1);
+        return `${prefix + $col0 + indexToColumnChar(c1) + $row0 + (r1 + 1)}:${$col1}${indexToColumnChar(c2)}${$row1}${r2 + 1}`;
     }
     if (type === "add") {
         if (rc === "row") {
@@ -2327,35 +2308,34 @@ function functionStrChange_range(txt, type, rc, orient, stindex, step) {
             return txt;
         }
         if (Number.isNaN(c1) && Number.isNaN(c2)) {
-            return "".concat(prefix + $row0 + (r1 + 1), ":").concat($row1).concat(r2 + 1);
+            return `${prefix + $row0 + (r1 + 1)}:${$row1}${r2 + 1}`;
         }
         if (Number.isNaN(r1) && Number.isNaN(r2)) {
-            return "".concat(prefix + $col0 + indexToColumnChar(c1), ":").concat($col1).concat(indexToColumnChar(c2));
+            return `${prefix + $col0 + indexToColumnChar(c1)}:${$col1}${indexToColumnChar(c2)}`;
         }
-        return "".concat(prefix + $col0 + indexToColumnChar(c1) + $row0 + (r1 + 1), ":").concat($col1).concat(indexToColumnChar(c2)).concat($row1).concat(r2 + 1);
+        return `${prefix + $col0 + indexToColumnChar(c1) + $row0 + (r1 + 1)}:${$col1}${indexToColumnChar(c2)}${$row1}${r2 + 1}`;
     }
     return "";
 }
 export function israngeseleciton(ctx, istooltip) {
-    var _a, _b, _c;
     if (istooltip == null) {
         istooltip = false;
     }
-    var currSelection = window.getSelection();
+    const currSelection = window.getSelection();
     if (currSelection == null)
         return false;
-    var anchor = currSelection.anchorNode;
-    if (!(anchor === null || anchor === void 0 ? void 0 : anchor.textContent))
+    let anchor = currSelection.anchorNode;
+    if (!anchor?.textContent)
         return false;
-    var anchorOffset = currSelection.anchorOffset;
-    var anchorElement = anchor;
-    var parentElement = anchor.parentNode;
-    if (((_a = anchor === null || anchor === void 0 ? void 0 : anchor.parentNode) === null || _a === void 0 ? void 0 : _a.nodeName.toLowerCase()) === "span" &&
+    const { anchorOffset } = currSelection;
+    const anchorElement = anchor;
+    const parentElement = anchor.parentNode;
+    if (anchor?.parentNode?.nodeName.toLowerCase() === "span" &&
         anchorOffset !== 0) {
-        var txt = _.trim(anchor.textContent);
-        var lasttxt = "";
+        let txt = _.trim(anchor.textContent);
+        let lasttxt = "";
         if (txt.length === 0 && anchor.parentNode.previousSibling) {
-            var ahr = anchor.parentNode.previousSibling;
+            const ahr = anchor.parentNode.previousSibling;
             txt = _.trim(ahr.textContent || "");
             lasttxt = txt.substring(txt.length - 1, 1);
             ctx.formulaCache.rangeSetValueTo = anchor.parentNode;
@@ -2376,15 +2356,15 @@ export function israngeseleciton(ctx, istooltip) {
     }
     else if (anchorElement.id === "luckysheet-rich-text-editor" ||
         anchorElement.id === "luckysheet-functionbox-cell") {
-        var txt = _.trim((_b = _.last(anchorElement.querySelectorAll("span"))) === null || _b === void 0 ? void 0 : _b.innerText);
+        let txt = _.trim(_.last(anchorElement.querySelectorAll("span"))?.innerText);
         ctx.formulaCache.rangeSetValueTo = _.last(anchorElement.querySelectorAll("span"));
         if (txt.length === 0 && anchorElement.querySelectorAll("span").length > 1) {
-            var ahr = anchorElement.querySelectorAll("span");
+            const ahr = anchorElement.querySelectorAll("span");
             txt = _.trim(ahr[ahr.length - 2].innerText);
             txt = _.trim(ahr[ahr.length - 2].innerText);
             ctx.formulaCache.rangeSetValueTo = ahr;
         }
-        var lasttxt = txt.substring(txt.length - 1, 1);
+        const lasttxt = txt.substring(txt.length - 1, 1);
         if ((istooltip && (lasttxt === "(" || lasttxt === ",")) ||
             (!istooltip &&
                 (lasttxt === "(" ||
@@ -2403,11 +2383,11 @@ export function israngeseleciton(ctx, istooltip) {
         }
         if (!anchor)
             return false;
-        if (((_c = anchor.previousSibling) === null || _c === void 0 ? void 0 : _c.textContent) == null)
+        if (anchor.previousSibling?.textContent == null)
             return false;
         if (anchor.previousSibling) {
-            var txt = _.trim(anchor.previousSibling.textContent);
-            var lasttxt = txt.substring(txt.length - 1, 1);
+            const txt = _.trim(anchor.previousSibling.textContent);
+            const lasttxt = txt.substring(txt.length - 1, 1);
             ctx.formulaCache.rangeSetValueTo = anchor.previousSibling;
             if ((istooltip && (lasttxt === "(" || lasttxt === ",")) ||
                 (!istooltip &&
@@ -2429,22 +2409,22 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
     if (txt.substring(0, 1) === "=") {
         txt = txt.substring(1);
     }
-    var funcstack = txt.split("");
-    var i = 0;
-    var str = "";
-    var function_str = "";
-    var matchConfig = {
+    const funcstack = txt.split("");
+    let i = 0;
+    let str = "";
+    let function_str = "";
+    const matchConfig = {
         bracket: 0,
         comma: 0,
         squote: 0,
         dquote: 0, // 双引号
     };
     while (i < funcstack.length) {
-        var s = funcstack[i];
+        const s = funcstack[i];
         if (s === "(" && matchConfig.dquote === 0) {
             matchConfig.bracket += 1;
             if (str.length > 0) {
-                function_str += "".concat(str, "(");
+                function_str += `${str}(`;
             }
             else {
                 function_str += "(";
@@ -2453,12 +2433,12 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
         }
         else if (s === ")" && matchConfig.dquote === 0) {
             matchConfig.bracket -= 1;
-            function_str += "".concat(functionStrChange(str, type, rc, orient, stindex, step), ")");
+            function_str += `${functionStrChange(str, type, rc, orient, stindex, step)})`;
             str = "";
         }
         else if (s === '"' && matchConfig.squote === 0) {
             if (matchConfig.dquote > 0) {
-                function_str += "".concat(str, "\"");
+                function_str += `${str}"`;
                 matchConfig.dquote -= 1;
                 str = "";
             }
@@ -2468,12 +2448,12 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
             }
         }
         else if (s === "," && matchConfig.dquote === 0) {
-            function_str += "".concat(functionStrChange(str, type, rc, orient, stindex, step), ",");
+            function_str += `${functionStrChange(str, type, rc, orient, stindex, step)},`;
             str = "";
         }
         else if (s === "&" && matchConfig.dquote === 0) {
             if (str.length > 0) {
-                function_str += "".concat(functionStrChange(str, type, rc, orient, stindex, step), "&");
+                function_str += `${functionStrChange(str, type, rc, orient, stindex, step)}&`;
                 str = "";
             }
             else {
@@ -2481,12 +2461,12 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
             }
         }
         else if (s in operatorjson && matchConfig.dquote === 0) {
-            var s_next = "";
+            let s_next = "";
             if (i + 1 < funcstack.length) {
                 s_next = funcstack[i + 1];
             }
-            var p = i - 1;
-            var s_pre = null;
+            let p = i - 1;
+            let s_pre = null;
             if (p >= 0) {
                 do {
                     s_pre = funcstack[(p -= 1)];
@@ -2541,17 +2521,16 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
     return function_str;
 }
 export function rangeSetValue(ctx, cellInput, selected, fxInput) {
-    var _a, _b, _c, _d, _e;
-    var $editor = cellInput;
-    var $copyTo = fxInput;
-    if (((_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.id) === "luckysheet-functionbox-cell") {
+    let $editor = cellInput;
+    let $copyTo = fxInput;
+    if (document.activeElement?.id === "luckysheet-functionbox-cell") {
         $editor = fxInput;
         $copyTo = cellInput;
     }
-    var range = "";
-    var rf = selected.row[0];
-    var cf = selected.column[0];
-    if (ctx.config.merge != null && "".concat(rf, "_").concat(cf) in ctx.config.merge) {
+    let range = "";
+    const rf = selected.row[0];
+    const cf = selected.column[0];
+    if (ctx.config.merge != null && `${rf}_${cf}` in ctx.config.merge) {
         range = getRangetxt(ctx, ctx.currentSheetId, {
             column: [cf, cf],
             row: [rf, rf],
@@ -2663,7 +2642,7 @@ export function rangeSetValue(ctx, cellInput, selected, fxInput) {
         // const $span = $editor
         //   .find(`span[rangeindex='${formulaCache.rangechangeindex}']`)
         //   .html(range);
-        var span = $editor.querySelector("span[rangeindex='".concat(ctx.formulaCache.rangechangeindex, "']"));
+        const span = $editor.querySelector(`span[rangeindex='${ctx.formulaCache.rangechangeindex}']`);
         if (span) {
             span.innerHTML = range;
             setCaretPosition(ctx, span, 0, range.length);
@@ -2671,15 +2650,16 @@ export function rangeSetValue(ctx, cellInput, selected, fxInput) {
         //   }
     }
     else {
-        var function_str = "<span class=\"fortune-formula-functionrange-cell\" rangeindex=\"".concat(functionHTMLIndex, "\" dir=\"auto\" style=\"color:").concat(colors[functionHTMLIndex], ";\">").concat(range, "</span>");
-        var newEle = parseElement(function_str);
-        var refEle = ctx.formulaCache.rangeSetValueTo;
+        const function_str = `<span class="fortune-formula-functionrange-cell" rangeindex="${functionHTMLIndex}" dir="auto" style="color:${colors[functionHTMLIndex]};">${range}</span>`;
+        const newEle = parseElement(function_str);
+        const refEle = ctx.formulaCache.rangeSetValueTo;
         if (refEle && refEle.parentNode) {
-            var leftPar = (_b = document.getElementsByClassName("luckysheet-formula-text-lpar")) === null || _b === void 0 ? void 0 : _b[0];
+            const leftPar = document.getElementsByClassName("luckysheet-formula-text-lpar")?.[0];
             // handle case when user autocompletes the formula
-            if ((_c = leftPar === null || leftPar === void 0 ? void 0 : leftPar.parentElement) === null || _c === void 0 ? void 0 : _c.classList.contains("luckysheet-formula-text-color")) {
-                (_e = (_d = document
-                    .getElementsByClassName("luckysheet-formula-text-lpar")) === null || _d === void 0 ? void 0 : _d[0].parentNode) === null || _e === void 0 ? void 0 : _e.appendChild(newEle);
+            if (leftPar?.parentElement?.classList.contains("luckysheet-formula-text-color")) {
+                document
+                    .getElementsByClassName("luckysheet-formula-text-lpar")?.[0]
+                    .parentNode?.appendChild(newEle);
             }
             else {
                 refEle.parentNode.insertBefore(newEle, refEle.nextSibling);
@@ -2689,7 +2669,7 @@ export function rangeSetValue(ctx, cellInput, selected, fxInput) {
             $editor.appendChild(newEle);
         }
         ctx.formulaCache.rangechangeindex = functionHTMLIndex;
-        var span = $editor.querySelector("span[rangeindex='".concat(ctx.formulaCache.rangechangeindex, "']"));
+        const span = $editor.querySelector(`span[rangeindex='${ctx.formulaCache.rangechangeindex}']`);
         setCaretPosition(ctx, span, 0, range.length);
         functionHTMLIndex += 1;
     }
@@ -2698,9 +2678,9 @@ export function rangeSetValue(ctx, cellInput, selected, fxInput) {
 }
 export function onFormulaRangeDragEnd(ctx) {
     if (ctx.formulaCache.func_selectedrange) {
-        var _a = ctx.formulaCache.func_selectedrange, left = _a.left_move, top_1 = _a.top_move, width = _a.width_move, height = _a.height_move;
+        const { left_move: left, top_move: top, width_move: width, height_move: height, } = ctx.formulaCache.func_selectedrange;
         if (left != null &&
-            top_1 != null &&
+            top != null &&
             width != null &&
             height != null &&
             (ctx.formulaCache.rangestart ||
@@ -2708,39 +2688,39 @@ export function onFormulaRangeDragEnd(ctx) {
                 ctx.formulaCache.rangedrag_row_start))
             ctx.formulaRangeSelect = {
                 rangeIndex: ctx.formulaCache.rangeIndex || 0,
-                left: left,
-                top: top_1,
-                width: width,
-                height: height,
+                left,
+                top,
+                width,
+                height,
             };
     }
     ctx.formulaCache.selectingRangeIndex = -1;
 }
 function setRangeSelect(container, left, top, height, width) {
-    var rangeElement = container.querySelector(".fortune-formula-functionrange-select");
+    const rangeElement = container.querySelector(".fortune-formula-functionrange-select");
     if (rangeElement == null)
         return;
-    rangeElement.style.left = "".concat(left, "px");
-    rangeElement.style.top = "".concat(top, "px");
-    rangeElement.style.height = "".concat(height, "px");
-    rangeElement.style.width = "".concat(width, "px");
+    rangeElement.style.left = `${left}px`;
+    rangeElement.style.top = `${top}px`;
+    rangeElement.style.height = `${height}px`;
+    rangeElement.style.width = `${width}px`;
 }
 export function rangeDrag(ctx, e, cellInput, scrollLeft, scrollTop, container, fxInput) {
-    var func_selectedrange = ctx.formulaCache.func_selectedrange;
+    const { func_selectedrange } = ctx.formulaCache;
     if (!func_selectedrange ||
         func_selectedrange.left == null ||
         func_selectedrange.height == null ||
         func_selectedrange.top == null ||
         func_selectedrange.width == null)
         return;
-    var rect = container.getBoundingClientRect();
-    var x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
-    var y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
-    var _a = rowLocation(y, ctx.visibledatarow), row_pre = _a[0], row = _a[1], row_index = _a[2];
-    var _b = colLocation(x, ctx.visibledatacolumn), col_pre = _b[0], col = _b[1], col_index = _b[2];
-    var top = 0;
-    var height = 0;
-    var rowseleted = [];
+    const rect = container.getBoundingClientRect();
+    const x = e.pageX - rect.left - ctx.rowHeaderWidth + scrollLeft;
+    const y = e.pageY - rect.top - ctx.columnHeaderHeight + scrollTop;
+    const [row_pre, row, row_index] = rowLocation(y, ctx.visibledatarow);
+    const [col_pre, col, col_index] = colLocation(x, ctx.visibledatacolumn);
+    let top = 0;
+    let height = 0;
+    let rowseleted = [];
     if (func_selectedrange.top > row_pre) {
         top = row_pre;
         height = func_selectedrange.top + func_selectedrange.height - row_pre;
@@ -2756,9 +2736,9 @@ export function rangeDrag(ctx, e, cellInput, scrollLeft, scrollTop, container, f
         height = row - func_selectedrange.top - 1;
         rowseleted = [func_selectedrange.row[0], row_index];
     }
-    var left = 0;
-    var width = 0;
-    var columnseleted = [];
+    let left = 0;
+    let width = 0;
+    let columnseleted = [];
     if (func_selectedrange.left > col_pre) {
         left = col_pre;
         width = func_selectedrange.left + func_selectedrange.width - col_pre;
@@ -2784,10 +2764,10 @@ export function rangeDrag(ctx, e, cellInput, scrollLeft, scrollTop, container, f
     //   columnseleted[1],
     //   "v"
     // );
-    var changeparam = mergeMoveMain(ctx, columnseleted, rowseleted, func_selectedrange, top, height, left, width);
+    const changeparam = mergeMoveMain(ctx, columnseleted, rowseleted, func_selectedrange, top, height, left, width);
     if (changeparam != null) {
         // @ts-ignore
-        columnseleted = changeparam[0], rowseleted = changeparam[1], top = changeparam[2], height = changeparam[3], left = changeparam[4], width = changeparam[5];
+        [columnseleted, rowseleted, top, height, left, width] = changeparam;
     }
     func_selectedrange.row = rowseleted;
     func_selectedrange.column = columnseleted;
@@ -2816,23 +2796,23 @@ export function rangeDrag(ctx, e, cellInput, scrollLeft, scrollTop, container, f
     e.preventDefault();
 }
 export function rangeDragColumn(ctx, e, cellInput, scrollLeft, scrollTop, container, fxInput) {
-    var func_selectedrange = ctx.formulaCache.func_selectedrange;
+    const { func_selectedrange } = ctx.formulaCache;
     if (!func_selectedrange ||
         func_selectedrange.left == null ||
         func_selectedrange.height == null ||
         func_selectedrange.top == null ||
         func_selectedrange.width == null)
         return;
-    var mouse = mousePosition(e.pageX, e.pageY, ctx);
-    var x = mouse[0] + scrollLeft;
-    var visibledatarow = ctx.visibledatarow;
-    var row_index = visibledatarow.length - 1;
-    var row = visibledatarow[row_index];
-    var row_pre = 0;
-    var _a = colLocation(x, ctx.visibledatacolumn), col_pre = _a[0], col = _a[1], col_index = _a[2];
-    var left = 0;
-    var width = 0;
-    var columnseleted = [];
+    const mouse = mousePosition(e.pageX, e.pageY, ctx);
+    const x = mouse[0] + scrollLeft;
+    const { visibledatarow } = ctx;
+    const row_index = visibledatarow.length - 1;
+    const row = visibledatarow[row_index];
+    const row_pre = 0;
+    const [col_pre, col, col_index] = colLocation(x, ctx.visibledatacolumn);
+    let left = 0;
+    let width = 0;
+    let columnseleted = [];
     if (func_selectedrange.left > col_pre) {
         left = col_pre;
         width = func_selectedrange.left + func_selectedrange.width - col_pre;
@@ -2858,10 +2838,10 @@ export function rangeDragColumn(ctx, e, cellInput, scrollLeft, scrollTop, contai
     //   columnseleted[1],
     //   "v"
     // );
-    var changeparam = mergeMoveMain(ctx, columnseleted, [0, row_index], func_selectedrange, row_pre, row - row_pre - 1, left, width);
+    const changeparam = mergeMoveMain(ctx, columnseleted, [0, row_index], func_selectedrange, row_pre, row - row_pre - 1, left, width);
     if (changeparam != null) {
         // @ts-ignore
-        columnseleted = changeparam[0], left = changeparam[4], width = changeparam[5];
+        [columnseleted, , , , left, width] = changeparam;
         // rowseleted= changeparam[1];
         // top = changeparam[2];
         // height = changeparam[3];
@@ -2887,23 +2867,23 @@ export function rangeDragColumn(ctx, e, cellInput, scrollLeft, scrollTop, contai
     // luckysheetFreezen.scrollFreezen([0, row_index], columnseleted);
 }
 export function rangeDragRow(ctx, e, cellInput, scrollLeft, scrollTop, container, fxInput) {
-    var func_selectedrange = ctx.formulaCache.func_selectedrange;
+    const { func_selectedrange } = ctx.formulaCache;
     if (!func_selectedrange ||
         func_selectedrange.left == null ||
         func_selectedrange.height == null ||
         func_selectedrange.top == null ||
         func_selectedrange.width == null)
         return;
-    var mouse = mousePosition(e.pageX, e.pageY, ctx);
-    var y = mouse[1] + scrollTop;
-    var _a = rowLocation(y, ctx.visibledatarow), row_pre = _a[0], row = _a[1], row_index = _a[2];
-    var visibledatacolumn = ctx.visibledatacolumn;
-    var col_index = visibledatacolumn.length - 1;
-    var col = visibledatacolumn[col_index];
-    var col_pre = 0;
-    var top = 0;
-    var height = 0;
-    var rowseleted = [];
+    const mouse = mousePosition(e.pageX, e.pageY, ctx);
+    const y = mouse[1] + scrollTop;
+    const [row_pre, row, row_index] = rowLocation(y, ctx.visibledatarow);
+    const { visibledatacolumn } = ctx;
+    const col_index = visibledatacolumn.length - 1;
+    const col = visibledatacolumn[col_index];
+    const col_pre = 0;
+    let top = 0;
+    let height = 0;
+    let rowseleted = [];
     if (func_selectedrange.top > row_pre) {
         top = row_pre;
         height = func_selectedrange.top + func_selectedrange.height - row_pre;
@@ -2923,10 +2903,10 @@ export function rangeDragRow(ctx, e, cellInput, scrollLeft, scrollTop, container
     // rowseleted[1] = luckysheetFreezen.changeFreezenIndex(rowseleted[1], "h");
     // // columnseleted[0] = luckysheetFreezen.changeFreezenIndex(columnseleted[0], "v");
     // // columnseleted[1] = luckysheetFreezen.changeFreezenIndex(columnseleted[1], "v");
-    var changeparam = mergeMoveMain(ctx, [0, col_index], rowseleted, func_selectedrange, top, height, col_pre, col - col_pre - 1);
+    const changeparam = mergeMoveMain(ctx, [0, col_index], rowseleted, func_selectedrange, top, height, col_pre, col - col_pre - 1);
     if (changeparam != null) {
         // @ts-ignore
-        rowseleted = changeparam[1], top = changeparam[2], height = changeparam[3];
+        [, rowseleted, top, height] = changeparam;
     }
     func_selectedrange.row = rowseleted;
     func_selectedrange.top_move = top;
@@ -2943,48 +2923,48 @@ export function rangeDragRow(ctx, e, cellInput, scrollLeft, scrollTop, container
     // luckysheetFreezen.scrollFreezen(rowseleted, [0, col_index]);
 }
 function updateparam(orient, txt, step) {
-    var val = txt.split("!");
-    var rangetxt;
-    var prefix = "";
+    const val = txt.split("!");
+    let rangetxt;
+    let prefix = "";
     if (val.length > 1) {
-        rangetxt = val[1];
-        prefix = "".concat(val[0], "!");
+        [, rangetxt] = val;
+        prefix = `${val[0]}!`;
     }
     else {
-        rangetxt = val[0];
+        [rangetxt] = val;
     }
     if (rangetxt.indexOf(":") === -1) {
-        var row_3 = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10);
-        var col_3 = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
-        var freezonFuc = isfreezonFuc(rangetxt);
-        var $row = freezonFuc[0] ? "$" : "";
-        var $col = freezonFuc[1] ? "$" : "";
+        let row = parseInt(rangetxt.replace(/[^0-9]/g, ""), 10);
+        let col = columnCharToIndex(rangetxt.replace(/[^A-Za-z]/g, ""));
+        const freezonFuc = isfreezonFuc(rangetxt);
+        const $row = freezonFuc[0] ? "$" : "";
+        const $col = freezonFuc[1] ? "$" : "";
         if (orient === "u" && !freezonFuc[0]) {
-            row_3 -= step;
+            row -= step;
         }
         else if (orient === "r" && !freezonFuc[1]) {
-            col_3 += step;
+            col += step;
         }
         else if (orient === "l" && !freezonFuc[1]) {
-            col_3 -= step;
+            col -= step;
         }
         else if (orient === "d" && !freezonFuc[0]) {
-            row_3 += step;
+            row += step;
         }
-        if (!Number.isNaN(row_3) && !Number.isNaN(col_3)) {
-            return prefix + $col + indexToColumnChar(col_3) + $row + row_3;
+        if (!Number.isNaN(row) && !Number.isNaN(col)) {
+            return prefix + $col + indexToColumnChar(col) + $row + row;
         }
-        if (!Number.isNaN(row_3)) {
-            return prefix + $row + row_3;
+        if (!Number.isNaN(row)) {
+            return prefix + $row + row;
         }
-        if (!Number.isNaN(col_3)) {
-            return prefix + $col + indexToColumnChar(col_3);
+        if (!Number.isNaN(col)) {
+            return prefix + $col + indexToColumnChar(col);
         }
         return txt;
     }
     rangetxt = rangetxt.split(":");
-    var row = [];
-    var col = [];
+    const row = [];
+    const col = [];
     row[0] = parseInt(rangetxt[0].replace(/[^0-9]/g, ""), 10);
     row[1] = parseInt(rangetxt[1].replace(/[^0-9]/g, ""), 10);
     if (row[0] > row[1]) {
@@ -2995,12 +2975,12 @@ function updateparam(orient, txt, step) {
     if (col[0] > col[1]) {
         return txt;
     }
-    var freezonFuc0 = isfreezonFuc(rangetxt[0]);
-    var freezonFuc1 = isfreezonFuc(rangetxt[1]);
-    var $row0 = freezonFuc0[0] ? "$" : "";
-    var $col0 = freezonFuc0[1] ? "$" : "";
-    var $row1 = freezonFuc1[0] ? "$" : "";
-    var $col1 = freezonFuc1[1] ? "$" : "";
+    const freezonFuc0 = isfreezonFuc(rangetxt[0]);
+    const freezonFuc1 = isfreezonFuc(rangetxt[1]);
+    const $row0 = freezonFuc0[0] ? "$" : "";
+    const $col0 = freezonFuc0[1] ? "$" : "";
+    const $row1 = freezonFuc1[0] ? "$" : "";
+    const $col1 = freezonFuc1[1] ? "$" : "";
     if (orient === "u") {
         if (!freezonFuc0[0]) {
             row[0] -= step;
@@ -3037,12 +3017,12 @@ function updateparam(orient, txt, step) {
         return error.r;
     }
     if (Number.isNaN(col[0]) && Number.isNaN(col[1])) {
-        return "".concat(prefix + $row0 + row[0], ":").concat($row1).concat(row[1]);
+        return `${prefix + $row0 + row[0]}:${$row1}${row[1]}`;
     }
     if (Number.isNaN(row[0]) && Number.isNaN(row[1])) {
-        return "".concat(prefix + $col0 + indexToColumnChar(col[0]), ":").concat($col1).concat(indexToColumnChar(col[1]));
+        return `${prefix + $col0 + indexToColumnChar(col[0])}:${$col1}${indexToColumnChar(col[1])}`;
     }
-    return "".concat(prefix + $col0 + indexToColumnChar(col[0]) + $row0 + row[0], ":").concat($col1).concat(indexToColumnChar(col[1])).concat($row1).concat(row[1]);
+    return `${prefix + $col0 + indexToColumnChar(col[0]) + $row0 + row[0]}:${$col1}${indexToColumnChar(col[1])}${$row1}${row[1]}`;
 }
 function downparam(txt, step) {
     return updateparam("d", txt, step);
@@ -3066,22 +3046,22 @@ export function functionCopy(ctx, txt, mode, step) {
     if (txt.substring(0, 1) === "=") {
         txt = txt.substring(1);
     }
-    var funcstack = txt.split("");
-    var i = 0;
-    var str = "";
-    var function_str = "";
-    var matchConfig = {
+    const funcstack = txt.split("");
+    let i = 0;
+    let str = "";
+    let function_str = "";
+    const matchConfig = {
         bracket: 0,
         comma: 0,
         squote: 0,
         dquote: 0,
     };
     while (i < funcstack.length) {
-        var s = funcstack[i];
+        const s = funcstack[i];
         if (s === "(" && matchConfig.dquote === 0) {
             matchConfig.bracket += 1;
             if (str.length > 0) {
-                function_str += "".concat(str, "(");
+                function_str += `${str}(`;
             }
             else {
                 function_str += "(";
@@ -3090,12 +3070,12 @@ export function functionCopy(ctx, txt, mode, step) {
         }
         else if (s === ")" && matchConfig.dquote === 0) {
             matchConfig.bracket -= 1;
-            function_str += "".concat(functionCopy(ctx, str, mode, step), ")");
+            function_str += `${functionCopy(ctx, str, mode, step)})`;
             str = "";
         }
         else if (s === '"' && matchConfig.squote === 0) {
             if (matchConfig.dquote > 0) {
-                function_str += "".concat(str, "\"");
+                function_str += `${str}"`;
                 matchConfig.dquote -= 1;
                 str = "";
             }
@@ -3105,12 +3085,12 @@ export function functionCopy(ctx, txt, mode, step) {
             }
         }
         else if (s === "," && matchConfig.dquote === 0) {
-            function_str += "".concat(functionCopy(ctx, str, mode, step), ",");
+            function_str += `${functionCopy(ctx, str, mode, step)},`;
             str = "";
         }
         else if (s === "&" && matchConfig.dquote === 0) {
             if (str.length > 0) {
-                function_str += "".concat(functionCopy(ctx, str, mode, step), "&");
+                function_str += `${functionCopy(ctx, str, mode, step)}&`;
                 str = "";
             }
             else {
@@ -3118,12 +3098,12 @@ export function functionCopy(ctx, txt, mode, step) {
             }
         }
         else if (s in operatorjson && matchConfig.dquote === 0) {
-            var s_next = "";
+            let s_next = "";
             if (i + 1 < funcstack.length) {
                 s_next = funcstack[i + 1];
             }
-            var p = i - 1;
-            var s_pre = null;
+            let p = i - 1;
+            let s_pre = null;
             if (p >= 0) {
                 do {
                     s_pre = funcstack[p];

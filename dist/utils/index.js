@@ -3,13 +3,13 @@ import { locale } from "../locale";
 import { checkCellIsLocked } from "../modules";
 export * from "./patch";
 export function generateRandomSheetName(file, isPivotTable, ctx) {
-    var index = file.length;
-    var locale_pivotTable = locale(ctx).pivotTable;
-    var title = locale_pivotTable.title;
-    for (var i = 0; i < file.length; i += 1) {
+    let index = file.length;
+    const locale_pivotTable = locale(ctx).pivotTable;
+    const { title } = locale_pivotTable;
+    for (let i = 0; i < file.length; i += 1) {
         if (file[i].name.indexOf("Sheet") > -1 ||
             file[i].name.indexOf(title) > -1) {
-            var suffix = parseFloat(file[i].name.replace("Sheet", "").replace(title, ""));
+            const suffix = parseFloat(file[i].name.replace("Sheet", "").replace(title, ""));
             if (!Number.isNaN(suffix) && Math.ceil(suffix) > index) {
                 index = Math.ceil(suffix);
             }
@@ -18,28 +18,28 @@ export function generateRandomSheetName(file, isPivotTable, ctx) {
     if (isPivotTable) {
         return title + (index + 1);
     }
-    return "Sheet".concat(index + 1);
+    return `Sheet${index + 1}`;
 }
 // 颜色 rgb转16进制
 export function rgbToHex(color) {
-    var rgb;
+    let rgb;
     if (color.indexOf("rgba") > -1) {
         rgb = color.replace("rgba(", "").replace(")", "").split(",");
     }
     else {
         rgb = color.replace("rgb(", "").replace(")", "").split(",");
     }
-    var r = Number(rgb[0]);
-    var g = Number(rgb[1]);
-    var b = Number(rgb[2]);
-    return "#".concat(((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1));
+    const r = Number(rgb[0]);
+    const g = Number(rgb[1]);
+    const b = Number(rgb[2]);
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 // 列下标  数字转字母
 export function indexToColumnChar(n) {
-    var orda = "a".charCodeAt(0);
-    var ordz = "z".charCodeAt(0);
-    var len = ordz - orda + 1;
-    var s = "";
+    const orda = "a".charCodeAt(0);
+    const ordz = "z".charCodeAt(0);
+    const len = ordz - orda + 1;
+    let s = "";
     while (n >= 0) {
         s = String.fromCharCode((n % len) + orda) + s;
         n = Math.floor(n / len) - 1;
@@ -51,16 +51,16 @@ export function columnCharToIndex(a) {
     if (a == null || a.length === 0) {
         return NaN;
     }
-    var str = a.toLowerCase().split("");
-    var al = str.length;
-    var getCharNumber = function (charx) {
+    const str = a.toLowerCase().split("");
+    const al = str.length;
+    const getCharNumber = (charx) => {
         return charx.charCodeAt(0) - 96;
     };
-    var numout = 0;
-    var charnum = 0;
-    for (var i = 0; i < al; i += 1) {
+    let numout = 0;
+    let charnum = 0;
+    for (let i = 0; i < al; i += 1) {
         charnum = getCharNumber(str[i]);
-        numout += charnum * Math.pow(26, (al - i - 1));
+        numout += charnum * 26 ** (al - i - 1);
     }
     // console.log(a, numout-1);
     if (numout === 0) {
@@ -84,16 +84,15 @@ export function escapeHTMLTag(str) {
     return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 export function getSheetIndex(ctx, id) {
-    var _a;
-    for (var i = 0; i < ctx.luckysheetfile.length; i += 1) {
-        if (((_a = ctx.luckysheetfile[i]) === null || _a === void 0 ? void 0 : _a.id) === id) {
+    for (let i = 0; i < ctx.luckysheetfile.length; i += 1) {
+        if (ctx.luckysheetfile[i]?.id === id) {
             return i;
         }
     }
     return null;
 }
 export function getSheetIdByName(ctx, name) {
-    for (var i = 0; i < ctx.luckysheetfile.length; i += 1) {
+    for (let i = 0; i < ctx.luckysheetfile.length; i += 1) {
         if (ctx.luckysheetfile[i].name === name) {
             return ctx.luckysheetfile[i].id;
         }
@@ -104,7 +103,7 @@ export function getSheetByIndex(ctx, id) {
     if (_.isNil(id)) {
         id = ctx.currentSheetId;
     }
-    var i = getSheetIndex(ctx, id);
+    const i = getSheetIndex(ctx, id);
     if (_.isNil(i)) {
         return null;
     }
@@ -112,40 +111,40 @@ export function getSheetByIndex(ctx, id) {
 }
 // 获取当前日期时间
 export function getNowDateTime(format) {
-    var now = new Date();
-    var year = now.getFullYear(); // 得到年份
-    var month = now.getMonth(); // 得到月份
-    var date = now.getDate(); // 得到日期
-    var hour = now.getHours(); // 得到小时
-    var minu = now.getMinutes(); // 得到分钟
-    var sec = now.getSeconds(); // 得到秒
+    const now = new Date();
+    const year = now.getFullYear(); // 得到年份
+    let month = now.getMonth(); // 得到月份
+    let date = now.getDate(); // 得到日期
+    let hour = now.getHours(); // 得到小时
+    let minu = now.getMinutes(); // 得到分钟
+    let sec = now.getSeconds(); // 得到秒
     month += 1;
     if (month < 10)
-        month = "0".concat(month);
+        month = `0${month}`;
     if (date < 10)
-        date = "0".concat(date);
+        date = `0${date}`;
     if (hour < 10)
-        hour = "0".concat(hour);
+        hour = `0${hour}`;
     if (minu < 10)
-        minu = "0".concat(minu);
+        minu = `0${minu}`;
     if (sec < 10)
-        sec = "0".concat(sec);
-    var time = "";
+        sec = `0${sec}`;
+    let time = "";
     // 日期
     if (format === 1) {
-        time = "".concat(year, "-").concat(month, "-").concat(date);
+        time = `${year}-${month}-${date}`;
     }
     // 日期时间
     else if (format === 2) {
-        time = "".concat(year, "-").concat(month, "-").concat(date, " ").concat(hour, ":").concat(minu, ":").concat(sec);
+        time = `${year}-${month}-${date} ${hour}:${minu}:${sec}`;
     }
     return time;
 }
 // 替换temp中的${xxx}为指定内容 ,temp:字符串，这里指html代码，dataarry：一个对象{"xxx":"替换的内容"}
 // 例：luckysheet.replaceHtml("${image}",{"image":"abc","jskdjslf":"abc"})   ==>  abc
 export function replaceHtml(temp, dataarry) {
-    return temp.replace(/\$\{([\w]+)\}/g, function (s1, s2) {
-        var s = dataarry[s2];
+    return temp.replace(/\$\{([\w]+)\}/g, (s1, s2) => {
+        const s = dataarry[s2];
         if (typeof s !== "undefined") {
             return s;
         }
@@ -192,10 +191,10 @@ export function chatatABC(n) {
     //         }
     //     }
     // }
-    var orda = "a".charCodeAt(0);
-    var ordz = "z".charCodeAt(0);
-    var len = ordz - orda + 1;
-    var s = "";
+    const orda = "a".charCodeAt(0);
+    const ordz = "z".charCodeAt(0);
+    const len = ordz - orda + 1;
+    let s = "";
     while (n >= 0) {
         s = String.fromCharCode((n % len) + orda) + s;
         n = Math.floor(n / len) - 1;
@@ -203,22 +202,21 @@ export function chatatABC(n) {
     return s.toUpperCase();
 }
 export function isAllowEdit(ctx, range) {
-    var cfg = ctx.config;
-    var judgeRange = _.isUndefined(range) ? ctx.luckysheet_select_save : range;
-    return (_.every(judgeRange, function (selection) {
-        var _a, _b;
-        for (var r = selection.row[0]; r <= selection.row[1]; r += 1) {
-            if ((_a = cfg.rowReadOnly) === null || _a === void 0 ? void 0 : _a[r]) {
+    const cfg = ctx.config;
+    const judgeRange = _.isUndefined(range) ? ctx.luckysheet_select_save : range;
+    return (_.every(judgeRange, (selection) => {
+        for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
+            if (cfg.rowReadOnly?.[r]) {
                 return false;
             }
         }
-        for (var c = selection.column[0]; c <= selection.column[1]; c += 1) {
-            if ((_b = cfg.colReadOnly) === null || _b === void 0 ? void 0 : _b[c]) {
+        for (let c = selection.column[0]; c <= selection.column[1]; c += 1) {
+            if (cfg.colReadOnly?.[c]) {
                 return false;
             }
         }
-        for (var r = selection.row[0]; r <= selection.row[1]; r += 1) {
-            for (var c = selection.column[0]; c <= selection.column[1]; c += 1) {
+        for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
+            for (let c = selection.column[0]; c <= selection.column[1]; c += 1) {
                 if (checkCellIsLocked(ctx, r, c, ctx.currentSheetId)) {
                     return false;
                 }
