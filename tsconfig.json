@@ -1,16 +1,22 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "CommonJS",
+    "target": "es5",
+    "module": "es2015",
     "outDir": "./dist",
+        "declaration": true,
+    "moduleResolution": "node",
+        "noLib": false,
+        "jsx": "react",
+    "esModuleInterop": true,
     "rootDir": "./src",
-    "strict": false,
-    "noImplicitAny": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "skipDefaultLibCheck": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2017", "dom", "es2015"]
+    "lib": ["es2017", "dom", "es2015","es5"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.test.ts","**/*.spec.ts"]
 }

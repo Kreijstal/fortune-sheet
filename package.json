@@ -18,12 +18,14 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.179",
     "@types/numeral": "^2.0.2",
-    "@types/uuid": "^8.3.4"
+    "@types/react": "^18.3.12",
+    "@types/uuid": "^8.3.4",
+    "typescript": "^5.6.3"
   },
   "keywords": [
     "spreadsheet",
